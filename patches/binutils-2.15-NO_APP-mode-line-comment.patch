@@ -1,0 +1,40 @@
+2004-04-23  Andreas Schwab  <schwab@suse.de>
+
+        * read.c (read_a_source_file): Ignore unknown text after line
+        comment character.  Fix misleading comment.
+
+--- binutils-2.15/gas/read.c.orig	Wed Jun  2 18:43:04 2004
++++ binutils-2.15/gas/read.c	Wed Jun  2 18:50:33 2004
+@@ -1,6 +1,6 @@
+ /* read.c - read a source file -
+    Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
+-   1998, 1999, 2000, 2001, 2002, 2003 Free Software Foundation, Inc.
++   1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software Foundation, Inc.
+ 
+ This file is part of GAS, the GNU Assembler.
+ 
+@@ -950,10 +950,13 @@
+ 	      unsigned int new_length;
+ 	      char *tmp_buf = 0;
+ 
+-	      bump_line_counters ();
+ 	      s = input_line_pointer;
+ 	      if (strncmp (s, "APP\n", 4))
+-		continue;	/* We ignore it */
++		{
++	          /* We ignore it */
++	          ignore_rest_of_line ();
++		  continue;
++	        }
+ 	      s += 4;
+ 
+ 	      sb_new (&sbuf);
+@@ -1052,7 +1055,7 @@
+ 	    continue;
+ #endif
+ 	  input_line_pointer--;
+-	  /* Report unknown char as ignored.  */
++	  /* Report unknown char as error.  */
+ 	  demand_empty_rest_of_line ();
+ 	}
+ 

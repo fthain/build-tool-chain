@@ -1,0 +1,32 @@
+The idea here is to stop the host (Darwin) compiler being passed -mieee when building gcc
+for alpha, since this is fatal. Since we can't easily prevent -mieee showing up where it is
+not wanted and yet keep it there when it is wanted, we just make configure use the target
+compiler for CPP.
+
+Problem is, configure sometimes gets test results wrong when you pass Darwin specific
+options to the target compiler (i.e. -no-cpp-precomp). The compiler just issues a warning,
+but configure takes any output at all to mean failure, so config.h ends up missing a bunch of
+features. In this case we also empty the CPPFLAGS.
+
+Yuck.
+
+--- gcc-3.4.1/Makefile.in-orig	Thu Jan 15 07:09:37 2004
++++ gcc-3.4.1/Makefile.in	Fri Aug  6 01:27:13 2004
+@@ -21964,6 +21964,7 @@
+ 	CC="$(CC_FOR_TARGET)"; export CC; \
+ 	CFLAGS="$(CFLAGS_FOR_TARGET)"; export CFLAGS; \
+ 	CONFIG_SHELL="$(SHELL)"; export CONFIG_SHELL; \
++	CPP="$(CC_FOR_TARGET) -E"; export CPP; \
+ 	CPPFLAGS="$(CFLAGS_FOR_TARGET)"; export CPPFLAGS; \
+ 	CXX_FOR_TARGET="$(RAW_CXX_FOR_TARGET)"; export CXX_FOR_TARGET; \
+ 	CXX="$(RAW_CXX_FOR_TARGET)"; export CXX; \
+@@ -22539,7 +22540,8 @@
+ 	CC="$(CC_FOR_TARGET)"; export CC; \
+ 	CFLAGS="$(CFLAGS_FOR_TARGET)"; export CFLAGS; \
+ 	CONFIG_SHELL="$(SHELL)"; export CONFIG_SHELL; \
+-	CPPFLAGS="$(CFLAGS_FOR_TARGET)"; export CPPFLAGS; \
++	CPP="$(CC_FOR_TARGET) -E"; export CPP; \
++	CPPFLAGS=""; export CPPFLAGS; \
+ 	CXX="$(CXX_FOR_TARGET)"; export CXX; \
+ 	CXXFLAGS="$(CXXFLAGS_FOR_TARGET)"; export CXXFLAGS; \
+ 	GCJ="$(GCJ_FOR_TARGET)"; export GCJ; \

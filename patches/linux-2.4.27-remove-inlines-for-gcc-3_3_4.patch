@@ -1,0 +1,16 @@
+--- linux-2.4.27/include/linux/init.h-orig	Thu Aug 19 02:38:59 2004
++++ linux-2.4.27/include/linux/init.h	Thu Aug 19 02:39:25 2004
+@@ -133,11 +133,11 @@
+ typedef void (*__cleanup_module_func_t)(void);
+ #define module_init(x) \
+ 	int init_module(void) __attribute__((alias(#x))); \
+-	static inline __init_module_func_t __init_module_inline(void) \
++	static __init_module_func_t __init_module_inline(void) \
+ 	{ return x; }
+ #define module_exit(x) \
+ 	void cleanup_module(void) __attribute__((alias(#x))); \
+-	static inline __cleanup_module_func_t __cleanup_module_inline(void) \
++	static __cleanup_module_func_t __cleanup_module_inline(void) \
+ 	{ return x; }
+ 
+ #define __setup(str,func) /* nothing */

@@ -1,0 +1,26 @@
+diff -ur linux-2.6.4-rc2/scripts/Makefile.build linux-2.6.4-rc2-patched/scripts/Makefile.build
+--- linux-2.6.4-rc2/scripts/Makefile.build	2004-03-12 15:20:29.743131008 +1100
++++ linux-2.6.4-rc2-patched/scripts/Makefile.build	2004-03-12 15:19:54.998413008 +1100
+@@ -350,8 +350,8 @@
+ 
+ # Link a shared library, based on position independent .o files
+ # *.o -> .so shared library (host-cshlib)
+-quiet_cmd_host-cshlib	= HOSTLLD -shared $@
+-      cmd_host-cshlib	= $(HOSTCC) $(HOSTLDFLAGS) -shared -o $@ \
++quiet_cmd_host-cshlib	= HOSTLLD -dynamiclib $@
++      cmd_host-cshlib	= $(HOSTCC) $(HOSTLDFLAGS) -dynamiclib -o $@ \
+ 			  $(addprefix $(obj)/,$($(@F:.so=-objs))) \
+ 			  $(HOST_LOADLIBES) $(HOSTLOADLIBES_$(@F))
+ $(host-cshlib): %: $(host-cshobjs) FORCE
+diff -ur linux-2.6.4-rc2/scripts/Makefile.lib linux-2.6.4-rc2-patched/scripts/Makefile.lib
+--- linux-2.6.4-rc2/scripts/Makefile.lib	2004-03-12 15:20:16.994069160 +1100
++++ linux-2.6.4-rc2-patched/scripts/Makefile.lib	2004-03-12 15:19:54.876431552 +1100
+@@ -175,7 +175,7 @@
+ a_flags        = -Wp,-MD,$(depfile) $(NOSTDINC_FLAGS) $(CPPFLAGS) \
+ 		 $(__a_flags) $(modkern_aflags)
+ 
+-hostc_flags    = -Wp,-MD,$(depfile) $(__hostc_flags)
++hostc_flags    = -Wp,-MD,$(depfile) $(__hostc_flags) -fno-common
+ hostcxx_flags  = -Wp,-MD,$(depfile) $(__hostcxx_flags)
+ 
+ ld_flags       = $(LDFLAGS) $(EXTRA_LDFLAGS)

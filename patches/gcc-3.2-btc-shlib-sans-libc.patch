@@ -1,0 +1,11 @@
+--- gcc/config/t-slibgcc-elf-ver-orig	2004-03-22 22:58:28.012279640 +1100
++++ gcc/config/t-slibgcc-elf-ver	2004-03-22 23:17:21.694933680 +1100
+@@ -8,7 +8,7 @@
+ SHLIB_MAP = @shlib_map_file@
+ SHLIB_OBJS = @shlib_objs@
+ SHLIB_SLIBDIR_QUAL = @shlib_slibdir_qual@
+-SHLIB_LC = -lc
++SHLIB_LC =
+ 
+ SHLIB_LINK = $(GCC_FOR_TARGET) $(LIBGCC2_CFLAGS) -shared -nodefaultlibs \
+ 	-Wl,--soname=$(SHLIB_SONAME) \
