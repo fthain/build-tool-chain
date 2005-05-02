@@ -1,0 +1,55 @@
+--- a/drivers/scsi/mac_scsi.c	2005-02-28 15:12:31.050279180 +1100
++++ b/drivers/scsi/mac_scsi.c	2005-02-28 15:14:16.499002032 +1100
+@@ -233,7 +233,7 @@
+  *
+  */
+  
+-int macscsi_detect(Scsi_Host_Template * tpnt)
++int __init macscsi_detect(Scsi_Host_Template * tpnt)
+ {
+     static int called = 0;
+     int flags = 0;
+@@ -322,7 +322,7 @@
+     return 1;
+ }
+ 
+-int macscsi_release (struct Scsi_Host *shpnt)
++int __exit macscsi_release (struct Scsi_Host *shpnt)
+ {
+ 	if (shpnt->irq != SCSI_IRQ_NONE)
+ 		free_irq (shpnt->irq, NCR5380_intr);
+@@ -336,7 +336,7 @@
+  * Our 'bus reset on boot' function
+  */
+ 
+-static void mac_scsi_reset_boot(struct Scsi_Host *instance)
++static void __init mac_scsi_reset_boot(struct Scsi_Host *instance)
+ {
+ 	unsigned long end;
+ 
+@@ -586,7 +586,7 @@
+ 	.proc_info			= macscsi_proc_info,
+ 	.name				= "Macintosh NCR5380 SCSI",
+ 	.detect				= macscsi_detect,
+-	.release			= macscsi_release,
++	.release			= __exit_p(macscsi_release),
+ 	.info				= macscsi_info,
+ 	.queuecommand			= macscsi_queue_command,
+ 	.eh_abort_handler		= macscsi_abort,
+--- a/drivers/scsi/scsi_module.c	2005-02-28 18:16:17.408413324 +1100
++++ b/drivers/scsi/scsi_module.c	2005-02-28 18:16:46.696503105 +1100
+@@ -21,12 +21,14 @@
+ 	struct list_head *l;
+ 	int error;
+ 
++#ifdef MODULE
+ 	if (!sht->release) {
+ 		printk(KERN_ERR
+ 		    "scsi HBA driver %s didn't set a release method.\n",
+ 		    sht->name);
+ 		return -EINVAL;
+ 	}
++#endif
+ 
+ 	sht->module = THIS_MODULE;
+ 	INIT_LIST_HEAD(&sht->legacy_hosts);

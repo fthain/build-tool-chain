@@ -1,0 +1,22 @@
+--- scripts/lxdialog/Makefile-orig	Mon Mar 26 02:31:56 2001
++++ scripts/lxdialog/Makefile	Mon Jun 28 00:25:12 2004
+@@ -2,7 +2,7 @@
+ CPP = $(HOSTCC) -E
+ 
+ CFLAGS = $(HOSTCFLAGS) -DLOCALE 
+-LDFLAGS = -s -L .
++LDFLAGS = -s -L.
+ LDLIBS = -lncurses
+ 
+ ifeq (/usr/include/ncurses/ncurses.h, $(wildcard /usr/include/ncurses/ncurses.h))
+--- Makefile-orig	Mon Apr 11 19:28:06 2005
++++ Makefile	Mon Apr 11 19:28:22 2005
+@@ -459,7 +459,7 @@
+ 	@$(GENKSYMS) -k $(VERSION).$(PATCHLEVEL).$(SUBLEVEL) </dev/null \
+ 	2>/dev/null || ( echo -e "\nYou need a new version of the genksyms\
+ 	program, which is part of\nthe modutils package. Please read the file\
+-	Documentation/Changes\nfor more information.\n"; exit 1 )
++	Documentation/Changes\nfor more information.\n" )
+ 
+ else
+ 

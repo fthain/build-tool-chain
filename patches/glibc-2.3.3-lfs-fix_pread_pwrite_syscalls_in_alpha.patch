@@ -1,0 +1,33 @@
+--- glibc-2.3-20040213-1830/sysdeps/unix/sysv/linux/alpha/sysdep.h	2003-06-21 02:24:36.000000000 +1000
++++ glibc-2.3.3-lfs-5/sysdeps/unix/sysv/linux/alpha/sysdep.h	2004-02-16 18:02:33.000000000 +1100
+@@ -1,4 +1,4 @@
+-/* Copyright (C) 1992, 1993, 1995, 1996, 1997, 2002, 2003
++/* Copyright (C) 1992, 1993, 1995, 1996, 1997, 2002, 2003, 2004
+    Free Software Foundation, Inc.
+    This file is part of the GNU C Library.
+    Contributed by Ulrich Drepper, <drepper@gnu.ai.mit.edu>, August 1995.
+@@ -31,6 +31,24 @@
+ /* There is some commonality.  */
+ #include <sysdeps/unix/alpha/sysdep.h>
+ 
++/* Some systen calls got renamed over time, but retained the same semantics.
++ *    Handle them here so they can be catched by both C and assembler stubs in
++ *       glibc.  */
++
++#ifdef __NR_pread
++# ifdef __NR_pread64
++#  error "__NR_pread and __NR_pread64 both defined???"
++# endif
++# define __NR_pread64 __NR_pread
++#endif
++
++#ifdef __NR_pwrite
++# ifdef __NR_pwrite64
++#  error "__NR_pwrite and __NR_pwrite64 both defined???"
++# endif
++# define __NR_pwrite64 __NR_pwrite
++#endif
++
+ /* For Linux we can use the system call table in the header file
+ 	/usr/include/asm/unistd.h
+    of the kernel.  But these symbols do not follow the SYS_* syntax

@@ -1,0 +1,22 @@
+--- linux-2.6.9/scripts/Makefile.host-orig	Tue Oct 19 07:55:07 2004
++++ linux-2.6.9/scripts/Makefile.host	Tue Dec  7 01:08:18 2004
+@@ -89,7 +89,7 @@
+ __hostcxx_flags	= -I$(obj) $(call flags,_hostcxx_flags)
+ endif
+ 
+-hostc_flags    = -Wp,-MD,$(depfile) $(__hostc_flags)
++hostc_flags    = -Wp,-MD,$(depfile) $(__hostc_flags) -fno-common
+ hostcxx_flags  = -Wp,-MD,$(depfile) $(__hostcxx_flags)
+ 
+ #####
+@@ -143,8 +143,8 @@
+ 
+ # Link a shared library, based on position independent .o files
+ # *.o -> .so shared library (host-cshlib)
+-quiet_cmd_host-cshlib	= HOSTLLD -shared $@
+-      cmd_host-cshlib	= $(HOSTCC) $(HOSTLDFLAGS) -shared -o $@ \
++quiet_cmd_host-cshlib	= HOSTLLD -dynamiclib $@
++      cmd_host-cshlib	= $(HOSTCC) $(HOSTLDFLAGS) -dynamiclib -o $@ \
+ 			  $(addprefix $(obj)/,$($(@F:.so=-objs))) \
+ 			  $(HOST_LOADLIBES) $(HOSTLOADLIBES_$(@F))
+ $(host-cshlib): %: $(host-cshobjs) FORCE

@@ -1,0 +1,11 @@
+--- linux-2.6.10/Makefile-orig	Mon Apr  4 23:56:02 2005
++++ linux-2.6.10/Makefile	Mon Apr  4 23:56:07 2005
+@@ -203,7 +203,7 @@
+ 
+ HOSTCC  	= gcc
+ HOSTCXX  	= g++
+-HOSTCFLAGS	= -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer
++HOSTCFLAGS	= -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -no-cpp-precomp
+ HOSTCXXFLAGS	= -O2
+ 
+ # 	Decide whether to build built-in, modular, or both.

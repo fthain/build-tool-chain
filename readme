@@ -1,11 +1,11 @@
 Build Tool Chain script
-http://www.telegraphics.com.au/~fthain/build-tool-chain
+http://www.telegraphics.com.au/~fthain/sw/build-tool-chain
 
 
 PURPOSE
 
 This script has several uses: general experimentation with new releases of GNU 
-tools, building a cross-tool-chain, and cross-building a Linux kernel. It
+tools, building a cross tool chain, and cross-building a Linux kernel. It
 differs from other scripts having similar aims in that it works under Mac OS X
 as well as Linux, and it targets current glibc-based systems (rather than
 embedded Linux, for example).
@@ -16,31 +16,41 @@ requires sudo).
 
 The tool chain build includes glibc (with NPTL or linuxthreads), so you can
 also cross-compile packages that need that. You can also chroot your target
-machine into the tool-chain sysroot for testing. If you want scripts for
-cross-building an entire glibc-based system, in the vein of Linux From
-Scratch, check out cross-lfs.
+machine into the tool-chain sysroot for testing.
+
+If you want scripts for cross-building an entire glibc-based system, in the vein
+of Linux From Scratch, check out cross-lfs. If you aren't concerned with Mac
+OS X or NPTL, check out crosstool. Recent versions of crosstool do support Mac
+OS X, however they require that you provide a case-sensitive volume. This script
+was written before crosstool supported Mac OS X, and it doesn't care how your
+disks are partitioned, since it creates a case-sensitive disk image to build in.
 
 
-PURPOSE (NOT)
+PURPOSE (not)
+
+Providing for every conceivable use is not on the TODO list.
 
 This script was designed as an experiment in building recent releases of the
-GNU tool chain. It provides a working harness with which to try and build new
-releases on non-GNU platforms. That is what I wanted it for, but it will
-probably not do what you want unless you are prepared to modify the script.
-You should read it, at least. Providing for every conceivable use is not on
-the TODO list.
+GNU tool chain, mainly to help the author learn more about those tools. It
+provides a working harness with which to try and build new releases on non-GNU
+platforms. That is what I wanted it for, but it will probably not do what you
+want unless you are prepared to modify the script.
 
 The results are not expected to be bug free. If you want more correct results,
 you may wish to use mature package sources maintained by the source
-distributions like Gentoo and Linux From Scratch, or use the crosstool
-patches. The script applies various patches to fix build issues. Use these
-patches at your peril.
+distributions like Gentoo and Linux From Scratch, and/or use the crosstool
+patches. This script applies various patches to hack around build issues. Use
+these patches at your peril.
 
 As with any cross compiler, test suites can't be run easily and there is no
 stage 2 or stage 3 gcc build. If you want to improve your chances of getting
 correct results, bootstrap gcc natively on the target. Similarly, build glibc
 natively. According to the developers, you should build glibc under the latest
 glibc...
+
+If you are building Linux kernels, do not enable symbol versioning
+(CONFIG_MODVERSIONS) or you will end up with modules that cannot be loaded,
+since genksyms for the target is not generally available at build time.
 
 
 INSTRUCTIONS
@@ -49,34 +59,51 @@ INSTRUCTIONS
 
 - Edit the build-tool-chain.bash script as follows:
 
-  + Modify the BTC_ROOT variable definition to be the absolute path-name of
-    the btc directory you just untarred.
+  + Modify the $DIST_ROOT definition to be the absolute path-name of the btc
+    directory you just untarred. This needs to be on a filesystem with plenty
+    of free space (say, 1.5 GB).
 
-  + BUILD_DIR should be on a filesystem with a lot of free space (say, 1.5 GB).
+  + Change the $BUILD, $TARGET, and $TARGET_CPU definitions as appropriate.
 
-  + Change the BUILD, TARGET, and TARGET_CPU variable definitions as
-    appropriate.
+  + Specify the build $METHOD, and, if necessary, change the package versions
+    in the variables, BINUTILS_DIST, GCC_DIST, GCC_CORE_DIST, GLIBC_DIST,
+    GDB_DIST and KERNEL.
 
-  + Specify the package versions in the variables, BINUTILS_DIST, GCC_DIST,
-    GCC_CORE_DIST, GLIBC_DIST, GDB_DIST, KERNEL.
+- Download the relevant distributions into the $SOURCES directory.
+  The old bison is needed to build gcc-2.95. gdb is optional.
 
-  + Set KERNEL_2_4 to yes or no, as appropriate.
+ftp://ftp.gnu.org/gnu/bison/bison-1.28.tar.gz
 
-- Download these distributions into the $SOURCES directory. Other versions
-  also work (see below).
+ftp://ftp.gnu.org/gnu/gdb/gdb-6.1.1.tar.bz2
+
+ftp://ftp.kernel.org/pub/linux/devel/binutils/binutils-2.12.90.0.1.tar.bz2
+ftp://ftp.gnu.org/gnu/gcc/gcc-2.95.3.tar.gz
+$SOURCES/gcc-core-2.95.3.tar.gz can be a symlink to gcc-2.95.3.tar.gz
+ftp://ftp.kernel.org/pub/linux/kernel/v2.2/linux-2.2.26.tar.bz2
+ftp://ftp.gnu.org/gnu/glibc/glibc-2.2.5.tar.gz
+ftp://ftp.gnu.org/gnu/glibc/glibc-linuxthreads-2.2.5.tar.gz
 
 ftp://ftp.gnu.org/gnu/binutils/binutils-2.15.tar.bz2
-ftp://ftp.gnu.org/gnu/gdb/gdb-6.1.1.tar.bz2
-ftp://ftp.gnu.org/gnu/gcc/gcc-3.4.1/gcc-core-3.4.1.tar.bz2
-ftp://ftp.gnu.org/gnu/gcc/gcc-3.4.1/gcc-3.4.1.tar.bz2
-ftp://ftp.kernel.org/pub/linux/kernel/v2.6/linux-2.6.8.1.tar.bz2
+ftp://ftp.gnu.org/gnu/gcc/gcc-3.3.5/gcc-3.3.5.tar.bz2
+ftp://ftp.gnu.org/gnu/gcc/gcc-3.3.5/gcc-core-3.3.5.tar.bz2
+ftp://ftp.kernel.org/pub/linux/kernel/v2.4/linux-2.4.28.tar.bz2
+ftp://ftp.kernel.org/pub/linux/kernel/v2.4/linux-2.4.30.tar.bz2
 http://public.planetmirror.com/pub/lfs/lfs-packages/conglomeration/glibc/glibc-2.3.3-lfs-5.1.tar.bz2
-OR
 ftp://sources.redhat.com/pub/glibc/releases/glibc-2.3.3.tar.bz2
+ftp://sources.redhat.com/pub/glibc/releases/glibc-linuxthreads-2.3.3.tar.bz2
 
-- If you are not building on a Mac OS X system, download these distributions
-  into the $SOURCES directory. Ensure that the default compiler is the correct
-  one by running "gcc_select 3.3".
+ftp://ftp.kernel.org/pub/linux/devel/binutils/binutils-2.15.94.0.2.2.tar.bz2
+ftp://ftp.gnu.org/gnu/gcc/gcc-3.4.3/gcc-3.4.3.tar.bz2
+ftp://ftp.gnu.org/gnu/gcc/gcc-3.4.3/gcc-core-3.4.3.tar.bz2
+ftp://ftp.kernel.org/pub/linux/kernel/v2.6/linux-2.6.11.tar.bz2
+ftp://sources.redhat.com/pub/glibc/releases/glibc-2.3.5.tar.bz2
+ftp://sources.redhat.com/pub/glibc/releases/glibc-linuxthreads-2.3.5.tar.bz2
+
+http://www.busybox.net/cgi-bin/viewcvs.cgi/*checkout*/trunk/busybox/examples/depmod.pl
+
+- If you are building on a Mac OS X system, download these distributions into
+  the $SOURCES directory and ensure that the default compiler is the correct one
+  by running "gcc_select 3.3".
 
 ftp://ftp.gnu.org/gnu/sed/sed-4.1.1.tar.gz
 ftp://ftp.gnu.org/gnu/make/make-3.80.tar.bz2
@@ -91,10 +118,10 @@ ftp://ftp.gnu.org/gnu/coreutils/coreutils-5.2.1.tar.bz2
   800 MHz machine.
 
 
-MORE INSTRUCTIONS (for those that didn't read the script)
+MORE INSTRUCTIONS (for those that don't want to read the script)
 
 - If the kernel build stage stops because no kernel configuration was found,
-  and you want to build a kernel, you can generate the .config like so,
+  or you want to change the kernel config and then build a kernel, do this:
 
 build-tool-chain.bash -s # starts a shell inheriting the variables used below
 cd $KERNEL
@@ -103,8 +130,8 @@ cp .config ${CONFIGS}/${KERNEL}-${TARGET_CPU}-dot-config
 exit
 build-tool-chain.bash
 
-- Similarly, if you have built the kernel, and you have modified the source or
-  the config and want a clean build, do this:
+- Similarly, if you have built the kernel, and you have modified the source
+  and want a clean build, do this:
 
 build-tool-chain.bash -s
 rm ${KERNEL}/.compiled
@@ -115,8 +142,9 @@ build-tool-chain.bash
   kernel image tarball).
 
 - If you want to rebuild the whole tool-chain for the same target
-  architecture, you must remove the $BUILD_DIR directory, and move or remove
-  the $TC_PREFIX directory, then run build-tool-chain.bash.
+  architecture using the same tool versions, you must remove the $BUILD_DIR
+  directory, and move or remove the $TC_PREFIX directory, then run
+  build-tool-chain.bash.
 
 - If you want to build a tool-chain for a new architecture, change $TARGET in
   build-tool-chain.bash, run it, and a tool-chain will be created alongside
@@ -131,72 +159,34 @@ exit
 
 RELEASE NOTES
 
-Version 0.8, August 2004
-
-The latest stable kernels at the time of writing have been built (2.4.27 and
-2.6.8.1). Kernels older than 2.4.22 and 2.6.3 have not been tried. Note that
-some combinations of versions are not great:
-- When compiled with gcc 3.4.1, linux 2.4.27 may not build depending on the
-dot config; loadable modules are not; and alpha kernels may not boot. Better
-to use gcc 3.3.4 for linux 2.4.27 (later 2.4 kernels have fixes for recent
-compilers).
-- The glibc 2.3.3-20040728 snapshot doesn't build for alpha or m68k without
-patching, using current kernel headers.
-- gcc-3.3.4 for powerpc, if configured with altivec support, will not compile
-with binutils-2.15 since it doesn't pass -maltivec to the target gas, which
-then barfs on the vector opcodes. A workaround is to compile those files by
-hand passing -maltivec and to restart the build, or else remove
---enable-altivec from the configure flags.
-- gcc 3.3.4 for powerpc lacks TLS support, so linuxthreads must be used
-instead of nptl. Or use gcc 3.4.
-
+Version 0.9, April 2005
 
 The following combinations will build (unassisted):
 
-arch                binutils        gcc                glibc            kernel
+architecture        binutils        gcc                glibc            kernel
 ------------------------------------------------------------------------------
-               m68k 2.15            3.4.1              2.3.3-20040728      2.6
-          ppc       2.15            3.4.1              2.3.3-20040728+     2.6
-          ppc       2.15            3.4.1              2.3.3-20040728  2.4
-x86 alpha           2.15            3.4.1, 3.3.4       2.3.3-20040728+     2.6
-x86 alpha      m68k 2.15            3.4.1, 3.3.4       2.3.3-20040728  2.4
+x86 alpha  ppc      2.15.94.0.2.2   3.4.3              2.3.5            2.6.11
+x86 alpha  ppc      2.15            3.3.5              2.3.3-20040728   2.4.30
+               m68k 2.15.94.0.2.2   3.4.3              2.3.5            2.6.10
+               m68k 2.15            3.3.5              2.3.3-20040728   2.4.28
+x86        ppc m68k 2.12.90.0.1#    2.95.4.ds15-22#    2.2.5-11.8#      2.2.26
 
-               m68k 2.15            3.3.3              2.3.3-lfs-5.1       2.6
-               m68k 2.15            3.4.0, 3.3.3       2.3.3-20040423  2.4
-x86                 2.15            3.4.0              2.3.3-20040423+     2.6
-          ppc       2.15.90.0.3     3.4.0              2.3.3-20040423+     2.6
-    alpha           2.15            3.3.3              2.3.3-20040406+     2.6
-x86 alpha           2.15.90.0.3     3.3.3              2.3.3-20040406+     2.6
-          ppc       2.15.90.0.3     3.3.3_pre20040215* 2.3.3-20040406+     2.6
-x86 alpha ppc       2.15.90.0.3     3.3.3_pre20040215* 2.3.3-lfs-rc1   2.4
-x86 alpha ppc       2.14.90.0.8     3.3.3              2.3.3-lfs-rc1   2.4
-x86                 2.14.90.0.8     3.3.3              2.3.3-lfs-rc1+      2.6
-    alpha           2.14.90.0.8-r1* 3.3.3              2.3.3-lfs-rc1+      2.6
-          ppc       2.14.90.0.8     3.3.3_pre20040215* 2.3.3-lfs-rc1+      2.6
-          ppc       2.14.90.0.8     3.3.3              2.3.3-lfs-rc1       2.6
-          ppc       2.14.90.0.8     3.4-20040317       2.3.3-lfs-rc1   2.4 2.6
-
-+ indicates nptl instead of linuxthreads; * indicates Gentoo sources.
-m68k kernel sources are from the linux-m68k CVS.
+# indicates Debian source
+m68k kernel sources are the linux-m68k CVS (2.4, 2.6) & linux-mac68k CVS (2.2)
 
 
 TO DO
 
 - run more glibc test suites
-- boot a ppc kernel
-- get gcc 2.95 and 3.2 working, and remove excess configure options
-- get older glibc releases working
+- boot more kernels
 - push patches upstream
 - make it all work under Jaguar with apple's gcc 3.3 upgrade
   (larger set of host tools?)
-- add some logging
-- include distcc in host tools
-- build more target arch's (mips, arm, sparc, sparc64 etc)
+- make it all work under Darwin and Solaris
 - add make parallelism flags
 - fix gdb missing termcap lib error / binutils exe prefix when build=host
 - move the environment set-up, the host tool build and the kernel build into
   separate scripts
-- remove all && and add the -e flag
 
 
 ACKNOWLEDGEMENTS
@@ -205,5 +195,4 @@ Loosely based on Philippe Trottier's Xcompiler V0.93. Ryan Oliver provided
 encouragement and crucial assistance with the build method, as well as patches
 for glibc. Some ideas come from Dan Kegel's crosstool and other scripts
 elsewhere on the 'net. Martin Schaffner contributed some changes to the kernel
-make commands. Thanks go to the Gentoo, LFS and Debian projects for some of
-the patches.
+make commands. My thanks to the Gentoo, LFS and Debian projects for patches.

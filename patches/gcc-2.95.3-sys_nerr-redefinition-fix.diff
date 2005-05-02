@@ -1,0 +1,10 @@
+--- gcc-2.95.3/libiberty/strerror.c-orig	Tue Apr  5 12:11:55 2005
++++ gcc-2.95.3/libiberty/strerror.c	Tue Apr  5 12:12:03 2005
+@@ -462,7 +462,6 @@
+ 
+ #else
+ 
+-extern int sys_nerr;
+ extern char *sys_errlist[];
+ 
+ #endif

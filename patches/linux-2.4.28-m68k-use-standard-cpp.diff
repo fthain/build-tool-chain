@@ -1,0 +1,44 @@
+--- a/arch/m68k/kernel/Makefile	Tue Apr 12 22:36:26 2005
++++ b/arch/m68k/kernel/Makefile	Tue Apr 12 22:36:54 2005
+@@ -8,7 +8,7 @@
+ # Note 2! The CFLAGS definitions are now in the main makefile...
+ 
+ .S.o:
+-	$(CC) $(AFLAGS) -traditional -c $< -o $*.o
++	$(CC) $(AFLAGS) -c $< -o $*.o
+ 
+ ifndef CONFIG_SUN3
+ all: head.o kernel.o
+--- a/arch/m68k/kernel/head.S	Tue Apr 12 22:36:56 2005
++++ b/arch/m68k/kernel/head.S	Tue Apr 12 22:46:38 2005
+@@ -3263,7 +3263,7 @@
+ 	moveml	%sp@+,%d0-%d7/%a2-%a6
+ 	jbra	L(serial_putc_done)
+ 2:
+-#endif CONFIG_MVME16x
++#endif /* CONFIG_MVME16x */
+ 
+ #ifdef CONFIG_BVME6000
+ 	is_not_bvme6000(2f)
+--- a/arch/m68k/kernel/entry.S	Tue Apr 12 22:36:56 2005
++++ b/arch/m68k/kernel/entry.S	Tue Apr 12 22:40:42 2005
+@@ -77,7 +77,7 @@
+ 
+ 	| After a fork we jump here directly from resume,
+ 	| so that %d1 contains the previous task
+-	| Theoretically only needed on SMP, but let's watch
++	| Theoretically only needed on SMP, but let us watch
+ 	| what happens in schedule_tail() in future...
+ ENTRY(ret_from_fork)
+ 	movel	%d1,%sp@-
+--- a/arch/m68k/kernel/sun3-head.S	Tue Apr 12 22:42:26 2005
++++ b/arch/m68k/kernel/sun3-head.S	Tue Apr 12 22:43:02 2005
+@@ -58,7 +58,7 @@
+ 2:				
+ 	
+ /* Disable caches and jump to high code. */
+-	moveq	#ICACHE_ONLY,%d0	| Cache disabled until we're ready to enable it
++	moveq	#ICACHE_ONLY,%d0	| Cache disabled until we are ready to enable it
+ 	movc	%d0, %cacr	|   is this the right value? (yes --m)
+ 	jmp	1f:l		
+ 
