@@ -1,0 +1,113 @@
+diff -Naur linux-2.6.10-orig/Makefile linux-2.6.10/Makefile
+--- linux-2.6.10-orig/Makefile	Sat Dec 25 08:35:01 2004
++++ linux-2.6.10/Makefile	Sun May  1 23:11:05 2005
+@@ -203,7 +203,7 @@
+ 
+ HOSTCC  	= gcc
+ HOSTCXX  	= g++
+-HOSTCFLAGS	= -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer
++HOSTCFLAGS	= -Wall -Wstrict-prototypes -O2 -fomit-frame-pointer -no-cpp-precomp
+ HOSTCXXFLAGS	= -O2
+ 
+ # 	Decide whether to build built-in, modular, or both.
+diff -Naur linux-2.6.10-orig/arch/i386/boot/tools/build.c linux-2.6.10/arch/i386/boot/tools/build.c
+--- linux-2.6.10-orig/arch/i386/boot/tools/build.c	Sat Dec 25 08:34:45 2004
++++ linux-2.6.10/arch/i386/boot/tools/build.c	Sun May  1 23:10:52 2005
+@@ -30,7 +30,6 @@
+ #include <stdarg.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+-#include <sys/sysmacros.h>
+ #include <unistd.h>
+ #include <fcntl.h>
+ #include <asm/boot.h>
+diff -Naur linux-2.6.10-orig/arch/x86_64/boot/tools/build.c linux-2.6.10/arch/x86_64/boot/tools/build.c
+--- linux-2.6.10-orig/arch/x86_64/boot/tools/build.c	Sat Dec 25 08:35:50 2004
++++ linux-2.6.10/arch/x86_64/boot/tools/build.c	Sun May  1 23:10:52 2005
+@@ -30,7 +30,6 @@
+ #include <stdarg.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+-#include <sys/sysmacros.h>
+ #include <unistd.h>
+ #include <fcntl.h>
+ #include <asm/boot.h>
+diff -Naur linux-2.6.10-orig/scripts/Makefile.host linux-2.6.10/scripts/Makefile.host
+--- linux-2.6.10-orig/scripts/Makefile.host	Sat Dec 25 08:35:27 2004
++++ linux-2.6.10/scripts/Makefile.host	Sun May  1 23:10:48 2005
+@@ -89,7 +89,7 @@
+ __hostcxx_flags	= -I$(obj) $(call flags,_hostcxx_flags)
+ endif
+ 
+-hostc_flags    = -Wp,-MD,$(depfile) $(__hostc_flags)
++hostc_flags    = -Wp,-MD,$(depfile) $(__hostc_flags) -fno-common
+ hostcxx_flags  = -Wp,-MD,$(depfile) $(__hostcxx_flags)
+ 
+ #####
+@@ -143,8 +143,8 @@
+ 
+ # Link a shared library, based on position independent .o files
+ # *.o -> .so shared library (host-cshlib)
+-quiet_cmd_host-cshlib	= HOSTLLD -shared $@
+-      cmd_host-cshlib	= $(HOSTCC) $(HOSTLDFLAGS) -shared -o $@ \
++quiet_cmd_host-cshlib	= HOSTLLD -dynamiclib $@
++      cmd_host-cshlib	= $(HOSTCC) $(HOSTLDFLAGS) -dynamiclib -o $@ \
+ 			  $(addprefix $(obj)/,$($(@F:.so=-objs))) \
+ 			  $(HOST_LOADLIBES) $(HOSTLOADLIBES_$(@F))
+ $(host-cshlib): %: $(host-cshobjs) FORCE
+diff -Naur linux-2.6.10-orig/scripts/genksyms/parse.c_shipped linux-2.6.10/scripts/genksyms/parse.c_shipped
+--- linux-2.6.10-orig/scripts/genksyms/parse.c_shipped	Sat Dec 25 08:35:25 2004
++++ linux-2.6.10/scripts/genksyms/parse.c_shipped	Sun May  1 23:10:52 2005
+@@ -49,7 +49,7 @@
+ 
+ 
+ #include <assert.h>
+-#include <malloc.h>
++#include <stdlib.h>
+ #include "genksyms.h"
+ 
+ static int is_typedef;
+diff -Naur linux-2.6.10-orig/scripts/mod/file2alias.c linux-2.6.10/scripts/mod/file2alias.c
+--- linux-2.6.10-orig/scripts/mod/file2alias.c	Sat Dec 25 08:34:44 2004
++++ linux-2.6.10/scripts/mod/file2alias.c	Sun May  1 23:10:52 2005
+@@ -11,6 +11,7 @@
+  */
+ 
+ #include "modpost.h"
++#include <stdint.h>
+ 
+ /* We use the ELF typedefs for kernel_ulong_t but bite the bullet and
+  * use either stdint.h or inttypes.h for the rest. */
+diff -Naur linux-2.6.10-orig/scripts/mod/mk_elfconfig.c linux-2.6.10/scripts/mod/mk_elfconfig.c
+--- linux-2.6.10-orig/scripts/mod/mk_elfconfig.c	Sat Dec 25 08:35:39 2004
++++ linux-2.6.10/scripts/mod/mk_elfconfig.c	Sun May  1 23:10:52 2005
+@@ -1,7 +1,7 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+-#include <elf.h>
++#include "elf.h"
+ 
+ int
+ main(int argc, char **argv)
+diff -Naur linux-2.6.10-orig/scripts/mod/modpost.h linux-2.6.10/scripts/mod/modpost.h
+--- linux-2.6.10-orig/scripts/mod/modpost.h	Sat Dec 25 08:33:47 2004
++++ linux-2.6.10/scripts/mod/modpost.h	Sun May  1 23:10:53 2005
+@@ -7,7 +7,7 @@
+ #include <sys/mman.h>
+ #include <fcntl.h>
+ #include <unistd.h>
+-#include <elf.h>
++#include "elf.h"
+ 
+ #include "elfconfig.h"
+ 
+diff -Naur linux-2.6.10-orig/scripts/mod/sumversion.c linux-2.6.10/scripts/mod/sumversion.c
+--- linux-2.6.10-orig/scripts/mod/sumversion.c	Sat Dec 25 08:35:23 2004
++++ linux-2.6.10/scripts/mod/sumversion.c	Sun May  1 23:10:53 2005
+@@ -1,3 +1,5 @@
++#include <stdio.h>
++#include <stdlib.h>
+ #include <netinet/in.h>
+ #ifdef __sun__
+ #include <inttypes.h>

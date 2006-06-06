@@ -10,6 +10,6 @@
  .PHONY: _modinst_post
  _modinst_post: _modinst_
 -	if [ -r System.map ]; then $(DEPMOD) -ae -F System.map $(depmod_opts) $(KERNELRELEASE); fi
-+	if [ -r System.map ]; then depmod.pl -F System.map $(depmod_opts) -k vmlinux; fi
++	if [ -r System.map ]; then depmod.pl $(depmod_opts) -k vmlinux; fi
  
  else # CONFIG_MODULES

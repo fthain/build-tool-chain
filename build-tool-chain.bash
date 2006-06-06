@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Linux cross tool chain build script for Mac OS X Panther and Linux (gcc 3.3)
-# Copyright (c) 2004, 2005 Finn Thain
+# Linux cross tool chain build script for Mac OS X and Linux (gcc 3.3)
+# Copyright (c) 2004, 2005, 2006 Finn Thain
 # fthain@telegraphics.com.au
 
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -28,80 +28,55 @@
 set -e -u
 
 # This is to be set to the location of the unpacked btc tarball
-DIST_ROOT=${HOME}/Desktop/btc-0.9
-#DIST_ROOT=/Volumes/Linux/btc
+#DIST_ROOT=${HOME}/btc-0.10
+DIST_ROOT=/Volumes/btc-0.10
 
 # Where to find sources etc
-SOURCES=${DIST_ROOT}/sources
-PATCHES=${DIST_ROOT}/patches
 CONFIGS=${DIST_ROOT}/configs
+PATCHES=${DIST_ROOT}/patches
+PROFILES=${DIST_ROOT}/profiles
+SOURCES=${DIST_ROOT}/sources
 
-# Missing host tools needed for the build will be installed here
+# Missing host tools needed for the build to be installed here
 HOST_TOOLS_PREFIX=${DIST_ROOT}/hosttools
 
 # This is where tool chains will finally be installed
-BTC_PREFIX=/opt/btc-0.9
-#BTC_PREFIX=${DIST_ROOT}/xcompiler
+#BTC_PREFIX=/opt/btc-0.10
+BTC_PREFIX=${DIST_ROOT}
 
-# The build/host tuple 
-BUILD=${BUILD:-powerpc-apple-darwin}
-#BUILD=${BUILD:-i686-pc-linux-gnu}
-
-# The target tuple
-#TARGET=${TARGET:-m68k-unknown-linux-gnu}
-TARGET=${TARGET:-m68k-linux}
-TARGET_CPU=${TARGET_CPU:-m68k}
-#TARGET=alpha-unknown-linux-gnu
-#TARGET_CPU=alpha
-#TARGET=powerpc-unknown-linux-gnu
-#TARGET_CPU=ppc
-#TARGET=i686-pc-linux-gnu
-#TARGET_CPU=i386
-
-# $METHOD controls how kernel headers and binaries are made, also how gcc gets
-# patched & built, since NPTL => shared gcc => early build of glibc crt objects.
-# Current glibc seems to require gcc method 3, even for linuxthreads.
-# Also, older tools don't have support for sysroot, so they need the old method.
-METHOD=${METHOD:-3}
-
-# Packages to be built
-GDB_DIST=gdb-6.1.1
-
-case ${METHOD} in
-    ( 1 ) # This mode is suitable for gcc 3.1 and older
-        BINUTILS_DIST=binutils-2.12.90.0.1
-        KERNEL=linux-2.2.26
-        GCC_DIST=gcc-2.95.3
-        GCC_CORE_DIST=gcc-core-2.95.3
-        GLIBC_DIST=glibc-2.2.5
-        THREADING_LIB=glibc-linuxthreads-2.2.5
-        ;;
-    ( 2 ) # Suitable for gcc 3.2 and newer, glibc <= 2.3.3 and linuxthreads
-        BINUTILS_DIST=binutils-2.15.94.0.2.2
-#        KERNEL=linux-2.4.30
-        KERNEL=linux-2.4.28
-        GCC_DIST=gcc-3.3.5
-        GCC_CORE_DIST=gcc-core-3.3.5
-        GLIBC_DIST=glibc-2.3.3
-        THREADING_LIB=
-        ;;
-    ( 3 ) # Allows glibc > 2.3.3, NPTL (given TLS support) or linuxthreads
-        BINUTILS_DIST=binutils-2.15.94.0.2.2
-#        KERNEL=linux-2.6.11
-        KERNEL=linux-2.6.10
-        GCC_DIST=gcc-3.4.3
-        GCC_CORE_DIST=gcc-core-3.4.3
-        GLIBC_DIST=glibc-2.3.5
-        THREADING_LIB=glibc-linuxthreads-2.3.5
-        ;;
-esac
+# Set vars to determine what to build
+. ${PROFILES}/3-m68k
 
 ##############################################
 #
 # Below this line, angels fear to tread
 
+# The build/host tuple 
+BUILD=`/usr/share/libtool/config.guess`
+echo BUILD: $BUILD
+
+# Profile must set these
+echo TARGET: $TARGET
+echo TARGET_CPU: $TARGET_CPU
+echo METHOD: $METHOD
+echo KERNEL: $KERNEL
+echo GCC_DIST: $GCC_DIST
+echo GCC_CORE_DIST: $GCC_CORE_DIST
+echo GLIBC_DIST: $GLIBC_DIST
+echo THREADING_LIB: $THREADING_LIB
+echo GDB_DIST: $GDB_DIST
+
+# These must be set. set -u makes sure
+echo BTC_PREFIX: ${BTC_PREFIX}
+echo HOST_TOOLS_PREFIX: ${HOST_TOOLS_PREFIX}
+
 # Tool chain prefix
 TC_PREFIX=${BTC_PREFIX}/${GCC_DIST}-${BINUTILS_DIST}-${GLIBC_DIST}
+
+# $METHOD controls how kernel headers and binaries are made, also how gcc gets
+# patched & built, since NPTL => shared gcc => early build of glibc crt objects.
+# Current glibc seems to require gcc method 3, even for linuxthreads.
+# Also, older tools don't have support for sysroot, so they need the old method.
 
 case $METHOD in
     ( 1 )
@@ -129,13 +104,15 @@ case $METHOD in
         SYSROOT=${TC_PREFIX}/${TARGET}/sysroot
         BINUTILS_CONFIG_OPTS=--with-sysroot=${SYSROOT}
         case ${TARGET_CPU} in
-            ( m68k )
+            ( m68k | mips )
                 GLIBC_CONFIG_OPTS=--enable-add-ons=linuxthreads
                 ;;
             ( * )
                 GLIBC_CONFIG_OPTS="--enable-add-ons=nptl \
 --with-tls \
+--enable-bind-now \
 --cache-file=config.cache"
+# --with-__thread
                 ;;
         esac
         GLIBC_PREFIX=/usr
@@ -161,36 +138,61 @@ if [ $TARGET = $BUILD ] ; then
 fi
 
 if [ `expr ${BUILD##*-} : darwin` = 6 ]; then
+    # Need at least gcc 3.3
+    gcc_select 3.3 || sudo gcc_select 3.3
+    # Let the result be backward compatible with Panther
+    export MACOSX_DEPLOYMENT_TARGET=10.3
     # Turn off Apple's pre-compiled headers
-    HOST_CFLAGS=-no-cpp-precomp 
+    HOST_CFLAGS='-no-cpp-precomp'
 else
     # This works for Linux hosts
     HOST_CFLAGS=''
 fi
 
+export LANGUAGE=C LANG=C LC_ALL=C
 export CPP="gcc -E $HOST_CFLAGS"
 export CC=gcc
 export PATH=${TC_PREFIX}/bin:${HOST_TOOLS_PREFIX}/bin:/bin:/sbin:/usr/bin:/usr/sbin
-export LANGUAGE=C LANG=C LC_ALL=C
+echo PATH: $PATH
 
-# Where to unpack and build. Used as a mount point for a UFS on Mac OS X.
+# Where to unpack and build. Used as a case-sensitive mount point on Mac OS X.
 BUILD_DIR=${DIST_ROOT}/build
+echo BUILD_DIR: ${BUILD_DIR}
 
 if [ `expr ${BUILD##*-} : darwin` = 6 ]; then
     cd ${DIST_ROOT}
     if [ -e build.sparseimage ]; then
+        echo build.sparseimage already exists...
         if [ -d ${BUILD_DIR} ]; then
-            echo build.sparseimage already exists, and seems to be mounted.
+            echo and seems to be mounted.
+            if [ x"$@" == "x-d" ]; then
+                hdiutil detach $BUILD_DIR
+                [ ! -d ${BUILD_DIR} ] || exit 1
+                rm build.sparseimage
+                exit
+            fi
         else
-            echo build.sparseimage already exists: attempting to mount it.
+            echo but is probably not mounted.
+            if [ x"$@" == "x-d" ]; then
+                rm build.sparseimage
+                exit
+            fi
             hdiutil attach -mount required -mountroot ${DIST_ROOT} build.sparseimage
         fi
     else
+        if [ x"$@" == "x-d" ]; then
+            exit
+        fi
         hdiutil create -ov -size 1500M -type SPARSE -fs HFSX \
                        -volname build -partitionType Apple_HFS build
         hdiutil attach -mount required -mountroot ${DIST_ROOT} build.sparseimage
+        sudo mount -u -o perm,nodev,nosuid ${DIST_ROOT}/build
     fi
 else
+    if [ x"$@" == "x-d" ]; then
+        sudo rm -rf ${BUILD_DIR}
+        exit
+    fi
     mkdir -p ${BUILD_DIR}
 fi
 
@@ -209,18 +211,53 @@ function decompress () {
     for f in $1*; do
         case $f in
             ( $1.bz2 | $1.tbz | $1.tar.bz2 )
-                bzip2 -dc $f
+                bzip2 -dc $f | dd bs=4194304
                 return ;;
             ( $1.gz | $1.tgz | $1.tar.gz )
-                gzip -dc $f
+                gzip -dc $f | dd bs=4194304
                 return ;;
             ( $1 | $1.tar )
-                cat $f
+                dd bs=4194304 if=$f
                 return ;;
         esac
     done
     echo "uncompress: can't find $1" 1>&2
     echo "uncompress: can't find $1"
+}
+
+##############################################
+#
+# This function installs a source package given by the first argument.
+
+function install_host_tool () {
+    cd $BUILD_DIR
+    echo Unpacking $1 
+    case $1 in
+        ( flex-2.5.4 )
+            decompress ${SOURCES}/${1}a | tar -xf -
+            echo Building $1
+	    cd $1
+	    patch -p1 < ${PATCHES}/flex-2.5.4a-r6.diff ;;
+	( * )
+            decompress ${SOURCES}/${1} | tar -xf -
+            echo Building $1
+	    cd $1 ;;
+    esac
+    CFLAGS="-O2" ./configure --prefix=${HOST_TOOLS_PREFIX}
+    make
+    echo Installing $1
+    # one or more of coreutils' uname, rm and others are _broken_ on darwin (tested from 5.0 to 5.94).
+    case $1 in
+        ( coreutils-* )
+            dst=/tmp/junk$$
+            make DESTDIR=$dst install
+            cp -p $dst/${HOST_TOOLS_PREFIX}/bin/{expr,install} ${HOST_TOOLS_PREFIX}/bin
+            rm -fr $dst
+            ;;
+        ( * )
+            make install
+            ;;
+    esac
 }
 
 ##############################################
@@ -232,58 +269,42 @@ function decompress () {
 # No need if build host is a linux system, though the old bison
 # is required for gcc 2.95.
 
-test -z ${HOST_TOOLS_PREFIX} && exit
-
-if [ $BUILD = ${BUILD/%-linux-gnu} ] ; then
-     pkgs="sed-4.1.1 make-3.80 gettext-0.14.1 gawk-3.1.3 bison-1.28"
+if [ $BUILD = ${BUILD/%-gnu} ] ; then
+    pkgs="sed-4.1.5 make-3.80 gettext-0.14.5 gawk-3.1.5 bison-1.28"
 else
-     pkgs="bison-1.28"
+    pkgs="bison-1.28 flex-2.5.4"
 fi
 
 for pkg in $pkgs; do
     exe=${pkg/-*}
     if [ `which $exe | grep -c ${HOST_TOOLS_PREFIX}/bin/$exe` != 1 ]; then
-        echo Unpacking $pkg 
-        cd $BUILD_DIR
-        decompress ${SOURCES}/${pkg} | tar -xf -
-        echo Building $pkg
-        cd $pkg
-        ./configure --prefix=${HOST_TOOLS_PREFIX}
-        make
-        echo Installing $pkg
-        make install 
+        # gnu sed-4.1.5 won't build without gnu sed... duh
+        if [ $pkg = sed-4.1.5 ] ; then
+            install_host_tool sed-4.1.4
+        fi
+        install_host_tool $pkg
+    else
+        echo $exe already installed
     fi
 done
 
-if [ $BUILD = ${BUILD/%-linux-gnu} ] ; then
+if [ $BUILD = ${BUILD/%-gnu} ] ; then
     ln -fs make ${HOST_TOOLS_PREFIX}/bin/gnumake
-    pkg=coreutils-5.2.1
-    exe=expr
+    exe=install
     if [ `which $exe | grep -c ${HOST_TOOLS_PREFIX}/bin/$exe` != 1 ]; then
-        echo Unpacking $pkg 
-        cd $BUILD_DIR
-        decompress ${SOURCES}/${pkg} | tar -xf -
-        echo Building $pkg
-        cd $pkg
-        ./configure --prefix=${HOST_TOOLS_PREFIX}
-        make
-        echo Installing $pkg
-        make install
-# coreutils uname is broken on darwin
-        rm ${HOST_TOOLS_PREFIX}/bin/uname
-## same goes for coreutils-5.0 rm, give it some of its own medicine
-#        rm ${HOST_TOOLS_PREFIX}/bin/rm
-        hash -r
+        install_host_tool coreutils-5.94
+    else
+        echo $exe already installed
     fi
 fi
 
 if [ ! -x ${HOST_TOOLS_PREFIX}/bin/depmod.pl ]; then
     cd ${HOST_TOOLS_PREFIX}/bin
-    decompress ${SOURCES}/depmod.pl > depmod.pl
-    patch < ${PATCHES}/depmod-pl-btc-cross-compile.patch
+    decompress ${SOURCES}/depmod.pl-14592 > depmod.pl
+    patch < ${PATCHES}/depmod-pl-14592-btc-cross-compile.diff
     chmod 755 depmod.pl
 else
-    echo "depmod.pl already present"
+    echo "depmod.pl already installed"
 fi
 
 ##############################################
@@ -309,7 +330,7 @@ if [ ! -d ${KERNEL} ] ; then
             case ${TARGET_CPU} in
                 ( m68k )
                     # linux-m68k CVS snapshot
-                    decompress ${PATCHES}/linux-2.4.28-m68k-20050412.diff | patch -p1
+                    decompress ${PATCHES}/linux-2.4.32-m68k.diff | patch -p1
                     # avoid traditional CPP for gcc-3.3
                     decompress ${PATCHES}/linux-2.4.28-m68k-use-standard-cpp.diff | patch -p1 ;;
                 ( i386 )
@@ -318,9 +339,9 @@ if [ ! -d ${KERNEL} ] ; then
         ( linux-2.6.* )
             if [ `expr ${BUILD##*-} : darwin` = 6 ]; then
                 case $KERNEL in
-                    ( linux-2.6.[0-8] | linux-2.6.[0-8]-* | linux-2.6.8.1 | linux-2.6.8.1-* )
+                    ( linux-2.6.[0-8] | linux-2.6.[0-8][.-]* )
                         patch -p1 < ${PATCHES}/linux-2.6-btc-darwin-config.patch ;;
-                    ( linux-2.6.* )
+                    ( linux-2.6.9 | linux-2.6.9[.-]* )
                         patch -p1 < ${PATCHES}/linux-2.6.9-btc-darwin-config.patch ;;
                 esac
                 case $KERNEL in
@@ -333,20 +354,49 @@ if [ ! -d ${KERNEL} ] ; then
                         patch -p1 < ${PATCHES}/linux-2.6.5-btc-darwin-kbuild.patch ;;
                     ( linux-2.6.7 | linux-2.6.7-* )
                         patch -p1 < ${PATCHES}/linux-2.6.7-btc-darwin-kbuild.patch ;;
-                    ( linux-2.6.* )
+                    ( linux-2.6.[89] | linux-2.6.[89][.-]* )
                         patch -p1 < ${PATCHES}/linux-2.6.8-btc-darwin-kbuild.patch ;;
                 esac
                 case $KERNEL in
-                    ( linux-2.6.10 | linux-2.6.10-* )
-                        patch -p1 < ${PATCHES}/linux-2.6.10-darwin-HOSTCFLAGS.diff ;;
+                    ( linux-2.6.10 | linux-2.6.10[.-]* )
+                        patch -p1 < ${PATCHES}/linux-2.6.10-btc-darwin.diff ;;
+                    ( linux-2.6.1[1-5] | linux-2.6.1[1-5][.-]* )
+                        echo need to fix patch file
+                        exit 1 ;;
+                    ( linux-2.6.16 | linux-2.6.16[.-]* )
+                        patch -p1 < ${PATCHES}/linux-2.6.16-btc-darwin.diff ;;
+                esac
+                case $KERNEL in
+                    ( linux-2.6.[0-9] | linux-2.6.[0-9][.-]* | linux-2.6.1[01] | linux-2.6.1[01][.-]* )
+                        ;;
+                    ( * )
+                        sed -i -e 's,^#define LOCALEDIR .*,#define LOCALEDIR "'${HOST_TOOLS_PREFIX}'/share/locale",' scripts/kconfig/lkc.h
+                        ;;
                 esac
             fi
-            patch -p1 < ${PATCHES}/linux-2.6-btc-Makefile.patch
+            case $KERNEL in
+                ( linux-2.6.[0-9] | linux-2.6.[0-9][.-]* | linux-2.6.10 | linux-2.6.10[.-]* )
+                    patch -p1 < ${PATCHES}/linux-2.6-btc-Makefile.patch ;;
+                ( linux-2.6.1[1-5] | linux-2.6.1[1-5][.-]* )
+                    echo need to split up combined patch file
+                    exit 1 ;;
+                ( linux-2.6.16 | linux-2.6.16[.-]* )
+                    patch -p1 < ${PATCHES}/linux-2.6.16-btc-Makefile.diff ;;
+            esac
             if [ x${TARGET_CPU} = xm68k ] ; then
                 # linux-m68k CVS snapshot
-                decompress ${PATCHES}/linux-2.6.10-m68k-20050208.diff | patch -p1
-                # temporary fix for mac_scsi link error
-                decompress ${PATCHES}/linux-2.6.10-m68k-ncr5380-exit-link-fix.diff | patch -p1
+                decompress ${PATCHES}/linux-2.6.16-m68k-20060606.diff | patch -p1
+                decompress ${PATCHES}/linux-2.6.16-m68k-reversals.diff | patch -p1 -R
+                for p in \
+patch-2.6.16.18 \
+linux-2.6.15-m68k-ncr5380-exit-link-fix.diff \
+remove_unused_adb_header.diff \
+patch_d-via-alt-mapping.diff \
+linux-2.6.15-viro-m68k-math-emu-macro-names.diff \
+linux-2.6.15-viro-m68k-math-emu-macro-args.diff \
+; do
+                  decompress ${PATCHES}/$p | patch -p1
+                done
             fi ;;
     esac
 else
@@ -367,12 +417,21 @@ if [ ! -d ${BINUTILS_DIST} ] ; then
         ( binutils-2.12.90.0.1 )
             # Debian source package
             decompress ${PATCHES}/binutils-2.12.90.0.1-4-debian.diff | patch -p1 ;;
-        ( binutils-2.15 | binutils-2.15.* )
+        ( binutils-2.15 | binutils-2.15.* | binutils-2.16 | binutils-2.16.* )
             # Fix to support april '04 glibc asm (m68k/arm/cris)
-            patch -p1 < ${PATCHES}/binutils-2.15-NO_APP-mode-line-comment.patch ;;
+            patch -p1 < ${PATCHES}/binutils-2.15-NO_APP-mode-line-comment.patch
+            patch -p1 < ${PATCHES}/702-binutils-skip-comments.patch
+            ;;
+        ( binutils-2.17 | binutils-2.17.* )
+            # Avoid fatal compiler warnings
+            patch -p1 < ${PATCHES}/binutils-2.17.50.0.2-Werror.diff
+            patch -p1 < ${PATCHES}/binutils-2.17.50.0.2-README-script-portability.diff
+            patch -p1 < ${PATCHES}/702-binutils-skip-comments.patch
+            ;;
     esac
 ## Apply HJL patches according to patches/README, e.g.
-#    patch -p1 < patches/libtool-dso.patch
+##    patch -p1 < patches/libtool-dso.patch
+#    sh patches/README
 else
     echo "${BINUTILS_DIST} already present"
 fi
@@ -391,18 +450,24 @@ if [ ! -d ${GCC_CORE_DIST} ] ; then
     case ${GCC_CORE_DIST} in
         ( gcc-core-2.95.3 )
             # Debian sources
-            decompress ${PATCHES}/gcc-2.95.4.ds15-22-debian.diff | patch -p1
-            # Permit 2.95 compiler to be configured on Darwin
+            decompress ${PATCHES}/gcc-2.95.4.ds15-24-debian.diff | patch -p1
+            # Crosstool patches
+            decompress ${PATCHES}/gcc-pr3106.patch | patch -p1
+            decompress ${PATCHES}/backport-config.gcc-1.4.patch | patch -p1
+            # More autotools fixes
             decompress ${PATCHES}/gcc-2.95.2-host-darwin.diff | patch -p1
-            # Darwin compilation fix
-            decompress ${PATCHES}/gcc-2.95.3-sys_nerr-redefinition-fix.diff | patch -p1
             ;;
         ( gcc-core-3.[01].* )
             ;;
-        ( * )
+        ( gcc-core-3.* )
             if [ x${GLIBC_NEEDS_SHARED_GCC} = xyes ]; then
                 patch -p0 < ${PATCHES}/gcc-3.2-btc-shlib-sans-libc.patch
-            fi ;;
+            fi
+            ;;
+        ( * )
+            echo gcc patch for gcc 4?
+            exit 1
+            ;;
     esac
 else
     echo "${GCC_CORE_DIST} already present"
@@ -443,7 +508,14 @@ if [ ! -d ${GLIBC_DIST} ] ; then
             # CVS snapshot
             decompress ${PATCHES}/glibc-2.3.3-20040728.diff | patch -p1
             patch -p0 < ${PATCHES}/glibc-2.3.3-new-syscall-tests.patch
-            patch -p1 < ${PATCHES}/glibc-2.3.3-lfs-5.1-m68k_fix_fcntl.patch
+            ;;
+        ( glibc-2.3.6 )
+            patch -p0 < ${PATCHES}/glibc-2.3.6-symbol-hacks.patch
+            ;;
+    esac
+    case ${GLIBC_DIST} in
+        ( glibc-2.3.[2-6] )
+            patch -p1 < ${PATCHES}/glibc-2.3.2-btc-m68k_fix_fcntl.diff
             ;;
     esac
 else
@@ -463,11 +535,12 @@ if [ ! -d ${GCC_DIST} ] ; then
     case ${GCC_DIST} in
         ( gcc-2.95.3 )
             # Debian sources
-            decompress ${PATCHES}/gcc-2.95.4.ds15-22-debian.diff | patch -p1
-            # Permit 2.95 compiler to be configured on Darwin
+            decompress ${PATCHES}/gcc-2.95.4.ds15-24-debian.diff | patch -p1
+            # Crosstool patches
+            decompress ${PATCHES}/gcc-pr3106.patch | patch -p1
+            decompress ${PATCHES}/backport-config.gcc-1.4.patch | patch -p1
+            # More autotools fixes
             decompress ${PATCHES}/gcc-2.95.2-host-darwin.diff | patch -p1
-            # Darwin compilation fix
-            decompress ${PATCHES}/gcc-2.95.3-sys_nerr-redefinition-fix.diff | patch -p1
             ;;
         ( gcc-3.3.* )
             patch -p0 < ${PATCHES}/gcc-3.3-no-include-filio.patch
@@ -476,6 +549,10 @@ if [ ! -d ${GCC_DIST} ] ; then
             patch -p0 < ${PATCHES}/gcc-3.4-btc-no-include-filio.patch
             patch -p1 < ${PATCHES}/gcc-3.4.1-btc-use-target-cpp-for-lib-configure.patch
             ;;
+        ( gcc-4.* )
+	        echo gcc patch for gcc 4?
+	        exit 1
+	    ;;
     esac
 else
     echo "${GCC_DIST} already present"
@@ -524,15 +601,15 @@ fi
 # $TC_PREFIX directory. Then binutils will just reinstall. (This works
 # because binutils has no deps in $TC_PREFIX).
 
-if [ ! -d ${TC_PREFIX}/bin ]; then
+if [ ! -x ${TC_PREFIX}/bin/${TARGET}-as ]; then
 
-    (cd ${TC_PREFIX} && find . | sort > ${BUILD_DIR}/0)
+    (cd ${TC_PREFIX} && find . | sort > ${BUILD_DIR}/0.list)
 
     cd ${BUILD_DIR}/binutils-${TARGET}
     make install
     # no readelf on Darwin & glibc configure doesn't look for ${TARGET}-readelf
     cd ${TC_PREFIX}/bin
-    ln -s ${TARGET}-readelf readelf
+    ln -fs ${TARGET}-readelf readelf
 else
     echo "binutils already installed"
 fi
@@ -543,9 +620,6 @@ fi
 #
 
 if [ ! -d ${KERNEL_HEADERS}/linux ]; then
-
-    (cd ${TC_PREFIX} && find . | sort > ${BUILD_DIR}/1)
-
     cd ${BUILD_DIR}/${KERNEL}
     make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- mrproper
     case $KERNEL in
@@ -561,6 +635,9 @@ if [ ! -d ${KERNEL_HEADERS}/linux ]; then
     cp -r include/asm-${TARGET_CPU} ${KERNEL_HEADERS}/asm
     ln -fs ${KERNEL_HEADERS}/* ${GLIBC_HEADERS}
     cd ..
+
+    (cd ${TC_PREFIX} && find . | sort > ${BUILD_DIR}/2.list)
+
 else
     echo "linux kernel headers already present"
 fi
@@ -572,9 +649,6 @@ fi
 
 cd ${BUILD_DIR}
 if [ ! -d glibc-${TARGET}-1 ]; then
-
-    (cd ${TC_PREFIX} && find . | sort > ${BUILD_DIR}/2)
-
     mkdir glibc-${TARGET}-1
     cd glibc-${TARGET}-1
     # touch this to keep configure's compiler tests happy:
@@ -592,12 +666,34 @@ if [ ! -d glibc-${TARGET}-1 ]; then
             else
                 echo 'libc_cv_ppc_machine=${libc_cv_ppc_machine=yes}' >config.cache # XXX
             fi ;;
+        ( glibc-2.4.* )
+            echo glibc config cache for glibc 2.4?
+	    exit 1
+	    ;;
     esac
     if [ `expr ${BUILD##*-} : darwin` = 6 ]; then
-        # darwin 6 doesn't have one but we need to keep the #includes happy
+        # keep the the compiler happy to prevent missing stddef.h warnings
         touch stddef.h
     fi
-    CC=gcc CPP="gcc -E" CFLAGS="-O2 ${HOST_CFLAGS}" \
+
+    case ${TARGET_CPU} in
+        ( mips )
+            # o32
+            arch_defines="-D_MIPS_FPSET=16 -D_MIPS_ISA=2 -D_ABIO32=1 -D_MIPS_SIM=_ABIO32 -D_MIPS_SZINT=32 -D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32 -D__WORDSIZE=32"
+            ## n64
+            #arch_defines="-D_MIPS_FPSET=32 -D_MIPS_ISA=4 -D_ABI64=3 -D_MIPS_SIM=_ABI64 -D_MIPS_SZINT=32 -D_MIPS_SZLONG=64 -D_MIPS_SZPTR=64 -D__WORDSIZE=64"
+            ## n32
+            #arch_defines="-D_MIPS_FPSET=32 -D_MIPS_ISA=4 -D_ABI64=3 -D_MIPS_SIM=_NABI32 -D_MIPS_SZINT=32 -D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32 -D__WORDSIZE=32"
+            ;;
+       ( arm )
+            arch_defines="-D__ARM_EABI__"
+            ;;
+       ( * )
+            arch_defines=""
+            ;;
+    esac
+
+    CC="gcc $arch_defines" CPP="gcc -E $arch_defines" CFLAGS="-O2 ${HOST_CFLAGS}" \
 ../${GLIBC_DIST}/configure --prefix=${GLIBC_PREFIX} \
 --host=${TARGET} --build=${BUILD} \
 --without-cvs --disable-sanity-checks \
@@ -611,6 +707,9 @@ $GLIBC_CONFIG_OPTS \
     mkdir -p ${GLIBC_HEADERS}/gnu
     touch ${GLIBC_HEADERS}/gnu/stubs.h
     cp bits/stdio_lim.h ${GLIBC_HEADERS}/bits || true
+
+    (cd ${TC_PREFIX} && find . | sort > ${BUILD_DIR}/3.list)
+
 else
     echo "glibc-${TARGET}-1 already present"
 fi
@@ -622,9 +721,6 @@ fi
 
 cd ${BUILD_DIR}
 if [ ! -d gcc-core-${TARGET}-1 ]; then
-
-    (cd ${TC_PREFIX} && find . | sort > ${BUILD_DIR}/3)
-
     mkdir gcc-core-${TARGET}-1
     cd gcc-core-${TARGET}-1
     CFLAGS="-O2 $HOST_CFLAGS" \
@@ -638,9 +734,13 @@ ${GCC_CONFIG_OPTS} \
 --enable-threads=posix \
 --enable-__cxa_atexit \
 --enable-languages=c \
---disable-shared
+--disable-shared \
+--disable-libmudflap --disable-libssp --disable-libunwind-exceptions
     make all-gcc
     make install-gcc 
+
+    (cd ${TC_PREFIX} && find . | sort > ${BUILD_DIR}/4.list)
+
 else
     echo "gcc-core-${TARGET}-1 already present"
 fi
@@ -653,9 +753,6 @@ fi
 
 cd ${BUILD_DIR}
 if [ x${GLIBC_NEEDS_SHARED_GCC} = xyes -a ! -d glibc-${TARGET}-2 ]; then
-
-    (cd ${TC_PREFIX} && find . | sort > ${BUILD_DIR}/4)
-
     mkdir glibc-${TARGET}-2
     cd glibc-${TARGET}-2
     cp ${CONFIGS}/glibc-2.3.2-nptl-config.cache config.cache
@@ -699,6 +796,9 @@ ${GCC_CONFIG_OPTS} \
     cp ../glibc-${TARGET}-2/csu/crt[in].o gcc
     make all-gcc
     make install-gcc 
+
+    (cd ${TC_PREFIX} && find . | sort > ${BUILD_DIR}/5.list)
+
 else
     echo "gcc-core-${TARGET}-2 already present"
 fi
@@ -710,9 +810,6 @@ fi
 
 cd ${BUILD_DIR}
 if [ ! -d glibc-${TARGET}-3 ]; then
-
-    (cd ${TC_PREFIX} && find . | sort > ${BUILD_DIR}/5)
-
     mkdir glibc-${TARGET}-3
     cd glibc-${TARGET}-3
     if [ x${GLIBC_NEEDS_SHARED_GCC} = xyes ]; then
@@ -733,6 +830,9 @@ $GLIBC_CONFIG_OPTS \
         make
     fi
     make install_root=${GLIBC_INSTALL_ROOT} install
+
+    (cd ${TC_PREFIX} && find . | sort > ${BUILD_DIR}/6.list)
+
 else
     echo "glibc-${TARGET}-3 already present"
 fi
@@ -744,9 +844,6 @@ fi
 
 cd ${BUILD_DIR}
 if [ ! -d gcc-${TARGET} ]; then
-
-    (cd ${TC_PREFIX} && find . | sort > ${BUILD_DIR}/6)
-
     mkdir gcc-${TARGET}
     cd gcc-${TARGET}
     CFLAGS="-O2 $HOST_CFLAGS" \
@@ -762,6 +859,9 @@ ${GCC_CONFIG_OPTS} \
 #--enable-languages=ada,c,c++,objc,java,f77
     make all
     make install
+
+    (cd ${TC_PREFIX} && find . | sort > ${BUILD_DIR}/7.list)
+
 else
     echo "gcc-${TARGET} already present"
 fi
@@ -773,27 +873,19 @@ fi
 
 cd ${BUILD_DIR}
 if [ ! -d gdb-${TARGET} ]; then
-
-    (cd ${TC_PREFIX} && find . | sort > ${BUILD_DIR}/7)
-
     mkdir gdb-${TARGET}
     cd gdb-${TARGET}
-    # the following cache is needed for gdb-6.0
-    cp ${CONFIGS}/gdb-6.0-config.cache config.cache
-    CFLAGS="-O2 $HOST_CFLAGS" AR=ar RANLIB=ranlib \
+    CFLAGS="$HOST_CFLAGS -O2" AR=ar RANLIB=ranlib \
     ../${GDB_DIST}/configure --prefix=${TC_PREFIX} --target=${TARGET} \
---build=${BUILD} --cache-file=config.cache
-    # for gdb-6.1.1, the following cache is needed as well
-    mkdir readline
-    cp config.cache readline/config.cache
+--build=${BUILD}
     make
     make install
+
+    (cd ${TC_PREFIX} && find . | sort > ${BUILD_DIR}/8.list)
+
 else
     echo "gdb-${TARGET} already present"
 fi
-
-
-(cd ${TC_PREFIX} && find . | sort > ${BUILD_DIR}/8)
 
 ##############################################
 #
@@ -805,7 +897,7 @@ if [ ! -e ${KERNEL}/.compiled ]; then
     cd ${KERNEL}
     make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- clean
     make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- mrproper
-    cp ${CONFIGS}/${KERNEL}-${TARGET_CPU}-dot-config .config
+    cp ${CONFIGS}/${DOTCONFIG:-${KERNEL}-${TARGET_CPU}-dot-config} .config
     yes "" | make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- oldconfig
     case $KERNEL in
         ( linux-2.[24].* )
@@ -835,16 +927,18 @@ fi
 
 if ( sudo -V >/dev/null 2>&1 ) && \
      [ ! -e ${BUILD_DIR}/${KERNEL}-${TARGET_CPU}-image.tar.gz ]; then
-    ver=${KERNEL#*-}
-    if [ x${ver} = x$KERNEL ] || [ x${ver} = x ]; then
-        exit
-    fi;
     KERNEL_IMAGE=${BUILD_DIR}/${KERNEL}-${TARGET_CPU}-image
     sudo rm -fr ${KERNEL_IMAGE}
     mkdir -p ${KERNEL_IMAGE}/boot
     cd ${BUILD_DIR}/${KERNEL}
     make INSTALL_MOD_PATH=$KERNEL_IMAGE ARCH=$TARGET_CPU \
 CROSS_COMPILE=${TARGET}- modules_install
+    cd ${KERNEL_IMAGE}/lib/modules
+    ver=`ls -d [0-9]*`
+    if [ x${ver} = x ]; then
+        exit
+    fi
+    cd ${BUILD_DIR}/${KERNEL}
     if [ ${TARGET_CPU} = alpha ]; then
         if [ -e arch/${TARGET_CPU}/boot/vmlinux.gz ]; then
             cp arch/${TARGET_CPU}/boot/vmlinux.gz \
@@ -866,11 +960,10 @@ CROSS_COMPILE=${TARGET}- modules_install
     cd ${KERNEL_IMAGE}/boot
     ln -s System.map-${ver} System.map
     cd ${KERNEL_IMAGE}
-    rm -f lib/modules/${ver}/build
+    rm -f lib/modules/${ver}/{build,source}
     chmod -R g-w,o-w ${KERNEL_IMAGE}
-    sudo chown -R root ${KERNEL_IMAGE}
+    sudo chown -R 0 ${KERNEL_IMAGE}
     tar -czf ${BUILD_DIR}/${KERNEL}-${TARGET_CPU}-image.tar.gz .
-    sudo rm -fr ${KERNEL_IMAGE}
 else
     echo "linux kernel tarball already present or sudo absent"
 fi

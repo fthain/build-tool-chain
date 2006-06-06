@@ -1,0 +1,8 @@
+. ${PROFILES}/2
+GLIBC_DIST=glibc-2.3.3 # glibc-2.3.6 doesn't build for m68k :-(
+THREADING_LIB=glibc-linuxthreads-2.3.3
+
+# The target tuple
+#TARGET=m68k-unknown-linux-gnu
+TARGET=m68k-linux
+TARGET_CPU=m68k
