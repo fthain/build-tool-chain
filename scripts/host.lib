@@ -115,3 +115,35 @@ function install_loadkeys () {
 
     cp -p loadkeys ${HOST_TOOLS_PREFIX}/bin
 }
+
+function install_gmp () {
+    [ -e ${HOST_TOOLS_PREFIX}/lib/libgmp.a ] && return
+
+    echo unpacking $1
+    cd $BUILD_DIR
+    untar $1
+
+    echo building $1
+    cd $1
+    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} --with-gmp=${HOST_TOOLS_PREFIX}
+    make
+
+    echo installing $1
+    make install
+}
+
+function install_mpfr () {
+    [ -e ${HOST_TOOLS_PREFIX}/lib/libmpfr.a ] && return
+
+    echo unpacking $1
+    cd $BUILD_DIR
+    untar $1
+
+    echo building $1
+    cd $1
+    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} --with-gmp=${HOST_TOOLS_PREFIX}
+    make
+
+    echo installing $1
+    make install
+}

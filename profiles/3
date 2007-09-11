@@ -1,10 +1,9 @@
 # Method 3 base profile
 # Allows glibc > 2.3.3, NPTL (given TLS support) or linuxthreads
 METHOD=3
-BINUTILS_DIST=binutils-2.17.50.0.18
+BINUTILS_DIST=binutils-2.18.50.0.1
 KERNEL=linux-2.6.22
 GCC_DIST=gcc-3.4.6
-GCC_CORE_DIST=gcc-core-3.4.6
 GLIBC_DIST=glibc-2.3.6
 THREADING_LIB=glibc-linuxthreads-2.3.6
 GDB_DIST=gdb-6.6

@@ -1,0 +1,3 @@
+# Method 3 subprofile for gcc-4.2
+. ${PROFILES}/3
+GCC_DIST=gcc-4.2.0

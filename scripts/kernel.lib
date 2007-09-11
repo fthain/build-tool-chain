@@ -127,7 +127,7 @@ function prep_kernel () {
                 decompress ${PATCHES}/linux-2.6.20-m68k-20070303.diff | patch -p1
                 ;;
             ( linux-2.6.22 | linux-2.6.22-* )
-                decompress ${PATCHES}/linux-2.6.22-m68k-20070815.diff | patch -p1
+                decompress ${PATCHES}/linux-2.6.22-m68k-20070827.diff | patch -p1
                 ;;
             esac
             patch -p1 < ${PATCHES}/linux-2.6.15-viro-m68k-math-emu-macro-names.diff

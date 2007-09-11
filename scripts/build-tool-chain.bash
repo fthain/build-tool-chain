@@ -56,7 +56,6 @@ echo METHOD: $METHOD
 echo KERNEL: $KERNEL
 echo BINUTILS_DIST: $BINUTILS_DIST
 echo GCC_DIST: $GCC_DIST
-echo GCC_CORE_DIST: $GCC_CORE_DIST
 echo GLIBC_DIST: $GLIBC_DIST
 echo THREADING_LIB: $THREADING_LIB
 echo GDB_DIST: $GDB_DIST
@@ -191,6 +190,13 @@ else
     log install_host_tool bison-1.28
     log install_flex      flex-2.5.4a
 fi
+case ${GCC_DIST#*-} in
+( 4.3[.-]* )
+    log install_gmp gmp-4.2.1
+    log install_mpfr mpfr-2.3.0
+    GCC_CONFIG_OPTS=${GCC_CONFIG_OPTS}" --with-gmp=${HOST_TOOLS_PREFIX} --with-mpfr=${HOST_TOOLS_PREFIX}"
+    ;;
+esac
 log install_depmod depmod.pl-19079
 
 rm -rf ${HOST_TOOLS_PREFIX}/share/{emacs,doc,aclocal}
@@ -239,8 +245,8 @@ log install_glibc_headers glibc-${TARGET}-1
 #
 # gcc-core pass 1: static compiler
 
-log prep_gcc_core ${GCC_CORE_DIST}
-log install_gcc_core_static gcc-core-${TARGET}-1
+log prep_gcc_core ${GCC_DIST}
+log install_gcc_core_static gcc-${TARGET}-1
 
 ##############################################
 #
@@ -251,7 +257,7 @@ log install_gcc_core_static gcc-core-${TARGET}-1
 
 if [ x${GLIBC_NEEDS_SHARED_GCC} = xyes ]; then
     log make_glibc_runtime glibc-${TARGET}-2
-    log install_gcc_core_shared gcc-core-${TARGET}-2
+    log install_gcc_core_shared gcc-${TARGET}-2
 fi
 
 ##############################################

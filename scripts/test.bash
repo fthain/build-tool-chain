@@ -5,7 +5,7 @@ set -e -u
 BTC_PREFIX=/Volumes/btc-0.11
 PROFILES=${BTC_PREFIX}/profiles
 
-t=`mktemp -d`
+t=`mktemp -d /tmp/tmp.XXXXXX`
 mkdir ${t}/{ok,fail}
 for p in $( cd ${PROFILES} && ls *-* ) ; do 
     cd ${BTC_PREFIX}
