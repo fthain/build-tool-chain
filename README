@@ -83,6 +83,7 @@ INSTRUCTIONS (not a substitute for reading the scripts)
 
 ftp://ftp.gnu.org/gnu/gmp/gmp-4.2.1.tar.bz2
 http://www.mpfr.org/mpfr-current/mpfr-2.3.0.tar.bz2
+http://www.mpfr.org/mpfr-2.3.0/patches
 
 http://www.busybox.net/cgi-bin/viewcvs.cgi/*checkout*/trunk/busybox/examples/depmod.pl?rev=19079
 
@@ -189,7 +190,6 @@ TO DO
 - run glibc test suites
 - port to solaris
 - add make parallelism flags
-- fix build=host
 
 
 ACKNOWLEDGEMENTS

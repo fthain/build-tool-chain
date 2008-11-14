@@ -1,0 +1,11 @@
+--- a/Makefile	2008-02-10 00:00:00.000000000 +1000
++++ b/Makefile	2008-02-10 00:00:00.000000000 +1000
+@@ -464,7 +464,7 @@
+ all: vmlinux
+ 
+ ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
+-KBUILD_CFLAGS	+= -Os
++KBUILD_CFLAGS	+= -Os -fno-builtin-sprintf
+ else
+ KBUILD_CFLAGS	+= -O2
+ endif

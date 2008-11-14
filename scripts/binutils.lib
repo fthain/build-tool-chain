@@ -2,7 +2,7 @@
 # Functions relating to binutils
 
 function prep_binutils () {
-    cd ${BUILD_DIR}
+    cd ${BTC_BUILD}
     if [ -e ${1} ]; then
         echo ${1} already exists
         return 0
@@ -13,42 +13,60 @@ function prep_binutils () {
     case ${1} in
     ( binutils-2.12.90.0.1 )
         # Debian source package
-        decompress ${PATCHES}/binutils-2.12.90.0.1-4-debian.diff | patch -p1
-        patch -p1 < ${PATCHES}/binutils-2.12.90.0.1-4-btc-gcc4.diff
+        decompress ${BTC_PATCHES}/binutils-2.12.90.0.1-4-debian.diff | patch -p1
+        patch -p1 < ${BTC_PATCHES}/binutils-2.12.90.0.1-4-btc-gcc4.diff
         ;;
     ( binutils-2.15 | binutils-2.15.* | binutils-2.16 | binutils-2.16.* )
         # Fix to support april '04 glibc asm (m68k/arm/cris)
-        patch -p1 < ${PATCHES}/binutils-2.15-NO_APP-mode-line-comment.patch
-        patch -p1 < ${PATCHES}/702-binutils-skip-comments.patch
+        patch -p1 < ${BTC_PATCHES}/binutils-2.15-NO_APP-mode-line-comment.patch
+        patch -p1 < ${BTC_PATCHES}/702-binutils-skip-comments.patch
         ;;
     ( binutils-2.17 )
         # Debian
-        patch -p1 < ${PATCHES}/binutils-2.17-3.diff
-        patch -p1 < ${PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        patch -p1 < ${BTC_PATCHES}/binutils-2.17-3.diff
+        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         ;;
     ( binutils-2.17.50.0.2 )
         # Avoid fatal compiler warnings
-        patch -p1 < ${PATCHES}/binutils-2.17.50.0.2-Werror.diff
-        patch -p1 < ${PATCHES}/702-binutils-skip-comments.patch
+        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        patch -p1 < ${BTC_PATCHES}/702-binutils-skip-comments.patch
         ;;
     ( binutils-2.17.50.0.18 )
         # Avoid fatal compiler warnings
-        patch -p1 < ${PATCHES}/binutils-2.17.50.0.2-Werror.diff
-        patch -p1 < ${PATCHES}/binutils-2.17.50.0.18-fix-warning.diff
+        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.18-fix-warning.diff
+        ;;
+    ( binutils-2.18.50.0.1 )
+        # Avoid fatal compiler warnings
+        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        patch -p1 < ${BTC_PATCHES}/binutils-2.18-Werror.diff
+        patch -p1 < ${BTC_PATCHES}/binutils-2.18.50.0.1-Werror.diff
+        ;;
+    ( binutils-2.18.50.0.2 )
+        # Avoid fatal compiler warnings
+        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        patch -p1 < ${BTC_PATCHES}/binutils-2.18-Werror.diff
+        ;;
+    ( binutils-2.18.50.0.4 )
+        # Avoid fatal compiler warnings
+        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        patch -p1 < ${BTC_PATCHES}/binutils-2.18.50.0.4-opcodes-bfd-dylib.diff
+        patch -p1 < ${BTC_PATCHES}/binutils-2.18.50.0.4-pr5755.patch
         ;;
     ( * )
         # Avoid fatal compiler warnings
-        patch -p1 < ${PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        patch -p1 < ${BTC_PATCHES}/binutils-2.18.50.0.4-opcodes-bfd-dylib.diff
         ;;
     esac
 ## Apply HJL patches according to patches/README, e.g.
 ##    patch -p1 < patches/libtool-dso.patch
-#    patch -p1 < ${PATCHES}/binutils-2.17.50.0.2-README-script-portability.diff
+#    patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-README-script-portability.diff
 #    sh patches/README
 }
 
 function build_binutils () {
-    cd ${BUILD_DIR}
+    cd ${BTC_BUILD}
     if [ -e ${1} ]; then
         echo ${1} already exists
         return 0
@@ -59,7 +77,7 @@ function build_binutils () {
     CFLAGS="-O2 $HOST_CFLAGS" ../${BINUTILS_DIST}/configure \
 --prefix=${TC_PREFIX} --target=${TARGET} \
 ${BINUTILS_CONFIG_OPTS} \
---enable-64-bit-bfd --disable-nls --enable-shared
+--enable-64-bit-bfd --disable-nls --enable-shared --disable-werror
     case ${BINUTILS_DIST} in
     ( binutils-2.?.* | binutils-2.10.* | binutils-2.11.* | binutils-2.12.* )
         ;;
@@ -67,7 +85,7 @@ ${BINUTILS_CONFIG_OPTS} \
         make configure-bfd ;;
     esac
     make headers -C bfd
-    make all
+    make -j2 all
 }
 
 function install_binutils () {
@@ -76,7 +94,7 @@ function install_binutils () {
         return 0
     fi
 
-    cd ${BUILD_DIR}/${1}
+    cd ${BTC_BUILD}/${1}
     make install
     # no readelf on Darwin & glibc configure doesn't look for ${TARGET}-readelf
     cd ${TC_PREFIX}/bin

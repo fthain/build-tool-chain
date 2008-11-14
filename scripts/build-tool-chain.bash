@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Linux cross tool chain build script for Mac OS X and Linux
-# Copyright (c) 2004-2007 Finn Thain
+# Copyright (c) 2004-2008 Finn Thain
 # fthain@telegraphics.com.au
 
 set -e -u
@@ -15,10 +15,10 @@ set -e -u
 DIST_ROOT=/Volumes/btc-0.11
 
 # Where to find sources etc
-CONFIGS=${DIST_ROOT}/configs
-PATCHES=${DIST_ROOT}/patches
+BTC_CONFIGS=${DIST_ROOT}/configs
+BTC_PATCHES=${DIST_ROOT}/patches
+BTC_SOURCES=${DIST_ROOT}/sources
 PROFILES=${DIST_ROOT}/profiles
-SOURCES=${DIST_ROOT}/sources
 SCRIPTS=${DIST_ROOT}/scripts
 
 # Missing host tools needed for the build are to be installed here
@@ -33,21 +33,21 @@ BTC_PREFIX=${DIST_ROOT}
 # Below this line, angels fear to tread
 
 LOGS_DIR=${DIST_ROOT}/logs
-BUILD_DIR=${DIST_ROOT}/build
+BTC_BUILD=${DIST_ROOT}/build
 
 # Set vars to determine what to build
 if [ "${1:-}" == "-p" -a "${2:-}" != "" ]; then
     . ${PROFILES}/${2}
 elif [ "${1:-}" == "-d" ]; then
     # Clean up and stop here?
-    rm -rf ${BUILD_DIR} ${LOGS_DIR}
+    rm -rf ${BTC_BUILD} ${LOGS_DIR}
     exit
 else
     echo usage: $0 '{-d | -p <profile> {-s | -S}}'
     exit 1
 fi
 
-mkdir -p ${BUILD_DIR} ${LOGS_DIR} ${HOST_TOOLS_PREFIX}/bin
+mkdir -p ${BTC_BUILD} ${LOGS_DIR} ${HOST_TOOLS_PREFIX}/bin
 
 # Profile must set these
 echo TARGET: $TARGET
@@ -58,6 +58,7 @@ echo BINUTILS_DIST: $BINUTILS_DIST
 echo GCC_DIST: $GCC_DIST
 echo GLIBC_DIST: $GLIBC_DIST
 echo THREADING_LIB: $THREADING_LIB
+echo GLIBC_PORTS: $GLIBC_PORTS
 echo GDB_DIST: $GDB_DIST
 
 # Tool chain prefix
@@ -65,13 +66,13 @@ TC_PREFIX=${BTC_PREFIX}/${GCC_DIST}
 mkdir -p ${TC_PREFIX}
 
 # The filesystem must be case-sensitive.
-rm -f {${BUILD_DIR},${TC_PREFIX}}/{a,A}
-touch {${BUILD_DIR},${TC_PREFIX}}/{a,A}
-rm -f {${BUILD_DIR},${TC_PREFIX}}/A
-if [ -e ${BUILD_DIR}/a -a -e ${TC_PREFIX}/a ]; then
-    rm -f {${BUILD_DIR},${TC_PREFIX}}/a
+rm -f {${BTC_BUILD},${TC_PREFIX}}/{a,A}
+touch {${BTC_BUILD},${TC_PREFIX}}/{a,A}
+rm -f {${BTC_BUILD},${TC_PREFIX}}/A
+if [ -e ${BTC_BUILD}/a -a -e ${TC_PREFIX}/a ]; then
+    rm -f {${BTC_BUILD},${TC_PREFIX}}/a
 else
-    echo BUILD_DIR or TC_PREFIX is case-insensitive.
+    echo BTC_BUILD or TC_PREFIX is case-insensitive.
     exit 1
 fi
 
@@ -88,10 +89,11 @@ case $METHOD in
 ( 1 )
     SYSROOT=
     BINUTILS_CONFIG_OPTS=
-    GLIBC_CONFIG_OPTS=--enable-add-ons=linuxthreads
     GLIBC_PREFIX=${TC_PREFIX}/${TARGET}
     GLIBC_INSTALL_ROOT=/
     GLIBC_HEADERS=${GLIBC_PREFIX}/include
+    glibc_add_ons=linuxthreads
+    GLIBC_CONFIG_OPTS=
     GCC_CONFIG_OPTS="--with-local-prefix=${TC_PREFIX} \
 --with-headers=${GLIBC_HEADERS}"
     GLIBC_NEEDS_SHARED_GCC=no
@@ -99,35 +101,40 @@ case $METHOD in
 ( 2 )
     SYSROOT=${TC_PREFIX}/${TARGET}/sysroot
     BINUTILS_CONFIG_OPTS=--with-sysroot=${SYSROOT}
-    GLIBC_CONFIG_OPTS=--enable-add-ons=linuxthreads
     GLIBC_PREFIX=/usr
     GLIBC_INSTALL_ROOT=${SYSROOT}
     GLIBC_HEADERS=${SYSROOT}/usr/include
+    glibc_add_ons=linuxthreads
+    GLIBC_CONFIG_OPTS=
     GCC_CONFIG_OPTS=--with-sysroot=${SYSROOT}
     GLIBC_NEEDS_SHARED_GCC=no
     ;;
 ( 3 )
     SYSROOT=${TC_PREFIX}/${TARGET}/sysroot
     BINUTILS_CONFIG_OPTS=--with-sysroot=${SYSROOT}
-    case ${TARGET_CPU} in
-    ( m68k | mips )
-        GLIBC_CONFIG_OPTS=--enable-add-ons=linuxthreads
-        ;;
-    ( * )
-        GLIBC_CONFIG_OPTS="--enable-add-ons=nptl \
---with-tls \
---enable-bind-now"
-# --with-__thread
-                ;;
-    esac
     GLIBC_PREFIX=/usr
     GLIBC_INSTALL_ROOT=${SYSROOT}
     GLIBC_HEADERS=${SYSROOT}/usr/include
+    case ${TARGET_CPU} in
+    ( m68k | mips )
+        glibc_add_ons=linuxthreads
+        GLIBC_CONFIG_OPTS=
+        ;;
+    ( * )
+        glibc_add_ons=nptl
+        GLIBC_CONFIG_OPTS="--with-tls --enable-bind-now" # --with-__thread
+        ;;
+    esac
     GCC_CONFIG_OPTS="--with-sysroot=${SYSROOT} --enable-altivec"
     GLIBC_NEEDS_SHARED_GCC=yes
     ;;
 esac
-GLIBC_CONFIG_OPTS="${GLIBC_CONFIG_OPTS} --enable-kernel=${KERNEL#*-}"
+if [ -n "${GLIBC_PORTS}" ] ; then
+    glibc_add_ons="ports,${glibc_add_ons}"
+fi
+GLIBC_CONFIG_OPTS="${GLIBC_CONFIG_OPTS} \
+--enable-add-ons=${glibc_add_ons} \
+--enable-kernel=${KERNEL#*-}"
 
 mkdir -p ${GLIBC_HEADERS}
 test -n "${SYSROOT}" && mkdir -p ${SYSROOT}
@@ -136,17 +143,19 @@ test -n "${SYSROOT}" && mkdir -p ${SYSROOT}
 KERNEL_HEADERS=${TC_PREFIX}/${TARGET}/kernel-headers
 mkdir -p ${KERNEL_HEADERS}
 
+PATH_TO_AM=$(/bin/ls -d /usr/share/automake-*/ | tail -n 1)
+
 # The build/host tuple 
-BUILD=$(/usr/share/libtool/config.guess)
+BUILD=$(${PATH_TO_AM}/config.guess)
 
 # Sometimes useful for tricking configure into cross compiling
-if [ $(/usr/share/libtool/config.sub $TARGET) = ${BUILD} ] ; then
+if [ $(${PATH_TO_AM}/config.sub $TARGET) = ${BUILD} ] ; then
     BUILD=${BUILD}x
 fi
 
 if [ ${BUILD} != ${BUILD/%-apple-darwin*} ] ; then
-    # Let the result be backward compatible only with Tiger
-    export MACOSX_DEPLOYMENT_TARGET=10.4
+    # Build binaries backward compatible to panther
+    export MACOSX_DEPLOYMENT_TARGET=10.3
     # Turn off Apple's pre-compiled headers
     HOST_CFLAGS='-no-cpp-precomp'
 else
@@ -158,12 +167,13 @@ export LANGUAGE=C LANG=C LC_ALL=C
 export CPP="gcc -E $HOST_CFLAGS"
 export CC=gcc
 export PATH=${TC_PREFIX}/bin:${HOST_TOOLS_PREFIX}/bin:/bin:/sbin:/usr/bin:/usr/sbin
+export MANPATH=${MANPATH:-}${MANPATH:+:}${TC_PREFIX}/man
 
 # Stop here and start an interactive shell?
 if [ "${3:-}" == "-s" ]; then
-    export BTC_PREFIX HOST_TOOLS_PREFIX BUILD_DIR SOURCES PATCHES CONFIGS
-    export KERNEL BUILD TARGET TARGET_CPU TC_PREFIX
-    cd $BUILD_DIR
+    export BTC_PREFIX HOST_TOOLS_PREFIX BTC_BUILD BTC_SOURCES BTC_PATCHES BTC_CONFIGS
+    export KERNEL BUILD TARGET TARGET_CPU
+    cd $BTC_BUILD
     exec bash
 fi
 
@@ -185,6 +195,7 @@ if [ ${BUILD} != ${BUILD/%-apple-darwin*} ] ; then
     log install_host_tool bison-1.28
     log install_coreutils coreutils-6.9
     log install_loadkeys  kbd-1.12
+    log install_find_pl   find.pl-0.12
 else
     log install_host_tool gawk-3.1.5
     log install_host_tool bison-1.28
@@ -206,10 +217,10 @@ rm -rf ${HOST_TOOLS_PREFIX}/share/{emacs,doc,aclocal}
 # stop here?
 
 if [ "${3:-}" == "-S" ]; then
-    export BTC_PREFIX HOST_TOOLS_PREFIX BUILD_DIR SOURCES PATCHES CONFIGS
-    export KERNEL BUILD TARGET TARGET_CPU TC_PREFIX
+    export BTC_PREFIX HOST_TOOLS_PREFIX BTC_BUILD BTC_SOURCES BTC_PATCHES BTC_CONFIGS
+    export KERNEL BUILD TARGET TARGET_CPU
     export -f decompress untar prep_kernel build_kernel package_kernel
-    cd $BUILD_DIR
+    cd $BTC_BUILD
     exec bash
 fi
 
@@ -272,7 +283,7 @@ log install_glibc glibc-${TARGET}-3
 # gcc: final build and install
 
 log prep_gcc ${GCC_DIST}
-log install_gcc gcc-${TARGET}
+log install_gcc gcc-${TARGET}-3
 
 ##############################################
 #

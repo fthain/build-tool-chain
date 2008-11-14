@@ -2,7 +2,7 @@
 # Functions relating to gcc
 
 function prep_gcc_core () {
-    cd ${BUILD_DIR}
+    cd ${BTC_BUILD}
     local c
     c=${1/gcc/gcc-core}
     if [ -e ${c} ]; then
@@ -20,49 +20,46 @@ function prep_gcc_core () {
     # Debian sources
     case ${1} in
     ( gcc-2.95.3 )
-        decompress ${PATCHES}/gcc-2.95.4.ds15-27.diff | patch -p1
+        decompress ${BTC_PATCHES}/gcc-2.95.4.ds15-27.diff | patch -p1
         ;;
     ( gcc-3.3.6 )
-        decompress ${PATCHES}/gcc-core-3.3.6ds1-15.diff | patch -p1
+        decompress ${BTC_PATCHES}/gcc-core-3.3.6ds1-15.diff | patch -p1
         ;;
     ( gcc-4.1.1 )
-        decompress ${PATCHES}/gcc-core-4.1.1ds2-21.diff | patch -p1
+        decompress ${BTC_PATCHES}/gcc-core-4.1.1ds2-21.diff | patch -p1
         ;;
     ( gcc-4.2.0 )
-        decompress ${PATCHES}/gcc-core-4.2.0-gentoo-p1.4.diff | patch -p1
+        decompress ${BTC_PATCHES}/gcc-core-4.2.0-gentoo-p1.4.diff | patch -p1
         ;;
     esac
 
     case ${1} in
     ( gcc-2.95.* )
         # Crosstool patches
-        patch -p1 < ${PATCHES}/gcc-pr3106.patch
-        patch -p1 < ${PATCHES}/backport-config.gcc-1.4.patch
+        patch -p1 < ${BTC_PATCHES}/gcc-pr3106.patch
+        patch -p1 < ${BTC_PATCHES}/backport-config.gcc-1.4.patch
         # More autotools fixes
-        patch -p1 < ${PATCHES}/gcc-2.95.2-host-darwin.diff
+        patch -p1 < ${BTC_PATCHES}/gcc-2.95.2-host-darwin.diff
         ;;
-    ( gcc-3.[01].* )
+    ( gcc-3.[01][-.]* )
         ;;
     ( gcc-3.* )
-        if [ x${GLIBC_NEEDS_SHARED_GCC} = xyes ]; then
-            patch -p0 < ${PATCHES}/gcc-3.2-btc-shlib-sans-libc.patch
-        fi
+        # We build gcc-core before libc is built
+        patch -p0 < ${BTC_PATCHES}/gcc-3.2-btc-shlib-sans-libc.patch
         ;;
-    ( gcc-4.0.* )
-        # We build gcc-core only before libc is built
-        patch -p1 < ${PATCHES}/gcc-4-no-libc-yet.diff
-        # Bug fix
-        patch -p1 < ${PATCHES}/gcc-4.0-pr20583.patch
+    ( gcc-4.0[-.]* )
+        # We build gcc-core before libc is built
+        patch -p1 < ${BTC_PATCHES}/gcc-4-no-libc-yet.diff
         ;;
-    ( gcc-4.[123].* )
-        # We build gcc-core only before libc is built
-        patch -p1 < ${PATCHES}/gcc-4-no-libc-yet.diff
+    ( gcc-4.* )
+        # We build gcc-core before libc is built
+        patch -p1 < ${BTC_PATCHES}/gcc-4-no-libc-yet.diff
         ;;
     esac
 }
 
 function prep_gcc () {
-    cd ${BUILD_DIR}
+    cd ${BTC_BUILD}
     if [ -e ${1} ]; then
         echo ${1} already exists
         return 0
@@ -73,47 +70,47 @@ function prep_gcc () {
     # Debian sources
     case ${1} in
     ( gcc-2.95.3 )
-        decompress ${PATCHES}/gcc-2.95.4.ds15-27.diff | patch -p1
+        decompress ${BTC_PATCHES}/gcc-2.95.4.ds15-27.diff | patch -p1
         ;;
     ( gcc-3.3.6 )
-        decompress ${PATCHES}/gcc-3.3.6ds1-15.diff | patch -p1
+        decompress ${BTC_PATCHES}/gcc-3.3.6ds1-15.diff | patch -p1
         ;;
     ( gcc-4.1.1 )
-        decompress ${PATCHES}/gcc-4.1.1ds2-21.diff | patch -p1
+        decompress ${BTC_PATCHES}/gcc-4.1.1ds2-21.diff | patch -p1
         ;;
     ( gcc-4.2.0 )
-        decompress ${PATCHES}/gcc-4.2.0-gentoo-p1.4.diff | patch -p1
+        decompress ${BTC_PATCHES}/gcc-4.2.0-gentoo-p1.4.diff | patch -p1
         ;;
     esac
 
     case ${1} in
     ( gcc-2.95.3 )
         # Crosstool patches
-        patch -p1 < ${PATCHES}/gcc-pr3106.patch
-        patch -p1 < ${PATCHES}/backport-config.gcc-1.4.patch
+        patch -p1 < ${BTC_PATCHES}/gcc-pr3106.patch
+        patch -p1 < ${BTC_PATCHES}/backport-config.gcc-1.4.patch
         # More autotools fixes
-        patch -p1 < ${PATCHES}/gcc-2.95.2-host-darwin.diff
+        patch -p1 < ${BTC_PATCHES}/gcc-2.95.2-host-darwin.diff
         ;;
-    ( gcc-3.3.* )
-        patch -p0 < ${PATCHES}/gcc-3.3-no-include-filio.patch
+    ( gcc-3.3[-.]* )
+        patch -p0 < ${BTC_PATCHES}/gcc-3.3-no-include-filio.patch
         ;;
-    ( gcc-3.4.* )
-        patch -p0 < ${PATCHES}/gcc-3.4-btc-no-include-filio.patch
-        patch -p1 < ${PATCHES}/gcc-3.4.1-btc-use-target-cpp-for-lib-configure.patch
+    ( gcc-3.4[-.]* )
+        patch -p0 < ${BTC_PATCHES}/gcc-3.4-btc-no-include-filio.patch
+        patch -p1 < ${BTC_PATCHES}/gcc-3.4.1-btc-use-target-cpp-for-lib-configure.patch
         ;;
-    ( gcc-4.0.* )
-        patch -p0 < ${PATCHES}/gcc-3.4-btc-no-include-filio.patch
+    ( gcc-4.0[-.]* )
+        patch -p0 < ${BTC_PATCHES}/gcc-3.4-btc-no-include-filio.patch
+        ;;
+    ( gcc-4.[123][-.]* )
+        patch -p0 < ${BTC_PATCHES}/gcc-3.4-btc-no-include-filio.patch
         # Bug fix
-        patch -p1 < ${PATCHES}/gcc-4.0-pr20583.patch
-        ;;
-    ( gcc-4.[123].* )
-        patch -p0 < ${PATCHES}/gcc-3.4-btc-no-include-filio.patch
+        #patch -p0 < ${BTC_PATCHES}/gcc-4-pr29826.patch
         ;;
     esac
 }
 
 function install_gcc_core_static () {
-    cd ${BUILD_DIR}
+    cd ${BTC_BUILD}
     if [ -e ${1} ]; then
         echo ${1} already exists
         return 0
@@ -134,14 +131,20 @@ ${GCC_CONFIG_OPTS} \
 --enable-languages=c \
 --disable-shared \
 --disable-libmudflap --disable-libssp --disable-libunwind-exceptions
-    make all-gcc
+    make -j2 all-gcc
     make install-gcc 
+    case ${GCC_DIST} in
+    ( gcc-4.3[.-]* )
+        make all-target-libgcc
+        make install-target-libgcc 
+        ;;
+    esac
 
     manifest install_gcc_core_static
 }
 
 function install_gcc_core_shared () {
-    cd ${BUILD_DIR}
+    cd ${BTC_BUILD}
     if [ -e ${1} ]; then
         echo ${1} already exists
         return 0
@@ -163,14 +166,20 @@ ${GCC_CONFIG_OPTS} \
 --enable-shared
     mkdir -p gcc
     cp ../glibc-${TARGET}-2/csu/crt[in].o gcc
-    make all-gcc
+    make -j2 all-gcc
     make install-gcc 
+    case ${GCC_DIST} in
+    ( gcc-4.3[.-]* )
+        make all-target-libgcc
+        make install-target-libgcc 
+        ;;
+    esac
 
     manifest install_gcc_core_shared
 }
 
 function install_gcc () {
-    cd ${BUILD_DIR}
+    cd ${BTC_BUILD}
     if [ -e ${1} ]; then
         echo ${1} already exists
         return 0

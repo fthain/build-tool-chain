@@ -4,17 +4,17 @@
 function untar () {
     echo untar $1 1>&2
     local f
-    for f in $SOURCES/$1*; do
+    for f in $BTC_SOURCES/$1*; do
         case $f in
-        ( $SOURCES/$1.tar.bz2 )
+        ( $BTC_SOURCES/$1.tar.bz2 )
             tar -xjf $f
             return
             ;;
-        ( $SOURCES/$1.tar.gz )
+        ( $BTC_SOURCES/$1.tar.gz )
             tar -xzf $f
             return
             ;;
-        ( $SOURCES/$1.tar )
+        ( $BTC_SOURCES/$1.tar )
             tar -xf $f
             return
             ;;

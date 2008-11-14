@@ -1,0 +1,51 @@
+diff -ru linux-2.6.14/scripts/kconfig/gconf.c linux-2.6.14/scripts/kconfig/gconf.c
+--- linux-2.6.14/scripts/kconfig/gconf.c	Mon Aug 18 00:54:50 2008
++++ linux-2.6.14/scripts/kconfig/gconf.c	Fri Oct 28 10:02:08 2005
+@@ -1581,9 +1581,9 @@
+ 	kconfig_load();
+ #endif
+ 
+-	bindtextdomain(PACKAGE, LOCALEDIR);
+-	bind_textdomain_codeset(PACKAGE, "UTF-8");
+-	textdomain(PACKAGE);
++	//bindtextdomain(PACKAGE, LOCALEDIR);
++	//bind_textdomain_codeset(PACKAGE, "UTF-8");
++	//textdomain(PACKAGE);
+ 
+ 	/* GTK stuffs */
+ 	gtk_set_locale();
+diff -ru linux-2.6.14/scripts/kconfig/mconf.c linux-2.6.14/scripts/kconfig/mconf.c
+--- linux-2.6.14/scripts/kconfig/mconf.c	Mon Aug 18 00:54:58 2008
++++ linux-2.6.14/scripts/kconfig/mconf.c	Fri Oct 28 10:02:08 2005
+@@ -1044,8 +1044,8 @@
+ 	int stat;
+ 
+-	setlocale(LC_ALL, "");
+-	bindtextdomain(PACKAGE, LOCALEDIR);
+-	textdomain(PACKAGE);
++	//setlocale(LC_ALL, "");
++	//bindtextdomain(PACKAGE, LOCALEDIR);
++	//textdomain(PACKAGE);
+ 
+ 	conf_parse(av[1]);
+ 	conf_read(NULL);
+--- linux-2.6.14/scripts/kconfig/lkc.h	Wed Aug 20 16:11:58 2008
++++ linux-2.6.14/scripts/kconfig/lkc.h	Wed Aug 20 14:58:51 2008
+@@ -8,7 +8,7 @@
+ 
+ #include "expr.h"
+ 
+-#include <libintl.h>
++//#include <libintl.h>
+ 
+ #ifdef __cplusplus
+ extern "C" {
+@@ -28,7 +28,7 @@
+ #define PACKAGE "linux"
+ #define LOCALEDIR "/Volumes/btc-0.11/host_tools/share/locale"
+ 
+-#define _(text) gettext(text)
++#define _(text) (text)
+ #define N_(text) (text)
+ 
+ int zconfparse(void);

@@ -1,0 +1,20 @@
+--- scripts/gen_initramfs_list.sh.orig	2008-09-11 00:56:55.000000000 +1000
++++ scripts/gen_initramfs_list.sh	2008-09-11 01:01:44.000000000 +1000
+@@ -89,7 +89,7 @@
+ 	local my_mtime="0"
+ 
+ 	if [ -e "$1" ]; then
+-		my_mtime=$(find "$1" -printf "%T@\n" | sort -r | head -n 1)
++		my_mtime=$(find.pl -e 'print sprintf "%.10f\n", $mtime; 0' "$1" | sort -r | head -n 1)
+ 	fi
+ 
+ 	echo "# Last modified: ${my_mtime}" >> ${output}
+@@ -171,7 +171,7 @@
+ 	${dep_list}header "$1"
+ 
+ 	srcdir=$(echo "$1" | sed -e 's://*:/:g')
+-	dirlist=$(find "${srcdir}" -printf "%p %m %U %G\n")
++	dirlist=$(find.pl -e 'print sprintf "$_ %o %d %d\n", $mode & 07777, $uid, $gid; 0' "${srcdir}")
+ 
+ 	# If $dirlist is only one line, then the directory is empty
+ 	if [  "$(echo "${dirlist}" | wc -l)" -gt 1 ]; then

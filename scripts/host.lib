@@ -13,7 +13,7 @@ function install_host_tool () {
     is_installed ${1/-*} && return
 
     echo unpacking $1
-    cd $BUILD_DIR
+    cd $BTC_BUILD
     untar $1
 
     echo building $1
@@ -34,7 +34,7 @@ function install_sed () {
     fi
 
     echo unpacking $1
-    cd $BUILD_DIR
+    cd $BTC_BUILD
     untar $1
 
     echo building $1
@@ -54,10 +54,10 @@ function install_make () {
 }
 
 function install_coreutils () {
-    is_installed expr && return
+    is_installed readlink && return
 
     echo unpacking $1
-    cd $BUILD_DIR
+    cd $BTC_BUILD
     untar $1
 
     echo building $1
@@ -68,7 +68,7 @@ function install_coreutils () {
     echo installing $1
     dst=/tmp/junk$$
     make DESTDIR=$dst install
-    cp -p $dst/${HOST_TOOLS_PREFIX}/bin/{expr,install} ${HOST_TOOLS_PREFIX}/bin
+    cp -p $dst/${HOST_TOOLS_PREFIX}/bin/{readlink,expr,install} ${HOST_TOOLS_PREFIX}/bin
     rm -fr $dst
 }
 
@@ -76,10 +76,10 @@ function install_flex () {
     is_installed ${1/-*} && return
 
     echo unpacking $1
-    cd $BUILD_DIR
+    cd $BTC_BUILD
     untar $1
     cd ${1%a}
-    patch -p1 < ${PATCHES}/flex-2.5.4a-r6.diff
+    patch -p1 < ${BTC_PATCHES}/flex-2.5.4a-r6.diff
 
     echo building $1
     CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX}
@@ -94,19 +94,28 @@ function install_depmod () {
 
     echo installing $1
     cd ${HOST_TOOLS_PREFIX}/bin
-    decompress ${SOURCES}/${1} > depmod.pl
+    decompress ${BTC_SOURCES}/${1} > depmod.pl
     chmod 755 depmod.pl
+}
+
+function install_find_pl () {
+    is_installed find.pl && return
+
+    echo installing $1
+    cd ${HOST_TOOLS_PREFIX}/bin
+    decompress ${BTC_SOURCES}/${1} > find.pl
+    chmod 755 find.pl
 }
 
 function install_loadkeys () {
     is_installed loadkeys && return
     
     echo unpacking $1
-    cd $BUILD_DIR
+    cd $BTC_BUILD
     untar $1
     cd ${1}
-    patch -p1 < ${PATCHES}/kbd-1.12-gentoo.diff
-    patch -p1 < ${PATCHES}/kbd-1.12-btc-darwin.diff
+    patch -p1 < ${BTC_PATCHES}/kbd-1.12-gentoo.diff
+    patch -p1 < ${BTC_PATCHES}/kbd-1.12-btc-darwin.diff
 
     echo building $1
     CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX}
@@ -120,12 +129,20 @@ function install_gmp () {
     [ -e ${HOST_TOOLS_PREFIX}/lib/libgmp.a ] && return
 
     echo unpacking $1
-    cd $BUILD_DIR
+    cd $BTC_BUILD
     untar $1
 
     echo building $1
     cd $1
-    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} --with-gmp=${HOST_TOOLS_PREFIX}
+
+    local cflags
+    local opts
+    cflags="-O2"
+    if [ ${BUILD} != ${BUILD/%-apple-darwin*} ] ; then
+        cflags="$cflags -Wa,-force_cpusubtype_ALL"
+        opts=--with-pic
+    fi
+    CFLAGS="$cflags" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} --with-gmp=${HOST_TOOLS_PREFIX} $opts
     make
 
     echo installing $1
@@ -136,11 +153,12 @@ function install_mpfr () {
     [ -e ${HOST_TOOLS_PREFIX}/lib/libmpfr.a ] && return
 
     echo unpacking $1
-    cd $BUILD_DIR
+    cd $BTC_BUILD
     untar $1
+    cd $1
+    patch -p1 < ${BTC_PATCHES}/mpfr-2.3.0-20070911.patch
 
     echo building $1
-    cd $1
     CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} --with-gmp=${HOST_TOOLS_PREFIX}
     make
 

@@ -1,0 +1,11 @@
+--- glibc-2.3.6/configure.orig	2007-09-11 18:31:05.000000000 +1000
++++ glibc-2.3.6/configure	2007-09-11 18:31:41.000000000 +1000
+@@ -4443,7 +4443,7 @@
+ # thing on a system that doesn't need fixincludes.  (Not presently a problem.)
+ if test -n "$sysheaders"; then
+   ccheaders=`$CC -print-file-name=include`
+-  SYSINCLUDES="-nostdinc -isystem $ccheaders \
++  SYSINCLUDES="-nostdinc -isystem $ccheaders -isystem $ccheaders-fixed \
+ -isystem `echo $sysheaders | sed 's/:/ -isystem /g'`"
+ fi
+ 

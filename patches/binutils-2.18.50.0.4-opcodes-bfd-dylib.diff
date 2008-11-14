@@ -1,0 +1,20 @@
+--- binutils-2.18.50.0.4/opcodes/configure.in.orig	2008-02-11 23:33:39.000000000 +1100
++++ binutils-2.18.50.0.4/opcodes/configure.in	2008-02-11 23:35:31.000000000 +1100
+@@ -108,3 +108,7 @@
+       SHARED_LIBADD="-L`pwd`/../bfd -lbfd -L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin"
+       ;;
++    *-*-darwin*)
++      SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.dylib"
++      SHARED_DEPENDENCIES="../bfd/libbfd.la"
++      ;;
+     *)
+--- binutils-2.18.50.0.4/opcodes/configure.orig	2008-02-11 23:33:39.000000000 +1100
++++ binutils-2.18.50.0.4/opcodes/configure	2008-02-11 23:35:31.000000000 +1100
+@@ -11454,3 +11454,7 @@
+       SHARED_LIBADD="-L`pwd`/../bfd -lbfd -L`pwd`/../libiberty -liberty -L`pwd`/../intl -lintl -lcygwin"
+       ;;
++    *-*-darwin*)
++      SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.dylib"
++      SHARED_DEPENDENCIES="../bfd/libbfd.la"
++      ;;
+     *)

@@ -2,7 +2,7 @@
 # Functions relating to gdb
 
 function prep_gdb () {
-    cd ${BUILD_DIR}
+    cd ${BTC_BUILD}
     if [ -e ${1} ]; then
         echo ${1} already exists
         return 0
@@ -10,11 +10,11 @@ function prep_gdb () {
     untar ${1}
     cd ${1}
 
-    patch -p1 < ${PATCHES}/gdb-6.6-sim-ppc-libintl-link.diff
+    patch -p1 < ${BTC_PATCHES}/gdb-6.6-sim-ppc-libintl-link.diff
 }
 
 function install_gdb () {
-    cd ${BUILD_DIR}
+    cd ${BTC_BUILD}
     if [ -e ${1} ]; then
         echo ${1} already exists
         return 0
@@ -28,7 +28,7 @@ function install_gdb () {
     ../${GDB_DIST}/configure --prefix=${TC_PREFIX} --target=${TARGET} \
 --build=${BUILD} \
 --cache-file=config.cache
-    make
+    make -j2
     make install
 
     manifest install_gdb
