@@ -1,0 +1,11 @@
+--- linux-2.6.27/arch/powerpc/Makefile.orig	2009-09-23 12:48:06.000000000 +1000
++++ linux-2.6.27/arch/powerpc/Makefile	2009-09-23 12:48:14.000000000 +1000
+@@ -32,7 +32,7 @@
+ ifeq ($(CROSS_COMPILE),)
+ KBUILD_DEFCONFIG := $(shell uname -m)_defconfig
+ else
+-KBUILD_DEFCONFIG := ppc64_defconfig
++KBUILD_DEFCONFIG := pmac32_defconfig
+ endif
+ 
+ ifeq ($(CONFIG_PPC64),y)

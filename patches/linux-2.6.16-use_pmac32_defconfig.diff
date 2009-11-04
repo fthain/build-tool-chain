@@ -1,0 +1,11 @@
+--- linux-2.6.16/arch/powerpc/Makefile.orig	2006-03-20 16:53:29.000000000 +1100
++++ linux-2.6.16/arch/powerpc/Makefile	2009-09-23 12:45:23.000000000 +1000
+@@ -33,7 +33,7 @@
+ 
+ export CROSS32CC CROSS32AS CROSS32LD CROSS32OBJCOPY
+ 
+-KBUILD_DEFCONFIG := $(shell uname -m)_defconfig
++KBUILD_DEFCONFIG := pmac32_defconfig
+ 
+ ifeq ($(CONFIG_PPC64),y)
+ OLDARCH	:= ppc64

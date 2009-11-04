@@ -1,0 +1,61 @@
+--- glibc-2.5/configure.in.orig	2009-09-27 11:58:29.000000000 +1000
++++ glibc-2.5/configure.in	2009-09-27 12:00:41.000000000 +1000
+@@ -1557,6 +1557,22 @@
+   fi
+   AC_SUBST(libc_cv_z_combreloc)
+ 
++  AC_CACHE_CHECK(for -fgnu89-inline,
++		 libc_cv_fgnu89_inline, [dnl
++  cat > conftest.c <<EOF
++int main (void) { return 0; }
++EOF
++  if AC_TRY_COMMAND([${CC-cc} $CFLAGS $CPPFLAGS $LDFLAGS
++			      -c conftest.c -fgnu89-inline
++			      1>&AS_MESSAGE_LOG_FD])
++  then
++    libc_cv_fgnu89_inline=yes
++    CFLAGS="$CFLAGS -fgnu89-inline"
++  else
++    libc_cv_fgnu89_inline=no
++  fi
++  rm -f conftest*])
++
+   AC_CACHE_CHECK(for -z execstack,
+ 		 libc_cv_z_execstack, [dnl
+   cat > conftest.c <<EOF
+--- glibc-2.5/configure.orig	2009-09-27 11:58:40.000000000 +1000
++++ glibc-2.5/configure	2009-09-27 12:00:56.000000000 +1000
+@@ -5824,6 +5823,33 @@
+   fi
+ 
+ 
++  echo "$as_me:$LINENO: checking for -fgnu89-inline" >&5
++echo $ECHO_N "checking for -fgnu89-inline... $ECHO_C" >&6
++if test "${libc_cv_fgnu89_inline+set}" = set; then
++  echo $ECHO_N "(cached) $ECHO_C" >&6
++else
++    cat > conftest.c <<EOF
++int main (void) { return 0; }
++EOF
++  if { ac_try='${CC-cc} $CFLAGS $CPPFLAGS $LDFLAGS
++			      -c conftest.c -fgnu89-inline
++			      1>&5'
++  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
++  (eval $ac_try) 2>&5
++  ac_status=$?
++  echo "$as_me:$LINENO: \$? = $ac_status" >&5
++  (exit $ac_status); }; }
++  then
++    libc_cv_fgnu89_inline=yes
++    CFLAGS="$CFLAGS -fgnu89-inline"
++  else
++    libc_cv_fgnu89_inline=no
++  fi
++  rm -f conftest*
++fi
++echo "$as_me:$LINENO: result: $libc_cv_fgnu89_inline" >&5
++echo "${ECHO_T}$libc_cv_fgnu89_inline" >&6
++
+   echo "$as_me:$LINENO: checking for -z execstack" >&5
+ echo $ECHO_N "checking for -z execstack... $ECHO_C" >&6
+ if test "${libc_cv_z_execstack+set}" = set; then

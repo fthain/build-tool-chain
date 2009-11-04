@@ -1,27 +1,74 @@
 ##############################################
 # Common functions
 
+function fetch_stdout () {
+   if type -t wget >/dev/null 2>&1 ; then
+       wget -nv -O - "$1"
+   elif type -t curl >/dev/null 2>&1 ; then
+       curl -fSs "$1"
+   fi
+}
+
+function fetch () {
+   local f
+   f=$1
+   shift
+   declare -a dir_urls
+   if test -z "${BTC_MIRRORS:-}" ; then
+       dir_urls=("$@")
+   else
+       dir_urls=($BTC_MIRRORS "$@")
+   fi
+   declare -a urls
+   for u in "${dir_urls[@]}" ; do
+       if test -z "${urls[*]:-}" ; then
+           urls=("$u/$f.tar.bz2" "$u/$f.tar.gz")
+       else
+           urls=("${urls[@]}" "$u/$f.tar.bz2" "$u/$f.tar.gz")
+       fi
+   done
+   (
+       cd $BTC_SOURCES
+       for u in "${urls[@]}" ; do
+           echo fetch: trying $u 1>&2
+           if type -t wget >/dev/null 2>&1 ; then
+               wget -nv "$u" && return
+               continue
+           elif type -t curl >/dev/null 2>&1 ; then
+               curl -fSsO "$u" && return
+               rm -f "$f"
+               continue
+           fi
+       done
+       echo fetch: failed to download $f 1>&2
+       return 1
+   )
+}
+
 function untar () {
     echo untar $1 1>&2
     local f
-    for f in $BTC_SOURCES/$1*; do
-        case $f in
-        ( $BTC_SOURCES/$1.tar.bz2 )
-            tar -xjf $f
-            return
-            ;;
-        ( $BTC_SOURCES/$1.tar.gz )
-            tar -xzf $f
-            return
-            ;;
-        ( $BTC_SOURCES/$1.tar )
-            tar -xf $f
-            return
-            ;;
-        esac
+    while true; do
+        for f in $BTC_SOURCES/$1*; do
+            case $f in
+            ( $BTC_SOURCES/$1.tar.bz2 )
+                tar -xjf $f
+                return
+                ;;
+            ( $BTC_SOURCES/$1.tar.gz )
+                tar -xzf $f
+                return
+                ;;
+            ( $BTC_SOURCES/$1.tar )
+                tar -xf $f
+                return
+                ;;
+            ( * )
+                fetch "$@"
+                ;;
+            esac
+        done
     done
-    echo untar: can\'t find $1 1>&2
-    return 1
 }
 
 function decompress () {

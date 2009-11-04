@@ -1,0 +1,18 @@
+Provide required permissions for newly created file.
+Call only used for temporary ldout file, thus using mode 0600.
+
+https://bugs.gentoo.org/256638
+
+2009-01-30 Martin von Gagern
+
+--- gcc-3.4.6/gcc/collect2.c
++++ gcc-3.4.6/gcc/collect2.c
+@@ -1540,7 +1540,7 @@ collect_execute (const char *prog, char 
+   if (redir)
+     {
+       /* Open response file.  */
+-      redir_handle = open (redir, O_WRONLY | O_TRUNC | O_CREAT);
++      redir_handle = open (redir, O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR);
+ 
+       /* Duplicate the stdout and stderr file handles
+ 	 so they can be restored later.  */

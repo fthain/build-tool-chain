@@ -1,4 +1,4 @@
---- scripts/lxdialog/Makefile-orig	Mon Mar 26 02:31:56 2001
+--- scripts/lxdialog/Makefile.orig	Mon Mar 26 02:31:56 2001
 +++ scripts/lxdialog/Makefile	Mon Jun 28 00:25:12 2004
 @@ -2,7 +2,7 @@
  CPP = $(HOSTCC) -E
@@ -9,7 +9,7 @@
  LDLIBS = -lncurses
  
  ifeq (/usr/include/ncurses/ncurses.h, $(wildcard /usr/include/ncurses/ncurses.h))
---- Makefile-orig	Mon Apr 11 19:28:06 2005
+--- Makefile.orig	Mon Apr 11 19:28:06 2005
 +++ Makefile	Mon Apr 11 19:28:22 2005
 @@ -459,7 +459,7 @@
  	@$(GENKSYMS) -k $(VERSION).$(PATCHLEVEL).$(SUBLEVEL) </dev/null \
@@ -20,3 +20,18 @@
  
  else
  
+--- Makefile.orig	2009-10-07 00:38:17.000000000 +1100
++++ Makefile	2009-10-07 00:38:32.000000000 +1100
+@@ -291,9 +291,9 @@
+ 	fi
+ 
+ include/linux/compile.h: $(CONFIGURATION) include/linux/version.h newversion
+-	@echo -n \#define UTS_VERSION \"\#`cat .version` > .ver
+-	@if [ -n "$(CONFIG_SMP)" ] ; then echo -n " SMP" >> .ver; fi
+-	@if [ -f .name ]; then  echo -n \-`cat .name` >> .ver; fi
++	@/bin/echo -n \#define UTS_VERSION \"\#`cat .version` > .ver
++	@if [ -n "$(CONFIG_SMP)" ] ; then /bin/echo -n " SMP" >> .ver; fi
++	@if [ -f .name ]; then  /bin/echo -n \-`cat .name` >> .ver; fi
+ 	@echo ' '`LANG=C date`'"' >> .ver
+ 	@echo \#define LINUX_COMPILE_TIME \"`LANG=C date +%T`\" >> .ver
+ 	@echo \#define LINUX_COMPILE_BY \"`whoami`\" >> .ver

@@ -1,0 +1,59 @@
+Backport of the patch committed to gcc-3.4.1.
+via http://sources.redhat.com/ml/binutils/2005-02/msg00702.html
+
+
+To: "Richard Sandiford" <rsandifo at redhat dot com>
+cc: gcc-patches at gcc dot gnu dot org,
+	mark at codesourcery dot com
+Subject: Re: [trunk + 3.4-branch RFA] don't use empic relocs for mips-linux eh
+From: cgd at broadcom dot com
+Date: 15 Jun 2004 10:12:10 -0700
+Message-ID: <yov5isdslp91.fsf@ldt-sj3-010.sj.broadcom.com>
+MIME-Version: 1.0
+X-WSS-ID: 6CD1F2612EC1995975-01-01
+Content-Type: text/plain;
+ charset=us-ascii
+Content-Transfer-Encoding: 7bit
+
+At Mon, 14 Jun 2004 13:11:16 +0100, Richard Sandiford wrote:
+> A patch to remove both definitions is preapproved if it works.
+
+OK, tested and applied the following patch to the trunk.
+
+Richard, per Mark's comments, it's up to you to approve this for 3.4
+branch if you want it there.
+
+Assuming it builds/tests cleanly, would you like me to put it on the
+branch as well?  (Just to re-confirm.)
+
+
+thanks,
+
+chris
+--
+2004-06-15  Chris Demetriou  <cgd@broadcom.com>
+
+	* config/mips/linux.h (ASM_PREFERRED_EH_DATA_FORMAT): Remove
+	definition.
+	* config/mips/linux64.h (ASM_PREFERRED_EH_DATA_FORMAT): Remove
+	#undef and #if 0'd definition.
+
+Index: config/mips/linux.h
+===================================================================
+RCS file: /cvs/gcc/gcc/gcc/config/mips/linux.h,v
+retrieving revision 1.77
+diff -u -p -r1.77 linux.h
+--- gcc/config/mips/linux.h	19 Feb 2004 22:07:51 -0000	1.77
++++ gcc/config/mips/linux.h	15 Jun 2004 17:07:04 -0000
+@@ -170,11 +170,6 @@ Boston, MA 02111-1307, USA.  */
+ #undef FUNCTION_NAME_ALREADY_DECLARED
+ #define FUNCTION_NAME_ALREADY_DECLARED 1
+ 
+-#define ASM_PREFERRED_EH_DATA_FORMAT(CODE, GLOBAL)       		\
+-  (flag_pic								\
+-    ? ((GLOBAL) ? DW_EH_PE_indirect : 0) | DW_EH_PE_pcrel | DW_EH_PE_sdata4\
+-   : DW_EH_PE_absptr)
+-
+ /* The glibc _mcount stub will save $v0 for us.  Don't mess with saving
+    it, since ASM_OUTPUT_REG_PUSH/ASM_OUTPUT_REG_POP do not work in the
+    presence of $gp-relative calls.  */

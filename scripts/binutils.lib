@@ -3,21 +3,23 @@
 
 function prep_binutils () {
     cd ${BTC_BUILD}
-    if [ -e ${1} ]; then
-        echo ${1} already exists
-        return 0
-    fi
-    untar ${1}
-    cd ${1}
+    test -e $1 && echo $1 already exists && return
+    untar $1 ftp://ftp.gnu.org/gnu/binutils \
+             ftp://ftp.kernel.org/pub/linux/devel/binutils \
+             ftp://sourceware.org/pub/binutils/snapshots
+    cd $1
 
     case ${1} in
     ( binutils-2.12.90.0.1 )
         # Debian source package
         decompress ${BTC_PATCHES}/binutils-2.12.90.0.1-4-debian.diff | patch -p1
+        # Fix for recent gcc
         patch -p1 < ${BTC_PATCHES}/binutils-2.12.90.0.1-4-btc-gcc4.diff
+        # Fix for recent glibc
+        patch -p0 < ${BTC_PATCHES}/binutils-2.12-_bfd_ar_spacepad.patch
         ;;
     ( binutils-2.15 | binutils-2.15.* | binutils-2.16 | binutils-2.16.* )
-        # Fix to support april '04 glibc asm (m68k/arm/cris)
+        # Fix to support April '04 glibc asm (m68k/arm/cris)
         patch -p1 < ${BTC_PATCHES}/binutils-2.15-NO_APP-mode-line-comment.patch
         patch -p1 < ${BTC_PATCHES}/702-binutils-skip-comments.patch
         ;;
@@ -36,26 +38,26 @@ function prep_binutils () {
         patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.18-fix-warning.diff
         ;;
-    ( binutils-2.18.50.0.1 )
+    ( binutils-2.18 )
+        # Debian
+        decompress ${BTC_PATCHES}/binutils-2.18.1~cvs20080103-debian.diff | patch -p1
         # Avoid fatal compiler warnings
         patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
-        patch -p1 < ${BTC_PATCHES}/binutils-2.18-Werror.diff
-        patch -p1 < ${BTC_PATCHES}/binutils-2.18.50.0.1-Werror.diff
-        ;;
-    ( binutils-2.18.50.0.2 )
-        # Avoid fatal compiler warnings
-        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
-        patch -p1 < ${BTC_PATCHES}/binutils-2.18-Werror.diff
-        ;;
-    ( binutils-2.18.50.0.4 )
-        # Avoid fatal compiler warnings
-        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        # Darwin build failure
         patch -p1 < ${BTC_PATCHES}/binutils-2.18.50.0.4-opcodes-bfd-dylib.diff
-        patch -p1 < ${BTC_PATCHES}/binutils-2.18.50.0.4-pr5755.patch
+        ;;
+    ( binutils-2.18.50.0.9 )
+        # Avoid fatal compiler warnings
+        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        # Darwin build failure, fixes i386-darwin too
+        patch -p1 < ${BTC_PATCHES}/binutils-2.18-link-bfd-with-libiberty.patch
         ;;
     ( * )
+        # Debian
+        patch -p1 < ${BTC_PATCHES}/binutils-2.19.51-debian.diff
         # Avoid fatal compiler warnings
         patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        # Darwin build failure
         patch -p1 < ${BTC_PATCHES}/binutils-2.18.50.0.4-opcodes-bfd-dylib.diff
         ;;
     esac
@@ -67,38 +69,33 @@ function prep_binutils () {
 
 function build_binutils () {
     cd ${BTC_BUILD}
-    if [ -e ${1} ]; then
-        echo ${1} already exists
-        return 0
-    fi
-    mkdir ${1}
-    cd ${1}
+    test -e $1 && echo $1 already exists && return
+    mkdir $1
+    cd $1
 
     CFLAGS="-O2 $HOST_CFLAGS" ../${BINUTILS_DIST}/configure \
 --prefix=${TC_PREFIX} --target=${TARGET} \
 ${BINUTILS_CONFIG_OPTS} \
 --enable-64-bit-bfd --disable-nls --enable-shared --disable-werror
     case ${BINUTILS_DIST} in
-    ( binutils-2.?.* | binutils-2.10.* | binutils-2.11.* | binutils-2.12.* )
+    ( binutils-2.?.* | binutils-2.1[012].* )
         ;;
     ( * )
         make configure-bfd ;;
     esac
     make headers -C bfd
-    make -j2 all
+    make ${MAKE_OPTS} all
 }
 
 function install_binutils () {
-    if [ -x ${TC_PREFIX}/bin/${TARGET}-as ]; then
-        echo binutils already installed
-        return 0
-    fi
-
+    test -e ${TC_PREFIX}/bin/${TARGET}-as && echo binutils already installed && return
     cd ${BTC_BUILD}/${1}
+
     make install
-    # no readelf on Darwin & glibc configure doesn't look for ${TARGET}-readelf
-    cd ${TC_PREFIX}/bin
-    ln -fs ${TARGET}-readelf readelf
+    # There's no readelf on Darwin & glibc configure won't use ${TARGET}-readelf
+    # See http://sources.redhat.com/bugzilla/show_bug.cgi?id=3004
+    # wherein his highness determines that a cross binutils is not "sane".
+    ln -fs ${TARGET}-readelf ${TC_PREFIX}/bin/readelf
 
     manifest install_binutils
 }

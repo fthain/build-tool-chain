@@ -1,3 +1,5 @@
 . ${PROFILES}/3
 TARGET=powerpc-linux-gnu
 TARGET_CPU=powerpc
+
+KERNEL=linux-2.6.27

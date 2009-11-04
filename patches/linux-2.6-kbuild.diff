@@ -1,0 +1,18 @@
+  HOSTCC  scripts/mod/sumversion.o
+  scripts/mod/sumversion.c: In function `get_src_version':
+  scripts/mod/sumversion.c:384: error: `PATH_MAX' undeclared (first use in this function)
+  scripts/mod/sumversion.c:384: error: (Each undeclared identifier is reported only once
+  scripts/mod/sumversion.c:384: error: for each function it appears in.)
+  scripts/mod/sumversion.c:384: warning: unused variable `filelist'
+
+
+
+--- linux-2.6.20/scripts/mod/sumversion.c.orig	2009-09-23 10:19:47.000000000 +1000
++++ linux-2.6.20/scripts/mod/sumversion.c	2009-09-23 10:05:44.000000000 +1000
+@@ -7,5 +7,6 @@
+ #include <ctype.h>
+ #include <errno.h>
+ #include <string.h>
++#include <limits.h>
+ #include "modpost.h"
+ 

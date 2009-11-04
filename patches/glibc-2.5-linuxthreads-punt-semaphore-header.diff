@@ -1,0 +1,7 @@
+http://sourceware.org/ml/libc-ports/2006-10/msg00032.html
+
+diff -pruN glibc-2.5.orig/linuxthreads/sysdeps/pthread/semaphore.h glibc-2.5/linuxthreads/sysdeps/pthread/semaphore.h
+--- glibc-2.5.orig/linuxthreads/sysdeps/pthread/semaphore.h	2009-05-20 20:34:23.000000000 +1000
++++ glibc-2.5/linuxthreads/sysdeps/pthread/semaphore.h	1970-01-01 10:00:00.000000000 +1000
+@@ -1 +0,0 @@
+-#include <linuxthreads/semaphore.h>

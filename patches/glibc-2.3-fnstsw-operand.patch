@@ -1,0 +1,59 @@
+From binutils-return-53763-listarch-binutils=sources dot redhat dot com at sourceware dot org Sat Jan 12 16:01:21 2008
+Return-Path: <binutils-return-53763-listarch-binutils=sources dot redhat dot com at sourceware dot org>
+Delivered-To: listarch-binutils at sources dot redhat dot com
+Received: (qmail 6128 invoked by alias); 12 Jan 2008 16:01:20 -0000
+Received: (qmail 6094 invoked by uid 22791); 12 Jan 2008 16:01:20 -0000
+X-Spam-Check-By: sourceware.org
+Received: from qmta07.westchester.pa.mail.comcast.net (HELO QMTA07.westchester.pa.mail.comcast.net) (76.96.62.64)     by sourceware.org (qpsmtpd/0.31) with ESMTP; Sat, 12 Jan 2008 16:00:47 +0000
+Received: from OMTA14.westchester.pa.mail.comcast.net ([76.96.62.60]) 	by QMTA07.westchester.pa.mail.comcast.net with comcast 	id cFU11Y00F1HzFnQ0503B00; Sat, 12 Jan 2008 16:00:45 +0000
+Received: from lucon.org ([76.126.237.145]) 	by OMTA14.westchester.pa.mail.comcast.net with comcast 	id cG0T1Y00638uYQk3a00000; Sat, 12 Jan 2008 16:00:28 +0000
+X-Authority-Analysis: v=1.0 c=1 a=CCpqsmhAAAAA:8 a=R_CZnw0pE8al2LGg0gsA:9 a=bX1qLXpHnsOHRAaDtT8b-NRKZS8A:4 a=dGJ0OcVc7YAA:10 a=gi0PWCVxevcA:10
+Received: by lucon.org (Postfix, from userid 500) 	id 0C13DF828E; Sat, 12 Jan 2008 08:00:44 -0800 (PST)
+Date: Sat, 12 Jan 2008 08:00:44 -0800
+From: "H dot J dot  Lu" <hjl at lucon dot org>
+To: GNU C Library <libc-alpha at sources dot redhat dot com>
+Cc: binutils at sources dot redhat dot com
+Subject: PATCH: Use short for fnstsw
+Message-ID: <20080112160043.GA27537@lucon.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.5.17 (2007-11-01)
+Mailing-List: contact binutils-help at sourceware dot org; run by ezmlm
+Precedence: bulk
+List-Id: <binutils.sourceware.org>
+List-Subscribe: <mailto:binutils-subscribe at sourceware dot org>
+List-Archive: <http://sourceware.org/ml/binutils/>
+List-Post: <mailto:binutils at sourceware dot org>
+List-Help: <mailto:binutils-help at sourceware dot org>, <http://sourceware dot org/ml/#faqs>
+Sender: binutils-owner at sourceware dot org
+Delivered-To: mailing list binutils at sourceware dot org
+
+I am checking this x86 assembler patch:
+
+http://sourceware.org/ml/binutils/2008-01/msg00148.html
+
+to check operand size. fnstsw stores 16bit into %ax. The upper
+16bit of %eax is unchanged.  The new assembler will disallow
+"fnstsw %eax".  Here is a patch for glibc.
+
+
+H.J.
+---
+2008-01-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* sysdeps/i386/fpu/ftestexcept.c (fetestexcept): Use short
+	for fnstsw.
+
+--- sysdeps/i386/fpu/ftestexcept.c.foo	2004-03-05 02:14:48.000000000 -0800
++++ sysdeps/i386/fpu/ftestexcept.c	2008-01-12 07:36:22.000000000 -0800
+@@ -26,7 +26,7 @@
+ int
+ fetestexcept (int excepts)
+ {
+-  int temp;
++  short temp;
+   int xtemp = 0;
+ 
+   /* Get current exceptions.  */
+

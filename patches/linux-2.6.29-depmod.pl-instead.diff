@@ -1,0 +1,34 @@
+--- linux-2.6.29/Makefile.orig	2009-03-24 10:12:14.000000000 +1100
++++ linux-2.6.29/Makefile	2009-05-19 22:56:03.000000000 +1000
+@@ -320,7 +320,7 @@
+ OBJDUMP		= $(CROSS_COMPILE)objdump
+ AWK		= awk
+ GENKSYMS	= scripts/genksyms/genksyms
+-DEPMOD		= /sbin/depmod
++DEPMOD		= depmod.pl
+ KALLSYMS	= scripts/kallsyms
+ PERL		= perl
+ CHECK		= sparse
+@@ -1138,11 +1138,6 @@
+ 
+ PHONY += _modinst_
+ _modinst_:
+-	@if [ -z "`$(DEPMOD) -V 2>/dev/null | grep module-init-tools`" ]; then \
+-		echo "Warning: you may need to install module-init-tools"; \
+-		echo "See http://www.codemonkey.org.uk/docs/post-halloween-2.6.txt";\
+-		sleep 1; \
+-	fi
+ 	@rm -rf $(MODLIB)/kernel
+ 	@rm -f $(MODLIB)/source
+ 	@mkdir -p $(MODLIB)/kernel
+@@ -1549,8 +1544,8 @@
+       cmd_depmod = \
+ 	if [ -r System.map -a -x $(DEPMOD) ]; then                              \
+ 		$(DEPMOD) -ae -F System.map                                     \
+-		$(if $(strip $(INSTALL_MOD_PATH)), -b $(INSTALL_MOD_PATH) )     \
+-		$(KERNELRELEASE);                                               \
++		-b $(INSTALL_MOD_PATH)/lib/modules/$(KERNELRELEASE)             \
++		-k vmlinux;                                                     \
+ 	fi
+ 
+ # Create temporary dir for module support files

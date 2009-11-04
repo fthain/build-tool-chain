@@ -3,32 +3,35 @@
 
 function prep_gdb () {
     cd ${BTC_BUILD}
-    if [ -e ${1} ]; then
-        echo ${1} already exists
-        return 0
-    fi
-    untar ${1}
-    cd ${1}
+    test -e $1 && echo $1 already exists && return 0
+    untar $1 ftp://ftp.gnu.org/gnu/gdb \
+             ftp://sourceware.org/pub/gdb/snapshots/branch
+    cd $1
 
-    patch -p1 < ${BTC_PATCHES}/gdb-6.6-sim-ppc-libintl-link.diff
+    case $1 in
+    ( gdb-6.6 )
+        patch -p1 < ${BTC_PATCHES}/gdb-6.6-sim-ppc-libintl-link.diff
+        ;;
+    ( gdb-6.8 | gdb-6.8.* )
+        patch -p1 < ${BTC_PATCHES}/gdb-6.8-sim-ppc-no-lz-target.diff
+        ;;
+    esac
 }
 
 function install_gdb () {
     cd ${BTC_BUILD}
-    if [ -e ${1} ]; then
-        echo ${1} already exists
-        return 0
-    fi
-    mkdir ${1}
-    cd ${1}
+    test -e $1 && echo $1 already exists && return 0
+    mkdir $1
+    cd $1
 
     mkdir intl
     echo 'am_cv_func_iconv=${am_cv_func_iconv=no}' >intl/config.cache
     CFLAGS="$HOST_CFLAGS -O2" AR=ar RANLIB=ranlib \
     ../${GDB_DIST}/configure --prefix=${TC_PREFIX} --target=${TARGET} \
 --build=${BUILD} \
+--disable-werror \
 --cache-file=config.cache
-    make -j2
+    make ${MAKE_OPTS}
     make install
 
     manifest install_gdb

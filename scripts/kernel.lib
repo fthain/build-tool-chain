@@ -3,12 +3,9 @@
 
 function prep_kernel () {
     cd ${BTC_BUILD}
-    if [ -e ${1} ]; then
-        echo ${1} already exists
-        return 0
-    fi
-    untar ${1}
-    cd ${1}
+    test -e $1 && echo $1 already exists && return
+    untar $1 ftp://ftp.kernel.org/pub/linux/kernel/v2.{6,4,2}
+    cd $1
 
     case ${1} in
     ( linux-2.2.26 )
@@ -83,8 +80,12 @@ function prep_kernel () {
                 patch -p1 < ${BTC_PATCHES}/linux-2.6.24-btc-darwin.diff
                 patch -p0 < ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
                 ;;
-            ( * )
+            ( linux-2.6.2[5-9] | linux-2.6.2[5-9][.-]* )
                 patch -p1 < ${BTC_PATCHES}/linux-2.6.25-btc-darwin.diff
+                patch -p0 < ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
+                ;;
+            ( * )
+                patch -p1 < ${BTC_PATCHES}/linux-2.6.30-btc-darwin.diff
                 patch -p0 < ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
                 ;;
             esac
@@ -98,28 +99,56 @@ function prep_kernel () {
             esac
         fi
         case ${1} in
-        ( linux-2.6.[0-9] | linux-2.6.[0-9][.-]* | \
+        ( linux-2.6.[0-7] | linux-2.6.[0-7][.-]* )
+            patch -p1 < ${BTC_PATCHES}/linux-2.6-btc-Makefile.patch
+            ;;
+        ( linux-2.6.[8-9] | linux-2.6.[8-9][.-]* | \
           linux-2.6.10 | linux-2.6.10[.-]* )
             patch -p1 < ${BTC_PATCHES}/linux-2.6-btc-Makefile.patch
+            patch -p1 < ${BTC_PATCHES}/linux-2.6-kbuild.diff
             ;;
         ( linux-2.6.1[1-3] | linux-2.6.1[1-3][.-]* )
             patch -p1 < ${BTC_PATCHES}/linux-2.6.12-depmod.pl-instead.diff
+            patch -p1 < ${BTC_PATCHES}/linux-2.6-kbuild.diff
             ;;
         ( linux-2.6.1[4-6] | linux-2.6.1[4-6][.-]* )
             patch -p1 < ${BTC_PATCHES}/linux-2.6.16-depmod.pl-instead.diff
+            patch -p1 < ${BTC_PATCHES}/linux-2.6-kbuild.diff
             ;;
         ( linux-2.6.1[7-9] | linux-2.6.1[7-9][.-]* | \
-          linux-2.6.2[0-2] | linux-2.6.2[0-2][.-]* )
+          linux-2.6.2[0-1] | linux-2.6.2[0-1][.-]* )
+            patch -p1 < ${BTC_PATCHES}/linux-2.6.17-depmod.pl-instead.diff
+            patch -p1 < ${BTC_PATCHES}/linux-2.6-kbuild.diff
+            ;;
+        ( linux-2.6.22 | linux-2.6.22[.-]* )
             patch -p1 < ${BTC_PATCHES}/linux-2.6.17-depmod.pl-instead.diff
             ;;
-        ( * )
+        ( linux-2.6.2[3-8] | linux-2.6.2[3-8][.-]* )
             patch -p1 < ${BTC_PATCHES}/linux-2.6.24-depmod.pl-instead.diff
+            ;;
+        ( * )
+            patch -p1 < ${BTC_PATCHES}/linux-2.6.29-depmod.pl-instead.diff
             ;;
         esac
 
         case ${TARGET_CPU} in
         ( powerpc )
-            patch -p1 < ${BTC_PATCHES}/use_pmac32_defconfig.diff || true
+            case ${1} in
+            ( linux-2.6.[0-9] | linux-2.6.[0-9][.-]* | \
+              linux-2.6.1[0-5] | linux-2.6.1[0-5][.-]* )
+                ;;
+            ( linux-2.6.1[6-9] | linux-2.6.1[6-9][.-]* | \
+              linux-2.6.2[0-3] | linux-2.6.2[0-3][.-]* )
+                patch -p1 < ${BTC_PATCHES}/linux-2.6.16-use_pmac32_defconfig.diff
+                ;;
+            ( linux-2.6.27 ) # probably other versions too
+                patch -p1 < ${BTC_PATCHES}/linux-2.6.27-use_pmac32_defconfig.diff
+                patch -p1 < ${BTC_PATCHES}/linux-2.6.27-powerpc-mktree-portability.diff
+                ;;
+            ( linux-2.6.* )
+                patch -p1 < ${BTC_PATCHES}/linux-2.6.27-use_pmac32_defconfig.diff
+                ;;
+            esac
             ;;
         ( mips )
             case ${1} in
@@ -145,13 +174,19 @@ function prep_kernel () {
             ( linux-2.6.24 | linux-2.6.24-* )
                 decompress ${BTC_PATCHES}/linux-2.6.24-m68k-20080212.diff | patch -p1
                 ;;
+            ( linux-2.6.29 | linux-2.6.29-* )
+                decompress ${BTC_PATCHES}/linux-2.6.29-m68k-20090520.diff | patch -p1
+                ;;
+            ( linux-2.6.31 | linux-2.6.31-* )
+                patch -p1 < ${BTC_PATCHES}/0001-Add-NPTL-support-for-m68k.patch
+                ;;
             esac
             case ${1} in
             ( linux-2.6.1[89] | linux-2.6.1[89]-* | \
-              linux-2.6.2[02] | linux-2.6.2[02]-*)
+              linux-2.6.2[02] | linux-2.6.2[02]-* )
                 patch -p1 < ${BTC_PATCHES}/linux-2.6.17-m68k-20060622-Os-strcpy.diff
                 ;;
-            ( linux-2.6.2[34] | linux-2.6.2[34]-*)
+            ( linux-2.6.2[34] | linux-2.6.2[34]-* )
                 patch -p1 < ${BTC_PATCHES}/linux-2.6.23-Os-strcpy.diff
                 ;;
             esac
@@ -164,11 +199,9 @@ function prep_kernel () {
 }
 
 function install_kernel_headers () {
-    if [ -d ${KERNEL_HEADERS}/linux ]; then
-        echo linux kernel headers already present
-        return 0
-    fi
-    cd ${BTC_BUILD}/${1}
+    test -d $KERNEL_HEADERS/linux && echo kernel headers already present && return
+    cd $BTC_BUILD/$1
+
     make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- mrproper
     case ${1} in
     ( linux-2.[24].* )
@@ -182,25 +215,30 @@ function install_kernel_headers () {
     esac
     cp -r include/linux ${KERNEL_HEADERS}
     cp -r include/asm-generic ${KERNEL_HEADERS}
-    cp -r include/asm-${TARGET_CPU} ${KERNEL_HEADERS}/asm
+    if test -d arch/${TARGET_CPU}/include/asm ; then
+      cp -r arch/${TARGET_CPU}/include/asm ${KERNEL_HEADERS}/asm
+    else
+      cp -r include/asm-${TARGET_CPU} ${KERNEL_HEADERS}/asm
+    fi
     ln -fs ${KERNEL_HEADERS}/* ${GLIBC_HEADERS}
 
     manifest install_kernel_headers
 }
 
 function build_kernel () {
-    if [ -e ${BTC_BUILD}/${1}/.compiled ]; then
-        echo kernel already compiled
-        return 0
-    fi
-    pushd ${BTC_BUILD}/${1} >/dev/null
+    test -e $BTC_BUILD/$1/.compiled && echo kernel already compiled && return
+    pushd $BTC_BUILD/$1 >/dev/null
+
     local config
     config=${BTC_CONFIGS}/${DOTCONFIG:-${1}-${TARGET_CPU}-dot-config}
     if [ -f $config ] ; then
         make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- clean
         cp ${config} .config
+    else
+        make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- defconfig || true
     fi
-    yes "" | make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- oldconfig
+    yes "" | make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- CONFIG_SHELL=/bin/bash oldconfig
+
     case ${1} in
     ( linux-2.[24].* )
         make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- dep
@@ -214,7 +252,7 @@ function build_kernel () {
         #    ( * )                                   out=scripts/mod/elf.h ;;
         #esac
         #sed 's/^#include <features.h>$//' < ${GLIBC_HEADERS}/elf.h > $out
-        make -j2 ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}-
+        make ${MAKE_OPTS} ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}-
         ;;
     esac
     touch .compiled
@@ -223,15 +261,12 @@ function build_kernel () {
 
 function package_kernel () {
     KERNEL_IMAGE=${BTC_BUILD}/${1}-${TARGET_CPU}-image
-    if [ -e ${KERNEL_IMAGE}.tar.gz ]; then
-        echo linux kernel tarball already present
-        return 0
-    fi
+    test -e $KERNEL_IMAGE.tar.gz && echo kernel tarball already present && return
+
     rm -fr ${KERNEL_IMAGE}
     mkdir -p ${KERNEL_IMAGE}/boot
     pushd ${BTC_BUILD}/${1} >/dev/null
-    make INSTALL_MOD_PATH=${KERNEL_IMAGE} ARCH=${TARGET_CPU} \
-CROSS_COMPILE=${TARGET}- modules_install
+    make INSTALL_MOD_PATH=${KERNEL_IMAGE} ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- modules_install
     cd ${KERNEL_IMAGE}/lib/modules
     ver=`ls -d [0-9]*`
     if [ x${ver} = x ]; then

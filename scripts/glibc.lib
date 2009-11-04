@@ -3,12 +3,10 @@
 
 function prep_glibc () {
     cd ${BTC_BUILD}
-    if [ -e ${1} ]; then
-        echo ${1} already exists
-        return 0
-    fi
-    untar ${1}
-    cd ${1}
+    test -e $1 && echo $1 already exists && return
+    untar $1 ftp://ftp.gnu.org/gnu/glibc \
+             ftp://sources.redhat.com/pub/glibc/releases
+    cd $1
 
     # Linuxthreads is a seperate package in 2.3.2 and earlier
     if [ -n "${THREADING_LIB}" ] ; then
@@ -49,6 +47,8 @@ function prep_glibc () {
         patch -p0 < ${BTC_PATCHES}/glibc-2.3-alpha-cfi-instructions.diff
         # powerpc build failure
         patch -p0 < ${BTC_PATCHES}/glibc-2.3.2-debian-bug-343571.diff
+        # intel binutils 2.18
+        patch -p0 < ${BTC_PATCHES}/glibc-2.3-fnstsw-operand.patch
         ;;
     ( glibc-2.3.3 )
         # CVS snapshot
@@ -61,6 +61,8 @@ function prep_glibc () {
         # Build failures
         patch -p0 < ${BTC_PATCHES}/glibc-2.3.3-debian-bug-339415.diff
         patch -p0 < ${BTC_PATCHES}/glibc-2.3.5-debian-bug-343571.diff
+        # intel binutils 2.18
+        patch -p0 < ${BTC_PATCHES}/glibc-2.3-fnstsw-operand.patch
         ;;
     ( glibc-2.3.6 )
         ## Some patches for vanila 2.3.6
@@ -75,18 +77,26 @@ function prep_glibc () {
         # gcc-4.3 fixes
         patch -p1 < ${BTC_PATCHES}/glibc-2.3.6-gcc-4.3-fixed-includes.diff
         patch -p1 < ${BTC_PATCHES}/glibc-2.3.6-gcc-4.3-visibility-fix.diff
+        # intel binutils 2.18
+        patch -p0 < ${BTC_PATCHES}/glibc-2.3-fnstsw-operand.patch
+        # binutils approx. 2.19
+        patch -p1 < ${BTC_PATCHES}/glibc-insert-_begin.patch
         ;;
     ( glibc-2.5 )
         # Debian sources
-        decompress ${BTC_PATCHES}/glibc-2.5-11.diff | patch -p1
+        decompress ${BTC_PATCHES}/glibc_2.5-11-debian.diff | patch -p1
         # Remove linuxthreads insanity check
         patch -p1 < ${BTC_PATCHES}/glibc-2.5-insane-ok.diff
         # gcc-4.3 fixes
         patch -p1 < ${BTC_PATCHES}/glibc-2.3.6-gcc-4.3-fixed-includes.diff
         patch -p1 < ${BTC_PATCHES}/glibc-2.3.6-gcc-4.3-visibility-fix.diff
-
-patch -p1 < ${BTC_PATCHES}/glibc-2.5-m68k-fchownat.patch
-patch -p1 -R < ${BTC_PATCHES}/bad_glibc25_patch
+        patch -p1 < ${BTC_PATCHES}/glibc-2.5-fgnu89-inline.diff
+        # build failures
+        patch -p1 < ${BTC_PATCHES}/glibc-2.5-m68k-fchownat.patch
+        # binutils approx. 2.19
+        patch -p1 < ${BTC_PATCHES}/glibc-insert-_begin.patch
+        # Remove bogus linuxthreads semaphore.h
+        patch -p1 < ${BTC_PATCHES}/glibc-2.5-linuxthreads-punt-semaphore-header.diff
         ;;
     esac
 
@@ -100,12 +110,9 @@ patch -p1 -R < ${BTC_PATCHES}/bad_glibc25_patch
 
 function install_glibc_headers () {
     cd ${BTC_BUILD}
-    if [ -e ${1} ]; then
-        echo ${1} already exists
-        return 0
-    fi
-    mkdir ${1}
-    cd ${1}
+    test -e $1 && echo $1 already exists && return
+    mkdir $1
+    cd $1
 
     # glibc wants to test the compiler, but it hasn't been built yet
     case $GLIBC_DIST in
@@ -125,25 +132,27 @@ function install_glibc_headers () {
         echo glibc config cache for glibc 2.4?
         exit 1
         ;;
+    ( glibc-2.5 )
+        cp ${BTC_CONFIGS}/glibc-2.5-config.cache config.cache
+        ;;
     esac
+
     # touch this to keep configure's compiler tests happy:
     touch ${GLIBC_HEADERS}/assert.h
-    if [ ${BUILD} != ${BUILD/%-apple-darwin*} ] ; then
+    if [ ${BUILD} != ${BUILD%-apple-darwin*} ] ; then
         # keep the the compiler happy and prevent missing stddef.h warnings
         touch stddef.h
     fi
 
     case ${TARGET_CPU} in
-    ( mips )
-        # o32
-        arch_defines="-D_MIPS_FPSET=16 -D_MIPS_ISA=2 -D_ABIO32=1 -D_MIPS_SIM=_ABIO32 -D_MIPS_SZINT=32 -D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32 -D__WORDSIZE=32"
-        ## n64
-        #arch_defines="-D_MIPS_FPSET=32 -D_MIPS_ISA=4 -D_ABI64=3 -D_MIPS_SIM=_ABI64 -D_MIPS_SZINT=32 -D_MIPS_SZLONG=64 -D_MIPS_SZPTR=64 -D__WORDSIZE=64"
-        ## n32
-        #arch_defines="-D_MIPS_FPSET=32 -D_MIPS_ISA=4 -D_ABI64=3 -D_MIPS_SIM=_NABI32 -D_MIPS_SZINT=32 -D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32 -D__WORDSIZE=32"
+    ( alpha )
+        arch_defines="-D__WORDSIZE=64"
         ;;
     ( arm )
         arch_defines="-D__ARM_EABI__"
+        ;;
+    ( mips )
+        arch_defines="-DABIO32=1 -D_MIPS_SIM=_ABIO32 -D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32 -D__WORDSIZE=32 -D_MIPS_FPSET=16 -D_MIPS_SZINT=32 -D_MIPS_ISA=2 -D__mips=2"
         ;;
     ( * )
         arch_defines=""
@@ -168,7 +177,7 @@ $GLIBC_CONFIG_OPTS \
         touch ${GLIBC_HEADERS}/gnu/stubs.h
     fi
     if [ ! -e ${GLIBC_HEADERS}/bits/stdio_lim.h ] ; then
-        cp bits/stdio_lim.h ${GLIBC_HEADERS}/bits || true
+        cp bits/stdio_lim.h ${GLIBC_HEADERS}/bits/ || true
     fi
 
     manifest install_glibc_headers
@@ -176,21 +185,13 @@ $GLIBC_CONFIG_OPTS \
 
 function make_glibc_runtime () {
     cd ${BTC_BUILD}
-    if [ -e ${1} ]; then
-        echo ${1} already exists
-        return 0
-    fi
-    mkdir ${1}
-    cd ${1}
-
-    local cflags
-    case `${TARGET}-gcc -dumpversion` in
-    ( 4.3[.-]* ) cflags="-fgnu89-inline" ;;
-    esac
+    test -e $1 && echo $1 already exists && return
+    mkdir $1
+    cd $1
 
     cp ${BTC_CONFIGS}/glibc-2.3.2-nptl-config.cache config.cache
     BUILD_CC=gcc BUILD_CFLAGS=$HOST_CFLAGS \
-CFLAGS="-O2 $cflags" CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib \
+CFLAGS="-O2" CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib \
 ../${GLIBC_DIST}/configure --prefix=${GLIBC_PREFIX} \
 --host=${TARGET} --build=${BUILD} \
 --cache-file=./config.cache \
@@ -203,20 +204,15 @@ $GLIBC_CONFIG_OPTS \
 
 function install_glibc () {
     cd ${BTC_BUILD}
-    [ -e $1 ] && echo $1 already exists && return 0
-    mkdir ${1}
-    cd ${1}
-
-    local cflags
-    case `${TARGET}-gcc -dumpversion` in
-    ( 4.3[.-]* ) cflags="-fgnu89-inline" ;;
-    esac
+    test -e $1 && echo $1 already exists && return
+    mkdir $1
+    cd $1
 
     if [ x${GLIBC_NEEDS_SHARED_GCC} = xyes ]; then
         cp ${BTC_CONFIGS}/glibc-2.3.2-nptl-config.cache config.cache
     fi
     BUILD_CC=gcc BUILD_CFLAGS=$HOST_CFLAGS \
-CFLAGS="-O2 $cflags" CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib \
+CFLAGS="-O2" CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib \
 ../${GLIBC_DIST}/configure --prefix=${GLIBC_PREFIX} \
 --host=${TARGET} --build=${BUILD} \
 --cache-file=./config.cache \

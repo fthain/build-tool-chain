@@ -1,0 +1,43 @@
+Use the host's makeinfo (the builtin one seg faults on darwin x86 for some reason)
+
+--- gcc-core-2.95.3/texinfo/Makefile.in.orig	2009-10-06 23:28:28.000000000 +1100
++++ gcc-core-2.95.3/texinfo/Makefile.in	2009-10-06 23:28:38.000000000 +1100
+@@ -102,10 +102,10 @@
+ # Do intl/ and lib/ first since the C programs depend on them.
+ # Do doc/ last so makeinfo will be built when we get there.
+ # Others are alphabetical.
+-SUBDIRS = intl lib info makeinfo po util doc
++SUBDIRS = intl lib info po util doc
+ # ??? For EGCS, only build the stuff we actually need.  This eliminates the
+ # need for xgettext that exists in the po subdirectory.
+-SUBDIRS = intl lib makeinfo
++SUBDIRS = intl lib
+ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
+ mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
+ CONFIG_HEADER = config.h
+--- gcc-core-2.95.3/gcc/Makefile.in.orig	2009-10-06 23:33:50.000000000 +1100
++++ gcc-core-2.95.3/gcc/Makefile.in	2009-10-06 23:34:21.000000000 +1100
+@@ -106,9 +106,7 @@
+ # These permit overriding just for certain files.
+ INSTALL_PROGRAM = @INSTALL_PROGRAM@
+ INSTALL_DATA = @INSTALL_DATA@
+-MAKEINFO = `if [ -f $(objdir)/../texinfo/makeinfo/Makefile ] ; \
+-	then echo $(objdir)/../texinfo/makeinfo/makeinfo ; \
+-	else echo makeinfo ; fi`
++MAKEINFO = makeinfo
+ MAKEINFOFLAGS =
+ TEXI2DVI = texi2dvi
+ # For GNUmake: let us decide what gets passed to recursive makes.
+--- gcc-core-2.95.3/Makefile.in.orig	2009-10-06 23:44:07.000000000 +1100
++++ gcc-core-2.95.3/Makefile.in	2009-10-06 23:44:25.000000000 +1100
+@@ -141,9 +141,7 @@
+ 	then echo $$r/m4/m4 ; \
+ 	else echo ${DEFAULT_M4} ; fi`
+ 
+-MAKEINFO = `if [ -f $$r/texinfo/makeinfo/Makefile ] ; \
+-	then echo $$r/texinfo/makeinfo/makeinfo ; \
+-	else echo makeinfo ; fi`
++MAKEINFO = makeinfo
+ 
+ # This just becomes part of the MAKEINFO definition passed down to
+ # sub-makes.  It lets flags be given on the command line while still

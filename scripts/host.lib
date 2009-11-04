@@ -4,7 +4,7 @@
 function is_installed () {
     if [ $(which $1 | grep -c ${HOST_TOOLS_PREFIX}/bin/$1) -eq 1 ]; then
         echo $1 already installed
-        return 0
+        return
     fi
     return 1
 }
@@ -14,12 +14,14 @@ function install_host_tool () {
 
     echo unpacking $1
     cd $BTC_BUILD
-    untar $1
+    untar "$@"
 
     echo building $1
     cd $1
-    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX}
-    make
+    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
+                             --infodir=${HOST_TOOLS_PREFIX}/share/info \
+                             --mandir=${HOST_TOOLS_PREFIX}/share/man
+    make ${MAKE_OPTS}
 
     echo installing $1
     make install
@@ -28,19 +30,21 @@ function install_host_tool () {
 function install_sed () {
     is_installed ${1/-*} && return
 
-    # gnu sed-4.1.5 won't build without gnu sed... duh
+    # gnu sed-4.1.5 won't build without gnu sed ... duh
     if [ $1 = sed-4.1.5 ] ; then
-        install_host_tool sed-4.1.4
+        install_host_tool sed-4.1.4 ftp://ftp.gnu.org/gnu/sed
     fi
 
     echo unpacking $1
     cd $BTC_BUILD
-    untar $1
+    untar $1 ftp://ftp.gnu.org/gnu/sed
 
     echo building $1
     cd $1
-    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX}
-    make
+    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
+                             --infodir=${HOST_TOOLS_PREFIX}/share/info \
+                             --mandir=${HOST_TOOLS_PREFIX}/share/man
+    make ${MAKE_OPTS}
 
     echo installing $1
     make install
@@ -49,7 +53,7 @@ function install_sed () {
 function install_make () {
     is_installed ${1/-*} && return
 
-    install_host_tool $1
+    install_host_tool $1 ftp://ftp.gnu.org/gnu/make
     ln -fs make ${HOST_TOOLS_PREFIX}/bin/gnumake
 }
 
@@ -58,17 +62,18 @@ function install_coreutils () {
 
     echo unpacking $1
     cd $BTC_BUILD
-    untar $1
+    untar $1 ftp://ftp.gnu.org/gnu/coreutils
 
     echo building $1
     cd $1
     CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX}
-    make
+    make ${MAKE_OPTS}
 
     echo installing $1
     dst=/tmp/junk$$
     make DESTDIR=$dst install
-    cp -p $dst/${HOST_TOOLS_PREFIX}/bin/{readlink,expr,install} ${HOST_TOOLS_PREFIX}/bin
+    cp -p $dst/${HOST_TOOLS_PREFIX}/bin/{readlink,expr,install} \
+          ${HOST_TOOLS_PREFIX}/bin
     rm -fr $dst
 }
 
@@ -77,13 +82,13 @@ function install_flex () {
 
     echo unpacking $1
     cd $BTC_BUILD
-    untar $1
+    untar $1 http://prdownloads.sourceforge.net/flex
     cd ${1%a}
     patch -p1 < ${BTC_PATCHES}/flex-2.5.4a-r6.diff
 
     echo building $1
     CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX}
-    make
+    make ${MAKE_OPTS}
 
     echo installing $1
     make install
@@ -93,18 +98,26 @@ function install_depmod () {
     is_installed ${1/-*} && return
 
     echo installing $1
+    if ! test -f ${BTC_SOURCES}/${1}.bz2 ; then
+        fetch_stdout http://git.busybox.net/busybox/plain/examples/depmod.pl?h=${1#*-} | bzip2 -c > ${BTC_SOURCES}/${1}.bz2
+    fi
     cd ${HOST_TOOLS_PREFIX}/bin
     decompress ${BTC_SOURCES}/${1} > depmod.pl
     chmod 755 depmod.pl
 }
 
 function install_find_pl () {
-    is_installed find.pl && return
+    local pn
+    pn=find.pl
+    is_installed $pn && return
 
-    echo installing $1
+    echo installing $pn
+    if ! test -f ${BTC_SOURCES}/${pn}.bz2 ; then
+        fetch_stdout http://www.telegraphics.com.au/~fthain/sw/${pn} | bzip2 -c > ${BTC_SOURCES}/${pn}.bz2
+    fi
     cd ${HOST_TOOLS_PREFIX}/bin
-    decompress ${BTC_SOURCES}/${1} > find.pl
-    chmod 755 find.pl
+    decompress ${BTC_SOURCES}/${pn} > ${pn}
+    chmod 755 ${pn}
 }
 
 function install_loadkeys () {
@@ -112,8 +125,8 @@ function install_loadkeys () {
     
     echo unpacking $1
     cd $BTC_BUILD
-    untar $1
-    cd ${1}
+    untar $1 ftp://ftp.kernel.org/pub/linux/utils/kbd
+    cd $1
     patch -p1 < ${BTC_PATCHES}/kbd-1.12-gentoo.diff
     patch -p1 < ${BTC_PATCHES}/kbd-1.12-btc-darwin.diff
 
@@ -126,41 +139,91 @@ function install_loadkeys () {
 }
 
 function install_gmp () {
-    [ -e ${HOST_TOOLS_PREFIX}/lib/libgmp.a ] && return
+    test -e ${HOST_TOOLS_PREFIX}/lib/libgmp.a && return
 
     echo unpacking $1
     cd $BTC_BUILD
-    untar $1
+    untar $1 ftp://ftp.gnu.org/gnu/gmp
 
     echo building $1
     cd $1
 
-    local cflags
-    local opts
-    cflags="-O2"
-    if [ ${BUILD} != ${BUILD/%-apple-darwin*} ] ; then
-        cflags="$cflags -Wa,-force_cpusubtype_ALL"
-        opts=--with-pic
-    fi
-    CFLAGS="$cflags" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} --with-gmp=${HOST_TOOLS_PREFIX} $opts
-    make
+    (
+        local opts
+        if [ ${BUILD} != "${BUILD#powerpc-apple-darwin}" ] ; then
+            export CFLAGS="-Wa,-force_cpusubtype_ALL"
+            opts="--with-pic"
+        elif [ ${BUILD} != "${BUILD#i386-apple-darwin9}" ] ; then
+            opts="--build=none-apple-darwin"
+        else
+            opts=
+        fi
+        ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
+                    --infodir=${HOST_TOOLS_PREFIX}/share/info \
+                    --enable-cxx --with-gmp=${HOST_TOOLS_PREFIX} \
+                    --disable-mpfr --disable-mpbsd $opts
+    )
+    make ${MAKE_OPTS}
 
     echo installing $1
     make install
 }
 
 function install_mpfr () {
-    [ -e ${HOST_TOOLS_PREFIX}/lib/libmpfr.a ] && return
+    test -e ${HOST_TOOLS_PREFIX}/lib/libmpfr.a && return
 
     echo unpacking $1
     cd $BTC_BUILD
-    untar $1
+    untar $1 http://www.mpfr.org/mpfr-current
     cd $1
-    patch -p1 < ${BTC_PATCHES}/mpfr-2.3.0-20070911.patch
+    patch -p1 < ${BTC_PATCHES}/mpfr-2.4.1-gentoo.patch
 
     echo building $1
-    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} --with-gmp=${HOST_TOOLS_PREFIX}
-    make
+    local opts
+    if [ ${BUILD} != "${BUILD#i386-apple-darwin9}" ] ; then
+        opts="--build=none-apple-darwin"
+    else
+        opts=
+    fi
+    ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
+                --with-gmp=${HOST_TOOLS_PREFIX} $opts
+    make ${MAKE_OPTS}
+
+    echo installing $1
+    make install
+}
+
+function install_ppl () {
+    is_installed ppl-config && return
+
+    echo unpacking $1
+    cd $BTC_BUILD
+    untar $1 ftp://ftp.cs.unipr.it/pub/ppl/releases/${1#*-}
+    cd $1
+
+    echo building $1
+    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
+                             --disable-optimization --enable-interfaces=c,cxx \
+                             --with-gmp=${HOST_TOOLS_PREFIX}
+    make ${MAKE_OPTS}
+
+    echo installing $1
+    make install
+}
+
+function install_cloog_ppl () {
+    is_installed cloog && return
+
+    echo unpacking $1
+    cd $BTC_BUILD
+    untar $1 ftp://gcc.gnu.org/pub/gcc/infrastructure
+    cd $1
+
+    echo building $1
+    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
+                             --with-gmp=${HOST_TOOLS_PREFIX} \
+                             --with-ppl=${HOST_TOOLS_PREFIX}
+    make ${MAKE_OPTS}
 
     echo installing $1
     make install

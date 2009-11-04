@@ -1,14 +1,17 @@
-Thanks to Andres (?) for this page, from which these diffs come:
+Thanks to Andres (?) for some of these diffs,
 http://gnupoc.sourceforge.net/macosx.html
 
 --- a/config.guess	Mon May 31 02:04:33 1999
 +++ b/config.guess	Wed Mar 30 01:33:35 2005
-@@ -225,6 +225,9 @@
+@@ -225,6 +225,12 @@
      mvme88k:OpenBSD:*:*)
  	echo m88k-unknown-openbsd${UNAME_RELEASE}
  	exit 0 ;;
 +    Power*Macintosh:Darwin:*:*)
 +        echo powerpc-apple-darwin${UNAME_RELEASE}
++        exit 0 ;;
++    i?86:Darwin:*:*)
++        echo ${UNAME_MACHINE}-apple-darwin${UNAME_RELEASE}
 +        exit 0 ;;
      powerpc:machten:*:*)
  	echo powerpc-apple-machten${UNAME_RELEASE}
@@ -24,3 +27,14 @@ http://gnupoc.sourceforge.net/macosx.html
  	-mac*)
  		os=`echo $os | sed -e 's|mac|macos|'`
  		;;
+--- a/gcc/configure.orig	2009-10-06 22:38:40.000000000 +1100
++++ b/gcc/configure	2009-10-06 22:48:10.000000000 +1100
+@@ -7307,6 +7307,8 @@
+ # Next line turned off because both 386BSD and BSD/386 use GNU ld.
+ #		use_collect2=yes
+ 		;;
++	i[34567]86-*-darwin*)
++		;;
+ 	i[34567]86-*-freebsdelf*)
+ 		tm_file="i386/i386.h i386/att.h svr4.h i386/freebsd-elf.h i386/perform.h"
+ 		extra_parts="crtbegin.o crtbeginS.o crtend.o crtendS.o"

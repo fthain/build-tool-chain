@@ -1,5 +1,3 @@
-. ${PROFILES}/411
+. ${PROFILES}/424
 TARGET=powerpc-linux-gnu
 TARGET_CPU=powerpc
-
-KERNEL=linux-2.6.27

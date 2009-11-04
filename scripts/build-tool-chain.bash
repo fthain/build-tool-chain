@@ -28,6 +28,12 @@ HOST_TOOLS_PREFIX=${DIST_ROOT}/host_tools
 #BTC_PREFIX=/opt/btc-0.11
 BTC_PREFIX=${DIST_ROOT}
 
+# options for make
+MAKE_OPTS="-j6"
+
+# optional local cache for source tars
+BTC_MIRRORS=http://192.168.64.33/~fthain/btc-sources
+
 ##############################################
 #
 # Below this line, angels fear to tread
@@ -153,9 +159,9 @@ if [ $(${PATH_TO_AM}/config.sub $TARGET) = ${BUILD} ] ; then
     BUILD=${BUILD}x
 fi
 
-if [ ${BUILD} != ${BUILD/%-apple-darwin*} ] ; then
-    # Build binaries backward compatible to panther
-    export MACOSX_DEPLOYMENT_TARGET=10.3
+if [ ${BUILD} != ${BUILD%-apple-darwin*} ] ; then
+    # Build binaries backward compatible to tiger
+    export MACOSX_DEPLOYMENT_TARGET=10.4
     # Turn off Apple's pre-compiled headers
     HOST_CFLAGS='-no-cpp-precomp'
 else
@@ -187,28 +193,37 @@ for f in ${SCRIPTS}/*.lib; do . $f; done
 #
 # install host tools
 
-if [ ${BUILD} != ${BUILD/%-apple-darwin*} ] ; then
+if [ ${BUILD} != ${BUILD%-apple-darwin*} ] ; then
     log install_sed       sed-4.1.5
     log install_make      make-3.81
-    log install_host_tool gettext-0.16.1
-    log install_host_tool gawk-3.1.5
-    log install_host_tool bison-1.28
-    log install_coreutils coreutils-6.9
+    log install_host_tool gettext-0.16.1 ftp://ftp.gnu.org/gnu/gettext
+    log install_coreutils coreutils-7.6
     log install_loadkeys  kbd-1.12
-    log install_find_pl   find.pl-0.12
-else
-    log install_host_tool gawk-3.1.5
-    log install_host_tool bison-1.28
-    log install_flex      flex-2.5.4a
+    log install_find_pl
 fi
+log install_host_tool gawk-3.1.5 ftp://ftp.gnu.org/gnu/gawk
+log install_host_tool bison-1.28 ftp://ftp.gnu.org/gnu/bison
+log install_flex      flex-2.5.4a 
 case ${GCC_DIST#*-} in
-( 4.3[.-]* )
-    log install_gmp gmp-4.2.1
-    log install_mpfr mpfr-2.3.0
+( 2.* | 3.* | 4.[012].* )
+    ;;
+( * )
+    log install_gmp gmp-4.3.1
+    log install_mpfr mpfr-2.4.1
     GCC_CONFIG_OPTS=${GCC_CONFIG_OPTS}" --with-gmp=${HOST_TOOLS_PREFIX} --with-mpfr=${HOST_TOOLS_PREFIX}"
     ;;
 esac
-log install_depmod depmod.pl-19079
+case ${GCC_DIST#*-} in
+( 2.* | 3.* | 4.[0123].* )
+    ;;
+( * )
+    log install_host_tool m4-1.4.13 ftp://ftp.gnu.org/gnu/m4
+    log install_ppl ppl-0.10.2
+    log install_cloog_ppl cloog-ppl-0.15.7
+    GCC_CONFIG_OPTS=${GCC_CONFIG_OPTS}" --with-ppl=${HOST_TOOLS_PREFIX} --with-cloog=${HOST_TOOLS_PREFIX}"
+    ;;
+esac
+log install_depmod depmod.pl-1_15_stable
 
 rm -rf ${HOST_TOOLS_PREFIX}/share/{emacs,doc,aclocal}
 
@@ -217,9 +232,9 @@ rm -rf ${HOST_TOOLS_PREFIX}/share/{emacs,doc,aclocal}
 # stop here?
 
 if [ "${3:-}" == "-S" ]; then
-    export BTC_PREFIX HOST_TOOLS_PREFIX BTC_BUILD BTC_SOURCES BTC_PATCHES BTC_CONFIGS
+    export BTC_PREFIX HOST_TOOLS_PREFIX BTC_BUILD BTC_SOURCES BTC_PATCHES BTC_CONFIGS BTC_MIRRORS
     export KERNEL BUILD TARGET TARGET_CPU
-    export -f decompress untar prep_kernel build_kernel package_kernel
+    export -f fetch untar decompress prep_kernel build_kernel package_kernel
     cd $BTC_BUILD
     exec bash
 fi
@@ -294,7 +309,7 @@ log install_gdb gdb-${TARGET}
 
 ##############################################
 #
-# kernel: test out the compiler
+# kernel: try out the compiler
 
 log build_kernel ${KERNEL}
 

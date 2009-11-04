@@ -1,0 +1,16 @@
+http://trac.nslu2-linux.org/unslung/browser/releases/unslung-6.10-beta/openembedded/packages/gcc/gcc-4.2.2/zecke-xgcc-cpp.patch?rev=33
+
+http://zecke.blogspot.com/2006/08/gnu-toolchain-hacking.html
+
+Index: gcc-4.1.1/Makefile.in
+===================================================================
+--- gcc-4.1.1.orig/Makefile.in	2006-08-06 13:32:44.000000000 +0200
++++ gcc-4.1.1/Makefile.in	2006-08-06 13:32:46.000000000 +0200
+@@ -194,6 +194,7 @@
+ 	AS="$(COMPILER_AS_FOR_TARGET)"; export AS; \
+ 	CC="$(CC_FOR_TARGET)"; export CC; \
+ 	CFLAGS="$(CFLAGS_FOR_TARGET)"; export CFLAGS; \
++	CPP="$(CC_FOR_TARGET) -E"; export CCP; \
+ 	CONFIG_SHELL="$(SHELL)"; export CONFIG_SHELL; \
+ 	CPPFLAGS="$(CPPFLAGS_FOR_TARGET)"; export CPPFLAGS; \
+ 	CXXFLAGS="$(CXXFLAGS_FOR_TARGET)"; export CXXFLAGS; \

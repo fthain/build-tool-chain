@@ -3,20 +3,27 @@
 set -e -u
 
 BTC_PREFIX=/Volumes/btc-0.11
-PROFILES=${BTC_PREFIX}/profiles
+cd ${BTC_PREFIX}
 
 t=`mktemp -d /tmp/tmp.XXXXXX`
 mkdir ${t}/{ok,fail}
-for p in $( cd ${PROFILES} && ls *-* ) ; do 
-    cd ${BTC_PREFIX}
+
+if [ -n "$*" ] ; then
+  profiles=("$@")
+else
+  profiles=(profiles/*-*)
+fi
+
+for p in "${profiles[@]}" ; do 
+    profile=$(basename "$p")
     scripts/build-tool-chain.bash -d
-    echo "===" ${p}
-    if ( scripts/build-tool-chain.bash -p ${p} ) ; then
+    echo "===" ${profile}
+    if ( scripts/build-tool-chain.bash -p ${profile} ) ; then
         echo "..." OK
-        mv logs ${t}/ok/${p}
+        mv logs ${t}/ok/${profile}
     else
         echo "!!!" FAIL
-        mv logs ${t}/fail/${p}
+        mv logs ${t}/fail/${profile}
     fi
     echo
 done

@@ -1,7 +1,7 @@
-diff -ruN kbd-1.12/src/Makefile.in kbd-1.12-hacked/src/Makefile.in
---- kbd-1.12/src/Makefile.in	2004-01-04 04:53:54.000000000 +1100
-+++ kbd-1.12-hacked/src/Makefile.in	2007-08-01 23:58:19.000000000 +1000
-@@ -162,7 +162,7 @@
+diff -pruN kbd-1.12.orig/src/Makefile.in kbd-1.12/src/Makefile.in
+--- kbd-1.12.orig/src/Makefile.in	2004-01-04 04:53:54.000000000 +1100
++++ kbd-1.12/src/Makefile.in	2009-10-06 21:30:15.000000000 +1100
+@@ -162,7 +162,7 @@ psfxtable: psffontop.o xmalloc.o utf8.o
  loadkeys mapscrn setfont resizecons loadunimap: findfile.o xmalloc.o
  
  chvt clrunimap deallocvt dumpkeys fgconsole getkeycodes getunimap: getfd.o
@@ -10,9 +10,9 @@ diff -ruN kbd-1.12/src/Makefile.in kbd-1.12-hacked/src/Makefile.in
  setpalette showconsolefont setlogcons setvesablank showkey: getfd.o
  
  setfont: mapscrn.o loadunimap.o kdmapop.o kdfontop.o psffontop.o utf8.o
-diff -ruN kbd-1.12/src/analyze.l kbd-1.12-hacked/src/analyze.l
---- kbd-1.12/src/analyze.l	2004-01-17 08:51:44.000000000 +1100
-+++ kbd-1.12-hacked/src/analyze.l	2007-08-01 23:41:00.000000000 +1000
+diff -pruN kbd-1.12.orig/src/analyze.l kbd-1.12/src/analyze.l
+--- kbd-1.12.orig/src/analyze.l	2004-01-17 08:51:44.000000000 +1100
++++ kbd-1.12/src/analyze.l	2009-10-06 21:30:15.000000000 +1100
 @@ -1,6 +1,6 @@
  %{
  #include <stdlib.h>
@@ -21,7 +21,7 @@ diff -ruN kbd-1.12/src/analyze.l kbd-1.12-hacked/src/analyze.l
  #include "ksyms.h"
  #include "xmalloc.h"
  
-@@ -117,7 +117,6 @@
+@@ -117,7 +117,6 @@ To                      to|To|TO
  .			{return(ERROR); /* report any unknown characters */}
  %%
  #include "ksyms.h"
@@ -29,9 +29,9 @@ diff -ruN kbd-1.12/src/analyze.l kbd-1.12-hacked/src/analyze.l
  
  void
  stringovfl(void) {
-diff -ruN kbd-1.12/src/kd.h kbd-1.12-hacked/src/kd.h
---- kbd-1.12/src/kd.h	1970-01-01 10:00:00.000000000 +1000
-+++ kbd-1.12-hacked/src/kd.h	2007-08-01 23:47:42.000000000 +1000
+diff -pruN kbd-1.12.orig/src/kd.h kbd-1.12/src/kd.h
+--- kbd-1.12.orig/src/kd.h	1970-01-01 10:00:00.000000000 +1000
++++ kbd-1.12/src/kd.h	2009-10-06 21:30:15.000000000 +1100
 @@ -0,0 +1,59 @@
 +#ifndef __LINUX_KD_H__
 +#define __LINUX_KD_H__
@@ -93,18 +93,18 @@ diff -ruN kbd-1.12/src/kd.h kbd-1.12-hacked/src/kd.h
 +};
 +#endif
 \ No newline at end of file
-diff -ruN kbd-1.12/src/ksyms.c kbd-1.12-hacked/src/ksyms.c
---- kbd-1.12/src/ksyms.c	2007-08-01 23:58:54.000000000 +1000
-+++ kbd-1.12-hacked/src/ksyms.c	2007-08-01 23:38:08.000000000 +1000
+diff -pruN kbd-1.12.orig/src/ksyms.c kbd-1.12/src/ksyms.c
+--- kbd-1.12.orig/src/ksyms.c	2009-10-06 21:29:48.000000000 +1100
++++ kbd-1.12/src/ksyms.c	2009-10-06 21:30:15.000000000 +1100
 @@ -1,4 +1,4 @@
 -#include <linux/keyboard.h>
 +#include "kd.h"
  #include <stdio.h>
  #include <string.h>
  #include "ksyms.h"
-diff -ruN kbd-1.12/src/loadkeys.y kbd-1.12-hacked/src/loadkeys.y
---- kbd-1.12/src/loadkeys.y	2007-08-01 23:58:54.000000000 +1000
-+++ kbd-1.12-hacked/src/loadkeys.y	2007-08-01 23:53:52.000000000 +1000
+diff -pruN kbd-1.12.orig/src/loadkeys.y kbd-1.12/src/loadkeys.y
+--- kbd-1.12.orig/src/loadkeys.y	2009-10-06 21:29:48.000000000 +1100
++++ kbd-1.12/src/loadkeys.y	2009-10-06 21:30:46.000000000 +1100
 @@ -18,10 +18,8 @@
  #include <fcntl.h>
  #include <ctype.h>
@@ -117,7 +117,25 @@ diff -ruN kbd-1.12/src/loadkeys.y kbd-1.12-hacked/src/loadkeys.y
  #include "findfile.h"
  #include "modifiers.h"
  #include "nls.h"
-@@ -330,8 +328,6 @@
+@@ -41,7 +39,7 @@ int max_keymap = 0;		/* from here on, de
+ int alt_is_meta = 0;
+ 
+ /* the kernel structures we want to set or print */
+-u_short *key_map[MAX_NR_KEYMAPS];
++unsigned short *key_map[MAX_NR_KEYMAPS];
+ char *func_table[MAX_NR_FUNC];
+ struct kbdiacr accent_table[MAX_DIACR];
+ unsigned int accent_table_size = 0;
+@@ -61,7 +59,7 @@ static void addfunc(struct kbsentry kbs_
+ static void killkey(int index, int table);
+ static void compose(int diacr, int base, int res);
+ static void do_constant(void);
+-static void do_constant_key (int, u_short);
++static void do_constant_key (int, unsigned short);
+ static void loadkeys(void);
+ static void mktable(void);
+ static void strings_as_usual(void);
+@@ -330,8 +328,6 @@ main(unsigned int argc, char *argv[]) {
  	do_constant();
  	if(optm)
  	        mktable();
@@ -126,7 +144,43 @@ diff -ruN kbd-1.12/src/loadkeys.y kbd-1.12-hacked/src/loadkeys.y
  	exit(0);
  }
  
-@@ -980,27 +976,6 @@
+@@ -667,7 +663,7 @@ addkey(int index, int table, int keycode
+ 	if (!defining[table])
+ 		addmap(table, 0);
+ 	if (!key_map[table]) {
+-	        key_map[table] = (u_short *)xmalloc(NR_KEYS * sizeof(u_short));
++	        key_map[table] = (unsigned short *)xmalloc(NR_KEYS * sizeof(unsigned short));
+ 		for (i = 0; i < NR_KEYS; i++)
+ 		  (key_map[table])[i] = K_HOLE;
+ 	}
+@@ -926,7 +922,7 @@ defdiacs(int fd){
+ }
+ 
+ void
+-do_constant_key (int i, u_short key) {
++do_constant_key (int i, unsigned short key) {
+ 	int typ, val, j;
+ 
+ 	typ = KTYP(key);
+@@ -934,7 +930,7 @@ do_constant_key (int i, u_short key) {
+ 	if ((typ == KT_LATIN || typ == KT_LETTER) &&
+ 	    ((val >= 'a' && val <= 'z') ||
+ 	     (val >= 'A' && val <= 'Z'))) {
+-		u_short defs[16];
++		unsigned short defs[16];
+ 		defs[0] = K(KT_LETTER, val);
+ 		defs[1] = K(KT_LETTER, val ^ 32);
+ 		defs[2] = defs[0];
+@@ -971,7 +967,7 @@ do_constant (void) {
+ 
+ 	for (i=0; i<NR_KEYS; i++) {
+ 		if (key_is_constant[i]) {
+-			u_short key;
++			unsigned short key;
+ 			if (!key_map[r0])
+ 				lkfatal(_("impossible error in do_constant"));
+ 			key = (key_map[r0])[i];
+@@ -980,27 +976,6 @@ do_constant (void) {
  	}
  }
  
@@ -154,3 +208,21 @@ diff -ruN kbd-1.12/src/loadkeys.y kbd-1.12-hacked/src/loadkeys.y
  
  static void strings_as_usual(void) {
  	/*
+@@ -1119,7 +1094,7 @@ mktable () {
+ 	int i, imax, j;
+ 
+ 	struct kbsentry kbs;
+-	u_char *p;
++	unsigned char *p;
+ 	int maxfunc;
+ 	unsigned int keymap_count = 0;
+ 
+@@ -1137,7 +1112,7 @@ mktable () {
+ 	      keymap_count++;
+ 	      if (i)
+ 		   printf("static ");
+-	      printf("u_short %s_map[NR_KEYS] = {", mk_mapname(i));
++	      printf("unsigned short %s_map[NR_KEYS] = {", mk_mapname(i));
+ 	      for (j = 0; j < NR_KEYS; j++) {
+ 		  if (!(j % 8))
+ 		    printf("\n");
