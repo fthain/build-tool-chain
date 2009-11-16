@@ -1,0 +1,173 @@
+From libc-hacker-return-9506-listarch-libc-hacker=sources dot redhat dot com at sourceware dot org Wed May 13 23:19:46 2009
+Return-Path: <libc-hacker-return-9506-listarch-libc-hacker=sources dot redhat dot com at sourceware dot org>
+Delivered-To: listarch-libc-hacker at sources dot redhat dot com
+Received: (qmail 28486 invoked by alias); 13 May 2009 23:19:45 -0000
+Received: (qmail 28468 invoked by uid 22791); 13 May 2009 23:19:45 -0000
+X-SWARE-Spam-Status: No, hits=-1.7 required=5.0
+	tests=AWL,BAYES_00,J_CHICKENPOX_42,J_CHICKENPOX_83
+X-Spam-Check-By: sourceware.org
+Received: from sunsite.ms.mff.cuni.cz (HELO sunsite.mff.cuni.cz) (195.113.15.26)
+    by sourceware dot org (qpsmtpd/0 dot 43rc1) with ESMTP; Wed, 13 May 2009 23:19:40 +0000
+Received: from sunsite.mff.cuni.cz (localhost.localdomain [127.0.0.1])
+	by sunsite dot mff dot cuni dot cz (8 dot 13 dot 8/8 dot 13 dot 8) with ESMTP id n4DNVaqF028832;
+	Thu, 14 May 2009 01:31:36 +0200
+Received: (from jakub@localhost)
+	by sunsite dot mff dot cuni dot cz (8 dot 13 dot 8/8 dot 13 dot 8/Submit) id n4DNVaM9028831;
+	Thu, 14 May 2009 01:31:36 +0200
+Date: Thu, 14 May 2009 01:31:35 +0200
+From: Jakub Jelinek <jakub at redhat dot com>
+To: Ulrich Drepper <drepper at redhat dot com>
+Cc: Glibc hackers <libc-hacker at sources dot redhat dot com>
+Subject: [PATCH] Fix fallocate64 on 32-bit arches
+Message-ID: <20090513233135.GL16681@sunsite.ms.mff.cuni.cz>
+Reply-To: Jakub Jelinek <jakub at redhat dot com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+User-Agent: Mutt/1.4.2.2i
+Mailing-List: contact libc-hacker-help at sourceware dot org; run by ezmlm
+Precedence: bulk
+List-Id: <libc-hacker.sourceware.org>
+List-Subscribe: <mailto:libc-hacker-subscribe at sourceware dot org>
+List-Archive: <http://sourceware.org/ml/libc-hacker/>
+List-Post: <mailto:libc-hacker at sourceware dot org>
+List-Help: <mailto:libc-hacker-help at sourceware dot org>, <http://sourceware dot org/ml/#faqs>
+Sender: libc-hacker-owner at sourceware dot org
+Delivered-To: mailing list libc-hacker at sourceware dot org
+
+Hi!
+
+Due to a pasto only 64-bit glibc exports fallocate64@@GLIBC_2.10,
+32-bit glibc does not (therefore programs using fallocate compiled with
+-D_FILE_OFFSET_BITS=64 fail to link).  The following patch attempts
+to fix it by fixing the 2 pastos and exporting the function @@GLIBC_2.11
+for 32-bit libc.so (and keeping it at @@GLIBC_2.10 for 64-bit).
+
+2009-05-14  Jakub Jelinek  <jakub@redhat.com>
+
+	* Versions.def (libc): Add GLIBC_2.11.
+	* sysdeps/unix/sysv/linux/i386/fallocate64.c (__fallocate64_l64):
+	Rename ...
+	(fallocate64): ... to this.
+	* sysdeps/unix/sysv/linux/fallocate64.c (__fallocate64_l64):
+	Rename ...
+	(fallocate64): ... to this.
+	* sysdeps/unix/sysv/linux/Versions (libc): Remove fallocate64.
+	* sysdeps/unix/sysv/linux/wordsize-64/Versions (libc): Add
+	fallocate64@@GLIBC_2.10.
+	* sysdeps/unix/sysv/linux/i386/Versions (libc): Add
+	fallocate64@@GLIBC_2.11.
+	* sysdeps/unix/sysv/linux/s390/s390-32/Versions (libc): Likewise.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc32/Versions (libc): Likewise.
+	* sysdeps/unix/sysv/linux/sparc/sparc32/Versions (libc): Likewise.
+	* sysdeps/unix/sysv/linux/sh/Versions (libc): Likewise.
+
+--- libc/Versions.def.jj	2008-12-09 10:58:34.000000000 +0100
++++ libc/Versions.def	2009-05-14 00:50:12.000000000 +0200
+@@ -27,6 +27,7 @@ libc {
+   GLIBC_2.8
+   GLIBC_2.9
+   GLIBC_2.10
++  GLIBC_2.11
+ %ifdef USE_IN_LIBIO
+   HURD_CTHREADS_0.3
+ %endif
+--- libc/sysdeps/unix/sysv/linux/i386/fallocate64.c.jj	2009-03-02 17:10:29.000000000 +0100
++++ libc/sysdeps/unix/sysv/linux/i386/fallocate64.c	2009-05-14 00:46:30.000000000 +0200
+@@ -26,7 +26,7 @@ extern int __call_fallocate (int fd, int
+ 
+ /* Reserve storage for the data of the file associated with FD.  */
+ int
+-__fallocate64_l64 (int fd, int mode, __off64_t offset, __off64_t len)
++fallocate64 (int fd, int mode, __off64_t offset, __off64_t len)
+ {
+   return __call_fallocate (fd, mode, offset, len);
+ }
+--- libc/sysdeps/unix/sysv/linux/i386/Versions.jj	2004-02-09 22:46:35.000000000 +0100
++++ libc/sysdeps/unix/sysv/linux/i386/Versions	2009-05-14 01:06:58.000000000 +0200
+@@ -41,6 +41,10 @@ libc {
+     # v*
+     vm86;
+   }
++  GLIBC_2.11 {
++    # f*
++    fallocate64;
++  }
+   GLIBC_PRIVATE {
+     __modify_ldt;
+   }
+--- libc/sysdeps/unix/sysv/linux/s390/s390-32/Versions.jj	2008-08-13 14:03:30.000000000 +0200
++++ libc/sysdeps/unix/sysv/linux/s390/s390-32/Versions	2009-05-14 01:07:52.000000000 +0200
+@@ -43,6 +43,9 @@ libc {
+     getutmp;
+     getutmpx;
+   }
++  GLIBC_2.11 {
++    fallocate64;
++  }
+ }
+ 
+ libutil {
+--- libc/sysdeps/unix/sysv/linux/powerpc/powerpc32/Versions.jj	2004-01-16 05:45:46.000000000 +0100
++++ libc/sysdeps/unix/sysv/linux/powerpc/powerpc32/Versions	2009-05-14 01:07:25.000000000 +0200
+@@ -27,4 +27,7 @@ libc {
+   GLIBC_2.3.4 {
+     setcontext; getcontext; swapcontext; makecontext;
+   }
++  GLIBC_2.11 {
++    fallocate64;
++  }
+ }
+--- libc/sysdeps/unix/sysv/linux/fallocate64.c.jj	2009-04-22 15:07:19.000000000 +0200
++++ libc/sysdeps/unix/sysv/linux/fallocate64.c	2009-05-14 00:45:40.000000000 +0200
+@@ -23,7 +23,7 @@
+ 
+ /* Reserve storage for the data of the file associated with FD.  */
+ int
+-__fallocate64_l64 (int fd, int mode, __off64_t offset, __off64_t len)
++fallocate64 (int fd, int mode, __off64_t offset, __off64_t len)
+ {
+ #ifdef __NR_fallocate
+   return INLINE_SYSCALL (fallocate, 6, fd, mode,
+--- libc/sysdeps/unix/sysv/linux/Versions.jj	2009-05-14 01:05:17.000000000 +0200
++++ libc/sysdeps/unix/sysv/linux/Versions	2009-05-14 01:05:31.000000000 +0200
+@@ -139,7 +139,7 @@ libc {
+     epoll_create1; inotify_init1;
+   }
+   GLIBC_2.10 {
+-    fallocate; fallocate64;
++    fallocate;
+   }
+   GLIBC_PRIVATE {
+     # functions used in other libraries
+--- libc/sysdeps/unix/sysv/linux/wordsize-64/Versions.jj	2009-05-14 01:05:50.000000000 +0200
++++ libc/sysdeps/unix/sysv/linux/wordsize-64/Versions	2009-05-14 01:06:09.000000000 +0200
+@@ -0,0 +1,5 @@
++libc {
++  GLIBC_2.10 {
++    fallocate64;
++  }
++}
+--- libc/sysdeps/unix/sysv/linux/sparc/sparc32/Versions.jj	2006-01-14 13:29:20.000000000 +0100
++++ libc/sysdeps/unix/sysv/linux/sparc/sparc32/Versions	2009-05-14 01:08:48.000000000 +0200
+@@ -20,4 +20,7 @@ libc {
+   GLIBC_2.3.3 {
+     posix_fadvise64; posix_fallocate64;
+   }
++  GLIBC_2.11 {
++    fallocate64;
++  }
+ }
+--- libc/sysdeps/unix/sysv/linux/sh/Versions.jj	2003-09-01 06:05:09.000000000 +0200
++++ libc/sysdeps/unix/sysv/linux/sh/Versions	2009-05-14 01:08:35.000000000 +0200
+@@ -24,4 +24,7 @@ libc {
+   GLIBC_2.3.3 {
+     posix_fadvise64; posix_fallocate64;
+   }
++  GLIBC_2.11 {
++    fallocate64;
++  }
+ }
+
+	Jakub
+

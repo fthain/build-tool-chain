@@ -1,0 +1,102 @@
+From libc-ports-return-1331-listarch-libc-ports=sources dot redhat dot com at sourceware dot org Tue Aug 25 13:39:54 2009
+Return-Path: <libc-ports-return-1331-listarch-libc-ports=sources dot redhat dot com at sourceware dot org>
+Delivered-To: listarch-libc-ports at sources dot redhat dot com
+Received: (qmail 9585 invoked by alias); 25 Aug 2009 13:39:53 -0000
+Received: (qmail 9501 invoked by uid 22791); 25 Aug 2009 13:39:51 -0000
+X-SWARE-Spam-Status: No, hits=-1.9 required=5.0 	tests=AWL,BAYES_00,SPF_PASS
+X-Spam-Check-By: sourceware.org
+Received: from mail.codesourcery.com (HELO mail.codesourcery.com) (65.74.133.4)     by sourceware.org (qpsmtpd/0.43rc1) with ESMTP; Tue, 25 Aug 2009 13:39:46 +0000
+Received: (qmail 19956 invoked from network); 25 Aug 2009 13:39:44 -0000
+Received: from unknown (HELO mbp.local) (maxim@127.0.0.2)   by mail.codesourcery.com with ESMTPA; 25 Aug 2009 13:39:44 -0000
+Message-ID: <4A93E997.1040109@codesourcery.com>
+Date: Tue, 25 Aug 2009 17:39:35 +0400
+From: Maxim Kuvyrkov <maxim at codesourcery dot com>
+User-Agent: Thunderbird 2.0.0.23 (Macintosh/20090812)
+MIME-Version: 1.0
+To: libc-ports at sourceware dot org
+CC: Andreas Schwab <schwab at linux-m68k dot org>
+Subject: [M68K/ColdFire patch 6/n] Add TLS relocations to elf/elf.h
+References: <4A93D885.3060004@codesourcery.com>
+In-Reply-To: <4A93D885 dot 3060004 at codesourcery dot com>
+Content-Type: multipart/mixed;  boundary="------------020802050209080307000101"
+X-IsSubscribed: yes
+Mailing-List: contact libc-ports-help at sourceware dot org; run by ezmlm
+Precedence: bulk
+List-Id: <libc-ports.sourceware.org>
+List-Subscribe: <mailto:libc-ports-subscribe at sourceware dot org>
+List-Post: <mailto:libc-ports at sourceware dot org>
+List-Help: <mailto:libc-ports-help at sourceware dot org>, <http://sourceware dot org/lists dot html#faqs>
+Sender: libc-ports-owner at sourceware dot org
+Delivered-To: mailing list libc-ports at sourceware dot org
+
+This is a multi-part message in MIME format.
+--------------020802050209080307000101
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+
+This patch humbly adds definitions of the new TLS relocations to GLIBC.
+
+This is one of the two patches that touch files outside of ports/.
+
+--
+Maxim K.
+CodeSourcery
+
+--------------020802050209080307000101
+Content-Type: text/plain; x-mac-type="0"; x-mac-creator="0";
+ name="0001-Add-m68k-TLS-relocations.patch"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline;
+ filename="0001-Add-m68k-TLS-relocations.patch"
+
+>From f6b0706def343f5716b01d59626a0f823bdec2ea Mon Sep 17 00:00:00 2001
+From: Maxim Kuvyrkov <maxim@codesourcery.com>
+Date: Tue, 25 Aug 2009 17:34:30 +0400
+Subject: [PATCH] Add m68k TLS relocations.
+
+	* elf/elf.h: Define m68k TLS relocations.
+---
+ elf/elf.h |   23 ++++++++++++++++++++++-
+ 1 files changed, 22 insertions(+), 1 deletions(-)
+
+diff --git a/elf/elf.h b/elf/elf.h
+index ce6de07..61673de 100644
+--- a/elf/elf.h
++++ b/elf/elf.h
+@@ -1117,8 +1117,29 @@ typedef struct
+ #define R_68K_GLOB_DAT	20		/* Create GOT entry */
+ #define R_68K_JMP_SLOT	21		/* Create PLT entry */
+ #define R_68K_RELATIVE	22		/* Adjust by program base */
++#define R_68K_TLS_GD32      25          /* 32 bit GOT offset for GD */
++#define R_68K_TLS_GD16      26          /* 16 bit GOT offset for GD */
++#define R_68K_TLS_GD8       27          /* 8 bit GOT offset for GD */
++#define R_68K_TLS_LDM32     28          /* 32 bit GOT offset for LDM */
++#define R_68K_TLS_LDM16     29          /* 16 bit GOT offset for LDM */
++#define R_68K_TLS_LDM8      30          /* 8 bit GOT offset for LDM */
++#define R_68K_TLS_LDO32     31          /* 32 bit module-relative offset */
++#define R_68K_TLS_LDO16     32          /* 16 bit module-relative offset */
++#define R_68K_TLS_LDO8      33          /* 8 bit module-relative offset */
++#define R_68K_TLS_IE32      34          /* 32 bit GOT offset for IE */
++#define R_68K_TLS_IE16      35          /* 16 bit GOT offset for IE */
++#define R_68K_TLS_IE8       36          /* 8 bit GOT offset for IE */
++#define R_68K_TLS_LE32      37          /* 32 bit offset relative to
++					   static TLS block */
++#define R_68K_TLS_LE16      38          /* 16 bit offset relative to
++					   static TLS block */
++#define R_68K_TLS_LE8       39          /* 8 bit offset relative to
++					   static TLS block */
++#define R_68K_TLS_DTPMOD32  40          /* 32 bit module number */
++#define R_68K_TLS_DTPREL32  41          /* 32 bit module-relative offset */
++#define R_68K_TLS_TPREL32   42          /* 32 bit TP-relative offset */
+ /* Keep this the last entry.  */
+-#define R_68K_NUM	23
++#define R_68K_NUM	43
+ 
+ /* Intel 80386 specific definitions.  */
+ 
+-- 
+1.6.4
+
+
+--------------020802050209080307000101--
+

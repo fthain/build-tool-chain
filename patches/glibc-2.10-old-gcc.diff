@@ -1,0 +1,14 @@
+
+The system gcc may be too old to actually build glibc, but we only need to install headers and we don't have a recent cross compiler yet. So this makes the fatal error non-fatal.
+
+--- glibc-2.10.1/configure.orig	2009-11-09 18:06:06.000000000 +1100
++++ glibc-2.10.1/configure	2009-11-09 18:08:46.000000000 +1100
+@@ -4760,7 +4760,7 @@
+ echo "$as_me: error:
+ *** These critical programs are missing or too old:$critic_missing
+ *** Check the INSTALL file for required versions." >&2;}
+-   { (exit 1); exit 1; }; }
++}
+ 
+ test -n "$aux_missing" && { echo "$as_me:$LINENO: WARNING:
+ *** These auxiliary programs are missing or incompatible versions:$aux_missing

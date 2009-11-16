@@ -1,0 +1,162 @@
+From libc-ports-return-1385-listarch-libc-ports=sources dot redhat dot com at sourceware dot org Fri Oct 23 09:39:05 2009
+Return-Path: <libc-ports-return-1385-listarch-libc-ports=sources dot redhat dot com at sourceware dot org>
+Delivered-To: listarch-libc-ports at sources dot redhat dot com
+Received: (qmail 19102 invoked by alias); 23 Oct 2009 09:39:04 -0000
+Received: (qmail 19092 invoked by uid 22791); 23 Oct 2009 09:39:03 -0000
+X-SWARE-Spam-Status: No, hits=-1.5 required=5.0 	tests=AWL,BAYES_00,SPF_PASS
+X-Spam-Check-By: sourceware.org
+Received: from mail.codesourcery.com (HELO mail.codesourcery.com) (38.113.113.100)     by sourceware.org (qpsmtpd/0.43rc1) with ESMTP; Fri, 23 Oct 2009 09:38:59 +0000
+Received: (qmail 3783 invoked from network); 23 Oct 2009 09:38:56 -0000
+Received: from unknown (HELO ?172.16.1.24?) (maxim@127.0.0.2)   by mail.codesourcery.com with ESMTPA; 23 Oct 2009 09:38:56 -0000
+Message-ID: <4AE179A8.2070208@codesourcery.com>
+Date: Fri, 23 Oct 2009 13:38:48 +0400
+From: Maxim Kuvyrkov <maxim at codesourcery dot com>
+User-Agent: Thunderbird 2.0.0.23 (Macintosh/20090812)
+MIME-Version: 1.0
+To: libc-ports at sourceware dot org
+CC: Andreas Schwab <schwab at linux-m68k dot org>
+Subject: Re: [M68K/ColdFire patch 5/n] Main NPTL patch
+References: <4A93D885.3060004@codesourcery.com> <4A93E120.60204@codesourcery.com> <4A9ABEB3.7040601@codesourcery.com> <4AC5D9D5.2060803@codesourcery.com>
+In-Reply-To: <4AC5D9D5 dot 2060803 at codesourcery dot com>
+Content-Type: multipart/mixed;  boundary="------------020501040206000205070706"
+X-IsSubscribed: yes
+Mailing-List: contact libc-ports-help at sourceware dot org; run by ezmlm
+Precedence: bulk
+List-Id: <libc-ports.sourceware.org>
+List-Subscribe: <mailto:libc-ports-subscribe at sourceware dot org>
+List-Post: <mailto:libc-ports at sourceware dot org>
+List-Help: <mailto:libc-ports-help at sourceware dot org>, <http://sourceware dot org/lists dot html#faqs>
+Sender: libc-ports-owner at sourceware dot org
+Delivered-To: mailing list libc-ports at sourceware dot org
+
+This is a multi-part message in MIME format.
+--------------020501040206000205070706
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+
+Maxim Kuvyrkov wrote:
+
+>> After I did a clean rebuild of the work, I've caught several small 
+>> issues that were introduced by the last-minute cleanups.  So here is 
+>> an updated patch; I'm also attaching the difference between the 
+>> patches for easier review.
+> 
+> While investigating GLIBC testsuite failures I've fixed a bug in the 
+> initialization of the vDSO pointers.  Attached are the patch that fixes 
+> the bug and the whole updated NPTL patch.
+> 
+> With this fix, a patch for mmap2 and fixes to sigcontext and siginfo 
+> kernel headers (discussed on linux-m68k@) there are no unexpected 
+> failures in the GLIBC testsuite.
+
+The following patch fixes a bug in runtime linker that may cause a 
+program to fail during relocation with divide-by-zero exception.
+
+This bug is responsible for 2 libstdc++ failures.
+
+The scenario under which the bug manifests itself is when an executable 
+doesn't have a TLS storage, but references a TLS variable, which is 
+defined in a library, using a TPREL32 relocation.  The bug is in runtime 
+linker binding undefined TLS reference to the executable itself instead 
+of the library's TLS storage.  Then the linker tries to allocate static 
+TLS storage for the executable and fails calculating alignment for TLS 
+block due to uninitialized alignment field (set to 0) in executable's phdrs.
+
+The attached patch adds handling of TLS relocations to 
+elf_machine_type_class similarly to other targets.
+
+The second patch is a simple fix to make gdb print nicer backtraces when 
+debugging the runtime linker.
+
+Thanks and regards,
+
+--
+Maxim K.
+CodeSourcery
+
+--------------020501040206000205070706
+Content-Type: text/plain; x-mac-type="0"; x-mac-creator="0";
+ name="0001-Fix-rtld-symbol-binding-bug.patch"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline;
+ filename="0001-Fix-rtld-symbol-binding-bug.patch"
+
+>From 867ab4cbbc7d86faf639293ee52e0179ad0597ac Mon Sep 17 00:00:00 2001
+From: Maxim Kuvyrkov <maxim@codesourcery.com>
+Date: Fri, 23 Oct 2009 13:25:57 +0400
+Subject: [PATCH] Fix rtld symbol binding bug
+
+        * sysdeps/m68k/dl-machine.h (elf_machine_type_class): Handle
+	TLS relocations.
+
+Signed-off-by: Maxim Kuvyrkov <maxim@codesourcery.com>
+---
+ sysdeps/m68k/dl-machine.h |   10 +++++++---
+ 1 files changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/sysdeps/m68k/dl-machine.h b/sysdeps/m68k/dl-machine.h
+index 08a4396..031d16e 100644
+--- a/ports/sysdeps/m68k/dl-machine.h
++++ b/ports/sysdeps/m68k/dl-machine.h
+@@ -159,12 +159,16 @@ _dl_start_user:\n\
+ 	.size _dl_start_user, . - _dl_start_user\n\
+ 	.previous");
+ 
+-/* ELF_RTYPE_CLASS_PLT iff TYPE describes relocation of a PLT entry, so
+-   PLT entries should not be allowed to define the value.
++/* ELF_RTYPE_CLASS_PLT iff TYPE describes relocation of a PLT entry or
++   TLS variable, so undefined references should not be allowed to
++   define the value.
+    ELF_RTYPE_CLASS_NOCOPY iff TYPE should not be allowed to resolve to one
+    of the main executable's symbols, as for a COPY reloc.  */
+ #define elf_machine_type_class(type) \
+-  ((((type) == R_68K_JMP_SLOT) * ELF_RTYPE_CLASS_PLT)	\
++  ((((type) == R_68K_JMP_SLOT	     \
++     || (type) == R_68K_TLS_DTPMOD32 \
++     || (type) == R_68K_TLS_DTPREL32 \
++     || (type) == R_68K_TLS_TPREL32) * ELF_RTYPE_CLASS_PLT)	\
+    | (((type) == R_68K_COPY) * ELF_RTYPE_CLASS_COPY))
+ 
+ /* A reloc type used for ld.so cmdline arg lookups to reject PLT entries.  */
+-- 
+1.6.4
+
+
+--------------020501040206000205070706
+Content-Type: text/plain; x-mac-type="0"; x-mac-creator="0";
+ name="0001-Init-rtld-stack-frame.patch"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline;
+ filename="0001-Init-rtld-stack-frame.patch"
+
+>From 6862845d9b6155aaacd69c9573ffc2856e1a0a5a Mon Sep 17 00:00:00 2001
+From: Maxim Kuvyrkov <maxim@codesourcery.com>
+Date: Fri, 23 Oct 2009 13:22:57 +0400
+Subject: [PATCH] Init rtld stack frame
+
+	* sysdeps/m68k/dl-machine.h (RTLD_START): Terminate stack frame to
+	generate better backtraces.
+
+Signed-off-by: Maxim Kuvyrkov <maxim@codesourcery.com>
+---
+ sysdeps/m68k/dl-machine.h |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+diff --git a/sysdeps/m68k/dl-machine.h b/sysdeps/m68k/dl-machine.h
+index 08a4396..749d5eb 100644
+--- a/ports/sysdeps/m68k/dl-machine.h
++++ b/ports/sysdeps/m68k/dl-machine.h
+@@ -121,6 +121,7 @@ elf_machine_runtime_setup (struct link_map *l, int lazy, int profile)
+ 	.globl _start\n\
+ 	.type _start,@function\n\
+ _start:\n\
++	sub.l %fp, %fp\n\
+ 	move.l %sp, -(%sp)\n\
+ 	jbsr _dl_start\n\
+ 	addq.l #4, %sp\n\
+-- 
+1.6.4
+
+
+--------------020501040206000205070706--
+

@@ -1,0 +1,80 @@
+diff -ru glibc-2.10.1.orig/sunrpc/rpc/types.h glibc-2.10.1/sunrpc/rpc/types.h
+--- glibc-2.10.1.orig/sunrpc/rpc/types.h	2009-11-08 01:24:30.000000000 +1100
++++ glibc-2.10.1/sunrpc/rpc/types.h	2009-11-08 00:55:11.000000000 +1100
+@@ -68,6 +68,7 @@
+ #include <sys/types.h>
+ #endif
+ 
++#if 0
+ #ifndef __u_char_defined
+ typedef __u_char u_char;
+ typedef __u_short u_short;
+@@ -83,6 +84,7 @@
+ typedef __caddr_t caddr_t;
+ # define __daddr_t_defined
+ #endif
++#endif
+ 
+ #include <sys/time.h>
+ #include <sys/param.h>
+diff -ru glibc-2.10.1.orig/sunrpc/rpc_main.c glibc-2.10.1/sunrpc/rpc_main.c
+--- glibc-2.10.1.orig/sunrpc/rpc_main.c	2009-11-08 01:24:30.000000000 +1100
++++ glibc-2.10.1/sunrpc/rpc_main.c	2009-11-08 01:21:50.000000000 +1100
+@@ -37,7 +37,8 @@
+ #include <stdio.h>
+ #include <string.h>
+ #include <unistd.h>
+-#include <libintl.h>
++#define gettext(a) (a)
++#define _(a) (a) 
+ #include <ctype.h>
+ #include <sys/types.h>
+ #include <sys/param.h>
+@@ -996,9 +997,13 @@
+ 	abort ();
+       temp = rindex (cmd->infile, '.');
+       cp = stpcpy (mkfilename, "Makefile.");
+-      if (temp != NULL)
+-	*((char *) stpncpy (cp, cmd->infile, temp - cmd->infile)) = '\0';
+-      else
++      if (temp != NULL) {
++	char *dest = cp;
++	int len = temp - cmd->infile;
++	strncpy (dest, cmd->infile, len);
++	dest += len;
++	*dest = '\0';
++      } else
+ 	stpcpy (cp, cmd->infile);
+ 
+     }
+diff -ru glibc-2.10.1.orig/sunrpc/rpc_scan.c glibc-2.10.1/sunrpc/rpc_scan.c
+--- glibc-2.10.1.orig/sunrpc/rpc_scan.c	2009-11-08 01:24:30.000000000 +1100
++++ glibc-2.10.1/sunrpc/rpc_scan.c	2009-11-08 00:57:16.000000000 +1100
+@@ -36,7 +36,8 @@
+ #include <stdio.h>
+ #include <ctype.h>
+ #include <string.h>
+-#include <libintl.h>
++#define gettext(a) (a)
++#define _(a) (a)
+ #include "rpc_scan.h"
+ #include "rpc_parse.h"
+ #include "rpc_util.h"
+--- glibc-2.10.1/timezone/Makefile.orig	2009-11-08 02:19:42.000000000 +1100
++++ glibc-2.10.1/timezone/Makefile	2009-11-08 02:19:57.000000000 +1100
+@@ -192,11 +192,10 @@
+ 	    -DTZDEFRULES='"$(posixrules-file)"' \
+ 	    -DTM_GMTOFF=tm_gmtoff -DTM_ZONE=tm_zone
+ 
+-CFLAGS-zdump.c = -fwrapv -Wno-strict-prototypes -DNOID $(tz-cflags) \
+-		 -DHAVE_GETTEXT
+-CFLAGS-zic.c = -Wno-strict-prototypes -DNOID $(tz-cflags) -DHAVE_GETTEXT
+-CFLAGS-ialloc.c = -Wno-strict-prototypes -DNOID -DHAVE_GETTEXT
+-CFLAGS-scheck.c = -Wno-strict-prototypes -DNOID -DHAVE_GETTEXT
++CFLAGS-zdump.c = -fwrapv -Wno-strict-prototypes -DNOID $(tz-cflags)
++CFLAGS-zic.c = -Wno-strict-prototypes -DNOID $(tz-cflags)
++CFLAGS-ialloc.c = -Wno-strict-prototypes -DNOID
++CFLAGS-scheck.c = -Wno-strict-prototypes -DNOID
+ 
+ # We have to make sure the data for testing the tz functions is available.
+ # Don't add leapseconds here since test-tz made checks that work only without

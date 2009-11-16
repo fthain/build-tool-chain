@@ -26,11 +26,13 @@ function install_gdb () {
 
     mkdir intl
     echo 'am_cv_func_iconv=${am_cv_func_iconv=no}' >intl/config.cache
+
     CFLAGS="$HOST_CFLAGS -O2" AR=ar RANLIB=ranlib \
     ../${GDB_DIST}/configure --prefix=${TC_PREFIX} --target=${TARGET} \
---build=${BUILD} \
---disable-werror \
---cache-file=config.cache
+    --build=${BUILD} \
+    --disable-werror \
+    --cache-file=config.cache
+
     make ${MAKE_OPTS}
     make install
 

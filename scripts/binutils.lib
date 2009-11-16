@@ -74,9 +74,10 @@ function build_binutils () {
     cd $1
 
     CFLAGS="-O2 $HOST_CFLAGS" ../${BINUTILS_DIST}/configure \
---prefix=${TC_PREFIX} --target=${TARGET} \
-${BINUTILS_CONFIG_OPTS} \
---enable-64-bit-bfd --disable-nls --enable-shared --disable-werror
+    --prefix=${TC_PREFIX} --target=${TARGET} \
+    ${BINUTILS_CONFIG_OPTS} \
+    --enable-64-bit-bfd --disable-nls --enable-shared --disable-werror
+
     case ${BINUTILS_DIST} in
     ( binutils-2.?.* | binutils-2.1[012].* )
         ;;

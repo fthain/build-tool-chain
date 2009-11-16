@@ -1,35 +1,36 @@
-Build Tool Chain script
+Build Tool Chain scripts
 http://www.telegraphics.com.au/~fthain/sw/build-tool-chain
 (c) 2004-2009 Finn Thain
 
 
 PURPOSE
 
-These scripts ("BTC") are designed for experimenting with new releases of GNU
-tools, for building cross-toolchains and for cross-compiling the Linux kernel.
+These scripts (collectively called "btc") are designed for experimenting with
+new releases of GNU tools, for building cross-toolchains and for cross-
+compiling the Linux kernel.
+
 They differ from other similar scripts in that they work under both Mac OS X
-and Linux, and target current glibc-based systems (rather than uCLinux, etc).
+and Linux, and target current glibc-based systems (rather than uCLinux etc).
+Development of BTC began before crosstool supported Mac OS X or NPTL.
 
 The tool-chain build includes glibc (with NPTL or linuxthreads) and supports
-cross-compilation of packages with shared libraries. You can also chroot your
-target machine into the tool-chain sysroot for testing.
+cross-compilation of packages using shared libraries. You can also chroot your
+target machine into the tool-chain sysroot for testing, or export the sysroot
+as an NFS root filesystem.
 
-If you want scripts for cross-building an entire glibc-based system, in the
-vein of Linux From Scratch, check out Cross Linux From Scratch (CLFS). Another
-good choice for building the tool-chain is crosstool (and its successors).
-
-Development of BTC began before crosstool supported Mac OS X or NPTL. BTC does
-not care how your disks are partitioned, since it uses a case-sensitive disk
-image on Mac OS X.
+If you need to cross-build an entire glibc-based system, you may want to
+check out Cross Linux From Scratch (CLFS). Another option for building the
+tool-chain is crosstool (and its successors).
 
 
 NOTA BENE
 
 The resulting tools are not expected to be bug free. If you want more
 confidence in the results, you may wish to use mature package sources
-maintained by the various Linux distros and/or use some crosstool patches.
+maintained by the various Linux distros.
+
 This script applies numerous patches to hack around build issues. Use these
-patches at your peril...
+patches at your peril.
 
 As with any cross compiler, test suites can't be run easily and no stage 2 or
 stage 3 gcc is built. Bootstrapping gcc natively on the target may improve
@@ -43,34 +44,27 @@ since genksyms for the target is not generally available at build time.
 
 INSTRUCTIONS (no substitute for reading the scripts)
 
-- Untar or mount the BTC distribution (as appropriate).
+- Untar the BTC distribution (as appropriate). If using Mac OS X, you'll need
+  a case-sensitive filesystem (a disk image is convenient).
 
 - Edit the build-tool-chain.bash script as follows:
 
   + Modify the $DIST_ROOT definition to be the absolute pathname of the
     untarred btc directory or its mountpoint. This needs to be a filesystem
-    with plenty of free space (say, 2 GB).
+    with plenty of free space (around 4 GB to build recent tools).
 
   + Change MAKEOPTS if you want to adjust the make parallelism option.
 
   + Change BTC_MIRROR if you want to download sources from a local cache.
+    The necessary source distributions will be downloaded into the $SOURCES
+    directory as needed.
 
-  + Create an appropriate profile for your target system (or choose one
-    of the provided ones). The profile is sourced by build-tool-chain.bash
+  + Create an appropriate profile for your target system or choose one
+    of the provided ones. The profile is sourced by build-tool-chain.bash
     in order to define variables that specify what to build and how to do so.
     In particular, the profile will define TARGET, TARGET_CPU, the build
     METHOD, and the package versions in the variables BINUTILS_DIST, GCC_DIST,
-    GLIBC_DIST, THREADING_LIB, GDB_DIST and KERNEL.
-
-- The necessary source distributions will be downloaded into the $SOURCES
-  directory as needed.
-  
-  The old bison is needed to build gcc-2.95. flex is for binutils-2.12. loadkeys
-  (from kbd) is used for v2.2 kernel keymaps.
-
-  The GNU compiler and libc are not very portable in that they require GNU
-  versions of awk, sed, make, gettext and one or two other commands. These are
-  built and added to the search path before the host's versions.
+    GLIBC_DIST, GLIBC_ADD_ONS, GDB_DIST and KERNEL.
 
 - Any given GNU system will probably be missing some tools. To build the older
   gcc you will need autoconf-2.13. Also, texinfo and ncurses-dev are generally
@@ -80,13 +74,19 @@ INSTRUCTIONS (no substitute for reading the scripts)
   and MPFR are required by gcc-4.3 and later. PPL and CLOOG are required by
   gcc-4.4 and later. A recent m4 is needed in turn by those tools.
 
+  The old bison is needed to build gcc-2.95. flex is for binutils-2.12. loadkeys
+  (from kbd) is used for v2.2 kernel keymaps.
+
+  The GNU compiler and libc are not very portable in that they require GNU
+  versions of awk, sed, make, gettext and one or two other commands. These are
+  built and added to the search path before the host's versions.
+
 - If you wish, provide a kernel configuration in the $CONFIGS directory. Name
-  it something like linux-2.4.27-powerpc-dot-config and it will be used for
-  the kernel build for that version.
+  it something like linux-2.4.27-powerpc-dot-config and it will be used in
+  building that particular kernel release.
 
 - Run build-tool-chain.bash, as a non-privileged user, as follows (where
-  PROFILE is your choice of toolchain, e.g. 336-m68k). Allow several hours
-  (given a single CPU around 1 GHz).
+  PROFILE is your choice of toolchain, e.g. 336-m68k).
 
 scripts/build-tool-chain.bash -p PROFILE
 
@@ -95,10 +95,10 @@ scripts/build-tool-chain.bash -p PROFILE
 
 scripts/build-tool-chain.bash -d
 
-- If you then want to build a tool-chain for a new architecture, use the same
-  script:
+- If you then want to build a tool-chain for a new architecture, for example,
+  use the same script:
 
-scripts/build-tool-chain.bash -p NEW_PROFILE
+scripts/build-tool-chain.bash -p ANOTHER_PROFILE
 
   The new tool-chain will be created under its own $TC_PREFIX.
 
@@ -112,7 +112,7 @@ build_kernel linux-2.6.22
 package_kernel linux-2.6.22
 exit
 
-  Alternatively, to simply use a cross compiler, just set your PATH variable to
+  Alternatively, to simply use a cross-compiler, just set your PATH variable to
   something like the value used by build-tool-chain.bash script itself:
 
 scripts/build-tool-chain.bash -p PROFILE -s
@@ -122,9 +122,9 @@ exit
 
 RELEASE NOTES
 
-Version 0.11, September 2009
+Version 0.11, November 2009
 
-Apart from the provided profiles, the following combinations have been tested
+Aside from the provided profiles, the following combinations have been tested
 (though not on all platforms):
 
 alpha   m68k    ppc  binutils        gcc              glibc             kernel
@@ -153,5 +153,5 @@ encouragement and crucial assistance with the build method, as well as patches
 for glibc. Some ideas come from Dan Kegel's crosstool and other scripts
 elsewhere on the 'net. Martin Schaffner contributed some changes to the kernel
 make commands. My gratitude goes to the Gentoo, LFS and Debian projects and
-the many mailing list correspondents who have provided most of the patches that
-make this stuff actually work.
+the many mailing list denizens who have provided patches that make this stuff
+actually work.

@@ -1,10 +1,11 @@
 #!/bin/bash
 
 # Linux cross tool chain build script for Mac OS X and Linux
-# Copyright (c) 2004-2008 Finn Thain
+# Copyright (c) 2004-2009 Finn Thain
 # fthain@telegraphics.com.au
 
 set -e -u
+eval set -o pipefail 2>/dev/null && set -o pipefail
 
 ##############################################
 #
@@ -29,10 +30,10 @@ HOST_TOOLS_PREFIX=${DIST_ROOT}/host_tools
 BTC_PREFIX=${DIST_ROOT}
 
 # options for make
-MAKE_OPTS="-j6"
+MAKE_OPTS=
 
-# optional local cache for source tars
-BTC_MIRRORS=http://192.168.64.33/~fthain/btc-sources
+# optional URL prefix for source tar file cache
+BTC_MIRRORS=
 
 ##############################################
 #
@@ -63,8 +64,7 @@ echo KERNEL: $KERNEL
 echo BINUTILS_DIST: $BINUTILS_DIST
 echo GCC_DIST: $GCC_DIST
 echo GLIBC_DIST: $GLIBC_DIST
-echo THREADING_LIB: $THREADING_LIB
-echo GLIBC_PORTS: $GLIBC_PORTS
+echo GLIBC_ADD_ONS: $GLIBC_ADD_ONS
 echo GDB_DIST: $GDB_DIST
 
 # Tool chain prefix
@@ -98,49 +98,51 @@ case $METHOD in
     GLIBC_PREFIX=${TC_PREFIX}/${TARGET}
     GLIBC_INSTALL_ROOT=/
     GLIBC_HEADERS=${GLIBC_PREFIX}/include
-    glibc_add_ons=linuxthreads
+    glibc_enable_add_ons=linuxthreads
     GLIBC_CONFIG_OPTS=
-    GCC_CONFIG_OPTS="--with-local-prefix=${TC_PREFIX} \
---with-headers=${GLIBC_HEADERS}"
+    GCC_CONFIG_OPTS="--with-local-prefix=${TC_PREFIX} --with-headers=${GLIBC_HEADERS}"
     GLIBC_NEEDS_SHARED_GCC=no
     ;;
 ( 2 )
     SYSROOT=${TC_PREFIX}/${TARGET}/sysroot
-    BINUTILS_CONFIG_OPTS=--with-sysroot=${SYSROOT}
+    BINUTILS_CONFIG_OPTS="--with-sysroot=${SYSROOT}"
     GLIBC_PREFIX=/usr
     GLIBC_INSTALL_ROOT=${SYSROOT}
     GLIBC_HEADERS=${SYSROOT}/usr/include
-    glibc_add_ons=linuxthreads
+    glibc_enable_add_ons=linuxthreads
     GLIBC_CONFIG_OPTS=
-    GCC_CONFIG_OPTS=--with-sysroot=${SYSROOT}
+    GCC_CONFIG_OPTS="--with-sysroot=${SYSROOT}"
     GLIBC_NEEDS_SHARED_GCC=no
     ;;
-( 3 )
+( * )
     SYSROOT=${TC_PREFIX}/${TARGET}/sysroot
-    BINUTILS_CONFIG_OPTS=--with-sysroot=${SYSROOT}
+    BINUTILS_CONFIG_OPTS="--with-sysroot=${SYSROOT}"
     GLIBC_PREFIX=/usr
     GLIBC_INSTALL_ROOT=${SYSROOT}
     GLIBC_HEADERS=${SYSROOT}/usr/include
-    case ${TARGET_CPU} in
-    ( m68k | mips )
-        glibc_add_ons=linuxthreads
+    case ${METHOD}-${TARGET} in
+    ( 3-m68k-* | 3-mipsel-* )
+        glibc_enable_add_ons=linuxthreads
         GLIBC_CONFIG_OPTS=
         ;;
     ( * )
-        glibc_add_ons=nptl
-        GLIBC_CONFIG_OPTS="--with-tls --enable-bind-now" # --with-__thread
+        glibc_enable_add_ons=nptl
+        GLIBC_CONFIG_OPTS="--with-tls --enable-bind-now --with-__thread"
         ;;
     esac
     GCC_CONFIG_OPTS="--with-sysroot=${SYSROOT} --enable-altivec"
     GLIBC_NEEDS_SHARED_GCC=yes
     ;;
 esac
-if [ -n "${GLIBC_PORTS}" ] ; then
-    glibc_add_ons="ports,${glibc_add_ons}"
-fi
-GLIBC_CONFIG_OPTS="${GLIBC_CONFIG_OPTS} \
---enable-add-ons=${glibc_add_ons} \
---enable-kernel=${KERNEL#*-}"
+GLIBC_CONFIG_OPTS="${GLIBC_CONFIG_OPTS} --enable-kernel=${KERNEL#*-}"
+
+for add_on in ${GLIBC_ADD_ONS}; do
+    # GLIBC_ADD_ONS will be unpacked, but only --enabled-add-ons will be used.
+    if [ $add_on != nptl -a $add_on != linuxthreads ] ; then
+        glibc_enable_add_ons="${add_on},${glibc_enable_add_ons}"
+    fi
+done
+GLIBC_CONFIG_OPTS="${GLIBC_CONFIG_OPTS} --enable-add-ons=${glibc_enable_add_ons}"
 
 mkdir -p ${GLIBC_HEADERS}
 test -n "${SYSROOT}" && mkdir -p ${SYSROOT}
@@ -210,7 +212,7 @@ case ${GCC_DIST#*-} in
 ( * )
     log install_gmp gmp-4.3.1
     log install_mpfr mpfr-2.4.1
-    GCC_CONFIG_OPTS=${GCC_CONFIG_OPTS}" --with-gmp=${HOST_TOOLS_PREFIX} --with-mpfr=${HOST_TOOLS_PREFIX}"
+    GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-gmp=${HOST_TOOLS_PREFIX} --with-mpfr=${HOST_TOOLS_PREFIX}"
     ;;
 esac
 case ${GCC_DIST#*-} in
@@ -220,7 +222,7 @@ case ${GCC_DIST#*-} in
     log install_host_tool m4-1.4.13 ftp://ftp.gnu.org/gnu/m4
     log install_ppl ppl-0.10.2
     log install_cloog_ppl cloog-ppl-0.15.7
-    GCC_CONFIG_OPTS=${GCC_CONFIG_OPTS}" --with-ppl=${HOST_TOOLS_PREFIX} --with-cloog=${HOST_TOOLS_PREFIX}"
+    GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-ppl=${HOST_TOOLS_PREFIX} --with-cloog=${HOST_TOOLS_PREFIX}"
     ;;
 esac
 log install_depmod depmod.pl-1_15_stable
@@ -277,7 +279,7 @@ log install_gcc_core_static gcc-${TARGET}-1
 ##############################################
 #
 # (omitted unless using NPTL in glibc pass 3)
-# glibc pass 2: csu/subdir_lib for crt[in].o
+# glibc pass 2: csu/subdir_lib for crt[1in].o
 # gcc-core pass 2: first non-static compiler;
 # build and install the required libgcc_s.so and libgcc_eh.a
 

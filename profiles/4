@@ -1,0 +1,8 @@
+# Method 4 base profile, for eglibc
+
+METHOD=4
+BINUTILS_DIST=binutils-2.19.51
+KERNEL=linux-2.6.31
+GLIBC_DIST=glibc-2.10.1
+GLIBC_ADD_ONS="ports libidn"
+GDB_DIST=gdb-6.8.91

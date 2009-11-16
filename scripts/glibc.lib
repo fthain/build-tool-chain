@@ -2,21 +2,24 @@
 # Functions relating to glibc
 
 function prep_glibc () {
+    local mirrors
+    mirrors="ftp://ftp.gnu.org/gnu/glibc ftp://sources.redhat.com/pub/glibc/releases"
     cd ${BTC_BUILD}
     test -e $1 && echo $1 already exists && return
-    untar $1 ftp://ftp.gnu.org/gnu/glibc \
-             ftp://sources.redhat.com/pub/glibc/releases
+    untar $1 $mirrors
     cd $1
 
-    # Linuxthreads is a seperate package in 2.3.2 and earlier
-    if [ -n "${THREADING_LIB}" ] ; then
-        untar ${THREADING_LIB}
-    fi
-    # Ports are in a seperate package as of around 2.4
-    if [ -n "${GLIBC_PORTS}" ] ; then
-        untar ${GLIBC_PORTS}
-        mv ${GLIBC_PORTS} ports
-    fi
+    local version
+    version=${1##*-}
+    local add_on
+    for add_on in ${GLIBC_ADD_ONS}; do
+        test ! -e "${add_on}"
+        untar glibc-${add_on}-${version} ${mirrors}
+        if test -d glibc-${add_on}-${version} ; then
+            mv glibc-${add_on}-${version} ${add_on}
+        fi
+    done
+
     case ${1} in
     ( glibc-2.2.5 )
         # Debian sources
@@ -91,13 +94,33 @@ function prep_glibc () {
         patch -p1 < ${BTC_PATCHES}/glibc-2.3.6-gcc-4.3-fixed-includes.diff
         patch -p1 < ${BTC_PATCHES}/glibc-2.3.6-gcc-4.3-visibility-fix.diff
         patch -p1 < ${BTC_PATCHES}/glibc-2.5-fgnu89-inline.diff
-        # build failures
+        # build failure
         patch -p1 < ${BTC_PATCHES}/glibc-2.5-m68k-fchownat.patch
         # binutils approx. 2.19
         patch -p1 < ${BTC_PATCHES}/glibc-insert-_begin.patch
         # Remove bogus linuxthreads semaphore.h
         patch -p1 < ${BTC_PATCHES}/glibc-2.5-linuxthreads-punt-semaphore-header.diff
         ;;
+    ( glibc-2.10.1 )
+#        # eglibc sources
+#        decompress ${BTC_PATCHES}/glibc-2.10.1-eglibc-r9124.diff | patch -p1
+        # Debian sources
+        decompress ${BTC_PATCHES}/eglibc-source_2.10.1-6_all-debian.diff | patch -p1
+        patch -p1 < ${BTC_PATCHES}/glibc-2.10-fix-fallocate64-on-32-bit-arches.patch
+        patch -p1 < ${BTC_PATCHES}/glibc-2.10-arm-mips-m68k-fallocate64-exports.patch
+        # m68k TLS/NPTL
+        patch -p1 < ${BTC_PATCHES}/eglibc-m68k-kuvyrkov-1-update-sysdep-h.patch
+        patch -p1 < ${BTC_PATCHES}/eglibc-m68k-kuvyrkov-2-add-cfi-information.patch
+        patch -p1 < ${BTC_PATCHES}/eglibc-m68k-kuvyrkov-3-update-jmpbuf-unwind-h.patch
+        patch -p1 < ${BTC_PATCHES}/eglibc-m68k-kuvyrkov-5-main-nptl-patch-i.patch
+        patch -p1 < ${BTC_PATCHES}/eglibc-m68k-kuvyrkov-5-main-nptl-patch-ii.patch
+        patch -p1 < ${BTC_PATCHES}/eglibc-m68k-kuvyrkov-6-add-tls-relocations.patch
+        # build failure
+        patch -p1 < ${BTC_PATCHES}/glibc-2.5-m68k-fchownat.patch
+        # darwin portability
+        patch -p1 < ${BTC_PATCHES}/glibc-2.10-non-gnu-portability-hacks.diff
+        # hack for installing headers
+        patch -p1 < ${BTC_PATCHES}/glibc-2.10-old-gcc.diff
     esac
 
     case ${1} in
@@ -135,6 +158,9 @@ function install_glibc_headers () {
     ( glibc-2.5 )
         cp ${BTC_CONFIGS}/glibc-2.5-config.cache config.cache
         ;;
+    ( glibc-2.10 | glibc-2.10.* )
+        cp ${BTC_CONFIGS}/glibc-2.10-config.cache config.cache
+        ;;
     esac
 
     # touch this to keep configure's compiler tests happy:
@@ -160,15 +186,16 @@ function install_glibc_headers () {
     esac
 
     CC="gcc $arch_defines" CPP="gcc -E $arch_defines" CFLAGS="-O2 ${HOST_CFLAGS}" \
-../${GLIBC_DIST}/configure --prefix=${GLIBC_PREFIX} \
---host=${TARGET} --build=${BUILD} \
---without-cvs --disable-sanity-checks \
---cache-file=./config.cache \
-$GLIBC_CONFIG_OPTS \
---with-headers=${KERNEL_HEADERS} \
---with-binutils=${TC_PREFIX}/${TARGET}/bin
+    ../${GLIBC_DIST}/configure --prefix=${GLIBC_PREFIX} \
+    --host=${TARGET} --build=${BUILD} \
+    --without-cvs --disable-sanity-checks \
+    --cache-file=./config.cache \
+    $GLIBC_CONFIG_OPTS \
+    --with-headers=${KERNEL_HEADERS} \
+    --with-binutils=${TC_PREFIX}/${TARGET}/bin
+
     rm ${GLIBC_HEADERS}/assert.h
-    make btc_wrong_cc=yes install_root=${GLIBC_INSTALL_ROOT} install-headers
+    make btc_wrong_cc=yes install_root=${GLIBC_INSTALL_ROOT} install-headers install-bootstrap-headers=yes
     if [ ! -e ${GLIBC_HEADERS}/features.h ] ; then
         cp ../${GLIBC_DIST}/include/features.h ${GLIBC_HEADERS}
     fi
@@ -190,15 +217,17 @@ function make_glibc_runtime () {
     cd $1
 
     cp ${BTC_CONFIGS}/glibc-2.3.2-nptl-config.cache config.cache
+
     BUILD_CC=gcc BUILD_CFLAGS=$HOST_CFLAGS \
-CFLAGS="-O2" CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib \
-../${GLIBC_DIST}/configure --prefix=${GLIBC_PREFIX} \
---host=${TARGET} --build=${BUILD} \
---cache-file=./config.cache \
-$GLIBC_CONFIG_OPTS \
---without-cvs --disable-profile --disable-debug --without-gd \
---enable-clocale=gnu \
---with-headers=${KERNEL_HEADERS}
+    CFLAGS="-O2" CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib \
+    ../${GLIBC_DIST}/configure --prefix=${GLIBC_PREFIX} \
+    --host=${TARGET} --build=${BUILD} \
+    --cache-file=./config.cache \
+    $GLIBC_CONFIG_OPTS \
+    --without-cvs --disable-profile --disable-debug --without-gd \
+    --enable-clocale=gnu \
+    --with-headers=${KERNEL_HEADERS}
+
     make csu/subdir_lib
 }
 
@@ -211,15 +240,17 @@ function install_glibc () {
     if [ x${GLIBC_NEEDS_SHARED_GCC} = xyes ]; then
         cp ${BTC_CONFIGS}/glibc-2.3.2-nptl-config.cache config.cache
     fi
+
     BUILD_CC=gcc BUILD_CFLAGS=$HOST_CFLAGS \
-CFLAGS="-O2" CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib \
-../${GLIBC_DIST}/configure --prefix=${GLIBC_PREFIX} \
---host=${TARGET} --build=${BUILD} \
---cache-file=./config.cache \
-$GLIBC_CONFIG_OPTS \
---without-cvs --disable-profile --disable-debug --without-gd \
---enable-clocale=gnu \
---with-headers=${KERNEL_HEADERS}
+    CFLAGS="-O2" CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib \
+    ../${GLIBC_DIST}/configure --prefix=${GLIBC_PREFIX} \
+    --host=${TARGET} --build=${BUILD} \
+    --cache-file=./config.cache \
+    $GLIBC_CONFIG_OPTS \
+    --without-cvs --disable-profile --disable-debug --without-gd \
+    --enable-clocale=gnu \
+    --with-headers=${KERNEL_HEADERS}
+
     if [ x${GLIBC_NEEDS_SHARED_GCC} != xyes ]; then
         # we have no libgcc_eh, libgcc_s
         make static-gnulib=-lgcc libgcc_eh=

@@ -5,6 +5,5 @@ BINUTILS_DIST=binutils-2.18.50.0.9
 KERNEL=linux-2.4.36
 GCC_DIST=gcc-3.3.6
 GLIBC_DIST=glibc-2.3.2
-THREADING_LIB=glibc-linuxthreads-2.3.2
-GLIBC_PORTS=
+GLIBC_ADD_ONS=linuxthreads
 GDB_DIST=gdb-6.8.91

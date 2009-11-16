@@ -1,0 +1,97 @@
+From dfb9e5ded82db0fd2daa201f47185aaab3ef4cf8 Mon Sep 17 00:00:00 2001
+From: Maxim Kuvyrkov <maxim@codesourcery.com>
+Date: Wed, 16 Sep 2009 20:30:14 +0400
+Subject: [PATCH] Fix siginfo layout.
+
+Fix erroneous aliasing of siginfo._kill._uid32 with siginfo._rt._sigval and
+siginfo._sigchld._status.  Similarly, fix offset of siginfo._timer.sigval.
+
+Signed-off-by: Maxim Kuvyrkov <maxim@codesourcery.com>
+
+---
+The bug is rather elegant and has been present in sources for years.
+The problem is that m68k uses a custom siginfo layout due to having
+a 16-bit uid field for 'backward compatibility'.  I.e., siginfo._kill
+fields are:
+
+  17                 /* kill() */
+  18                 struct {
+  19                         __kernel_pid_t _pid;    /* sender's pid */
+  20                         __kernel_uid_t _uid;    /* backwards compatibility */
+  21                         __kernel_uid32_t _uid32; /* sender's uid */
+  22                 } _kill;
+
+The same _uid32 field was also added *last* for _rt and _sigchld substructures
+(see below).  What the author didn't expect is that the si_uid macro is
+defined to _kill._uid32 *even when used in context of _rt or _sigchld*!
+Therefore, values intended for _rt._uid32 and _sigchld._uid32 are being
+written to _rt._sigval and _sigchld._status respectively.
+
+  33                 /* POSIX.1b signals */
+  34                 struct {
+  35                         __kernel_pid_t _pid;    /* sender's pid */
+  36                         __kernel_uid_t _uid;    /* backwards compatibility */
+  37                         sigval_t _sigval;
+  38                         __kernel_uid32_t _uid32; /* sender's uid */
+  39                 } _rt;
+  40
+  41                 /* SIGCHLD */
+  42                 struct {
+  43                         __kernel_pid_t _pid;    /* which child */
+  44                         __kernel_uid_t _uid;    /* backwards compatibility */
+  45                         int _status;            /* exit code */
+  46                         clock_t _utime;
+  47                         clock_t _stime;
+  48                         __kernel_uid32_t _uid32; /* sender's uid */
+  49                 } _sigchld;
+...
+  71 #define si_uid          _sifields._kill._uid32
+
+Once you know what the problem is, the fix is pretty much straightforward:
+ensure that _pid, _uid and _uid32 appear as the first fields in any of
+the substructures that mentions them.
+
+This fixes a number of GLIBC tests.
+---
+ arch/m68k/include/asm/siginfo.h |    9 +++++----
+ 1 files changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/arch/m68k/include/asm/siginfo.h b/arch/m68k/include/asm/siginfo.h
+index ca7dde8..6fd9b71 100644
+--- a/arch/m68k/include/asm/siginfo.h
++++ b/arch/m68k/include/asm/siginfo.h
+@@ -29,7 +29,8 @@ typedef struct siginfo {
+ 		struct {
+ 			timer_t _tid;		/* timer id */
+ 			int _overrun;		/* overrun count */
+-			char _pad[sizeof( __ARCH_SI_UID_T) - sizeof(int)];
++			char _pad[sizeof( __ARCH_SI_UID_T) - sizeof(int)
++				  + sizeof(__kernel_uid_t)];
+ 			sigval_t _sigval;	/* same as below */
+ 			int _sys_private;       /* not to be passed to user */
+ 		} _timer;
+@@ -38,18 +39,18 @@ typedef struct siginfo {
+ 		struct {
+ 			__kernel_pid_t _pid;	/* sender's pid */
+ 			__kernel_uid_t _uid;	/* backwards compatibility */
+-			sigval_t _sigval;
+ 			__kernel_uid32_t _uid32; /* sender's uid */
++			sigval_t _sigval;
+ 		} _rt;
+ 
+ 		/* SIGCHLD */
+ 		struct {
+ 			__kernel_pid_t _pid;	/* which child */
+ 			__kernel_uid_t _uid;	/* backwards compatibility */
+-			int _status;		/* exit code */
++			__kernel_uid32_t _uid32; /* sender's uid */
+ 			clock_t _utime;
+ 			clock_t _stime;
+-			__kernel_uid32_t _uid32; /* sender's uid */
++			int _status;		/* exit code */
+ 		} _sigchld;
+ 
+ 		/* SIGILL, SIGFPE, SIGSEGV, SIGBUS */
+-- 
+1.6.4
+

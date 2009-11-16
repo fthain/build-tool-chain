@@ -178,7 +178,8 @@ function prep_kernel () {
                 decompress ${BTC_PATCHES}/linux-2.6.29-m68k-20090520.diff | patch -p1
                 ;;
             ( linux-2.6.31 | linux-2.6.31-* )
-                patch -p1 < ${BTC_PATCHES}/0001-Add-NPTL-support-for-m68k.patch
+                patch -p1 < ${BTC_PATCHES}/linux-m68k-kuvyrkov-1-nptl-support.patch
+                patch -p1 < ${BTC_PATCHES}/linux-m68k-kuvyrkov-2-siginfo-layout.patch
                 ;;
             esac
             case ${1} in
@@ -237,7 +238,7 @@ function build_kernel () {
     else
         make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- defconfig || true
     fi
-    yes "" | make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- CONFIG_SHELL=/bin/bash oldconfig
+    (yes "" || true) | make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- CONFIG_SHELL=/bin/bash oldconfig
 
     case ${1} in
     ( linux-2.[24].* )

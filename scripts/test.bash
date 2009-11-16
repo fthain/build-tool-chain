@@ -5,7 +5,7 @@ set -e -u
 BTC_PREFIX=/Volumes/btc-0.11
 cd ${BTC_PREFIX}
 
-t=`mktemp -d /tmp/tmp.XXXXXX`
+t=`mktemp -d /tmp/btc.XXXXXX`
 mkdir ${t}/{ok,fail}
 
 if [ -n "$*" ] ; then

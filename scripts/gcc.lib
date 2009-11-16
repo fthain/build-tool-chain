@@ -34,9 +34,9 @@ function prep_gcc_core () {
     else
       case ${1} in
       ( gcc-3.3[-.]* )
-        # For binutils > 2.15
-        patch -p0 < ${BTC_PATCHES}/gcc-3.3-mips-embedded-pic.patch
-        ;;
+          # For binutils > 2.15
+          patch -p0 < ${BTC_PATCHES}/gcc-3.3-mips-embedded-pic.patch
+          ;;
       esac
     fi
 
@@ -160,19 +160,19 @@ function install_gcc_core_static () {
     fi
 
     CFLAGS="-O2 $HOST_CFLAGS" LDFLAGS="$ldflags" \
-../${GCC_DIST/gcc/gcc-core}/configure \
---prefix=${TC_PREFIX} --target=${TARGET} \
-${GCC_CONFIG_OPTS} \
---with-newlib \
---disable-multilib \
---disable-nls \
---enable-threads=posix \
---enable-symvers=gnu \
---enable-__cxa_atexit \
---enable-languages=c \
---disable-shared \
---disable-libunwind-exceptions \
---disable-libmudflap --disable-libssp --disable-decimal-float --disable-libgomp 
+    ../${GCC_DIST/gcc/gcc-core}/configure \
+    --prefix=${TC_PREFIX} --target=${TARGET} \
+    ${GCC_CONFIG_OPTS} \
+    --with-newlib \
+    --disable-multilib \
+    --disable-nls \
+    --enable-threads=posix \
+    --enable-symvers=gnu \
+    --enable-languages=c \
+    --disable-shared \
+    --disable-libunwind-exceptions \
+    --disable-libmudflap --disable-libssp --disable-decimal-float --disable-libgomp 
+
     make ${MAKE_OPTS} all-gcc
     make install-gcc 
     case ${GCC_DIST} in
@@ -198,20 +198,20 @@ function install_gcc_core_shared () {
     fi
 
     CFLAGS="-O2 $HOST_CFLAGS" LDFLAGS="$ldflags" \
-../${GCC_DIST/gcc/gcc-core}/configure \
---prefix=${TC_PREFIX} --target=${TARGET} \
-${GCC_CONFIG_OPTS} \
---with-newlib \
---disable-multilib \
---disable-nls \
---enable-threads=posix \
---enable-symvers=gnu \
---enable-__cxa_atexit \
---enable-languages=c \
---enable-shared \
---disable-libmudflap --disable-libssp --disable-decimal-float --disable-libgomp 
+    ../${GCC_DIST/gcc/gcc-core}/configure \
+    --prefix=${TC_PREFIX} --target=${TARGET} \
+    ${GCC_CONFIG_OPTS} \
+    --with-newlib \
+    --disable-multilib \
+    --disable-nls \
+    --enable-threads=posix \
+    --enable-symvers=gnu \
+    --enable-languages=c \
+    --enable-shared \
+    --disable-libmudflap --disable-libssp --disable-decimal-float --disable-libgomp 
+
     mkdir -p gcc
-    cp ../glibc-${TARGET}-2/csu/crt[in].o gcc
+    cp ../glibc-${TARGET}-2/csu/crt[1in].o gcc
     make ${MAKE_OPTS} all-gcc
     make install-gcc 
     case ${GCC_DIST} in
@@ -237,14 +237,15 @@ function install_gcc () {
     fi
 
     CFLAGS="-O2 $HOST_CFLAGS" LDFLAGS="$ldflags" \
-../${GCC_DIST}/configure \
---prefix=${TC_PREFIX} --target=${TARGET} \
-${GCC_CONFIG_OPTS} \
---enable-threads=posix \
---enable-symvers=gnu \
---enable-__cxa_atexit \
---enable-languages=c,c++ \
---enable-shared
+    ../${GCC_DIST}/configure \
+    --prefix=${TC_PREFIX} --target=${TARGET} \
+    ${GCC_CONFIG_OPTS} \
+    --enable-threads=posix \
+    --enable-symvers=gnu \
+    --enable-__cxa_atexit \
+    --enable-languages=c,c++ \
+    --enable-shared
+
     make all
     make install
 

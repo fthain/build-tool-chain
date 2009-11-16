@@ -16,8 +16,9 @@ function install_host_tool () {
     cd $BTC_BUILD
     untar "$@"
 
-    echo building $1
     cd $1
+    echo building $1
+
     CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
                              --infodir=${HOST_TOOLS_PREFIX}/share/info \
                              --mandir=${HOST_TOOLS_PREFIX}/share/man
@@ -39,8 +40,9 @@ function install_sed () {
     cd $BTC_BUILD
     untar $1 ftp://ftp.gnu.org/gnu/sed
 
-    echo building $1
     cd $1
+    echo building $1
+
     CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
                              --infodir=${HOST_TOOLS_PREFIX}/share/info \
                              --mandir=${HOST_TOOLS_PREFIX}/share/man
@@ -64,8 +66,9 @@ function install_coreutils () {
     cd $BTC_BUILD
     untar $1 ftp://ftp.gnu.org/gnu/coreutils
 
-    echo building $1
     cd $1
+    echo building $1
+
     CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX}
     make ${MAKE_OPTS}
 
@@ -87,6 +90,7 @@ function install_flex () {
     patch -p1 < ${BTC_PATCHES}/flex-2.5.4a-r6.diff
 
     echo building $1
+
     CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX}
     make ${MAKE_OPTS}
 
@@ -126,11 +130,13 @@ function install_loadkeys () {
     echo unpacking $1
     cd $BTC_BUILD
     untar $1 ftp://ftp.kernel.org/pub/linux/utils/kbd
+
     cd $1
     patch -p1 < ${BTC_PATCHES}/kbd-1.12-gentoo.diff
     patch -p1 < ${BTC_PATCHES}/kbd-1.12-btc-darwin.diff
 
     echo building $1
+
     CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX}
     cd src
     make analyze.c loadkeys
@@ -145,8 +151,8 @@ function install_gmp () {
     cd $BTC_BUILD
     untar $1 ftp://ftp.gnu.org/gnu/gmp
 
-    echo building $1
     cd $1
+    echo building $1
 
     (
         local opts
@@ -175,16 +181,19 @@ function install_mpfr () {
     echo unpacking $1
     cd $BTC_BUILD
     untar $1 http://www.mpfr.org/mpfr-current
+
     cd $1
     patch -p1 < ${BTC_PATCHES}/mpfr-2.4.1-gentoo.patch
 
     echo building $1
+
     local opts
     if [ ${BUILD} != "${BUILD#i386-apple-darwin9}" ] ; then
         opts="--build=none-apple-darwin"
     else
         opts=
     fi
+
     ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
                 --with-gmp=${HOST_TOOLS_PREFIX} $opts
     make ${MAKE_OPTS}
@@ -199,9 +208,10 @@ function install_ppl () {
     echo unpacking $1
     cd $BTC_BUILD
     untar $1 ftp://ftp.cs.unipr.it/pub/ppl/releases/${1#*-}
-    cd $1
 
+    cd $1
     echo building $1
+
     CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
                              --disable-optimization --enable-interfaces=c,cxx \
                              --with-gmp=${HOST_TOOLS_PREFIX}
@@ -217,9 +227,10 @@ function install_cloog_ppl () {
     echo unpacking $1
     cd $BTC_BUILD
     untar $1 ftp://gcc.gnu.org/pub/gcc/infrastructure
-    cd $1
 
+    cd $1
     echo building $1
+
     CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
                              --with-gmp=${HOST_TOOLS_PREFIX} \
                              --with-ppl=${HOST_TOOLS_PREFIX}
