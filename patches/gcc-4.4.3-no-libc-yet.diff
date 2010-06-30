@@ -1,0 +1,12 @@
+diff -ru gcc-4.4.3.orig/gcc/config/t-slibgcc-elf-ver gcc-4.4.3/gcc/config/t-slibgcc-elf-ver
+--- gcc-4.4.3.orig/gcc/config/t-slibgcc-elf-ver	2010-01-05 02:13:08.000000000 +1100
++++ gcc-4.4.3/gcc/config/t-slibgcc-elf-ver	2010-05-21 10:27:27.000000000 +1000
+@@ -9,7 +9,7 @@
+ SHLIB_OBJS = @shlib_objs@
+ SHLIB_DIR = @multilib_dir@
+ SHLIB_SLIBDIR_QUAL = @shlib_slibdir_qual@
+-SHLIB_LC = -lc
++SHLIB_LC =
+ SHLIB_MAKE_SOLINK = $(LN_S) $(SHLIB_SONAME) $(SHLIB_DIR)/$(SHLIB_SOLINK)
+ SHLIB_INSTALL_SOLINK = $(LN_S) $(SHLIB_SONAME) \
+ 	$$(DESTDIR)$$(slibdir)$(SHLIB_SLIBDIR_QUAL)/$(SHLIB_SOLINK)

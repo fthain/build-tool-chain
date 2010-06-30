@@ -84,6 +84,10 @@ function prep_kernel () {
                 patch -p1 < ${BTC_PATCHES}/linux-2.6.25-btc-darwin.diff
                 patch -p0 < ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
                 ;;
+            ( linux-2.6.32 | linux-2.6.32[.-]* )
+                patch -p1 < ${BTC_PATCHES}/linux-2.6.32-btc-darwin.diff
+                patch -p0 < ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
+                ;;
             ( * )
                 patch -p1 < ${BTC_PATCHES}/linux-2.6.30-btc-darwin.diff
                 patch -p0 < ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
@@ -126,8 +130,12 @@ function prep_kernel () {
         ( linux-2.6.2[3-8] | linux-2.6.2[3-8][.-]* )
             patch -p1 < ${BTC_PATCHES}/linux-2.6.24-depmod.pl-instead.diff
             ;;
-        ( * )
+        ( linux-2.6.29    | linux-2.6.29[.-]* | \
+          linux-2.6.3[01] | linux-2.6.3[01][.-]* )
             patch -p1 < ${BTC_PATCHES}/linux-2.6.29-depmod.pl-instead.diff
+            ;;
+        ( * )
+            patch -p1 < ${BTC_PATCHES}/linux-2.6.32-depmod.pl-instead.diff
             ;;
         esac
 
@@ -177,9 +185,9 @@ function prep_kernel () {
             ( linux-2.6.29 | linux-2.6.29-* )
                 decompress ${BTC_PATCHES}/linux-2.6.29-m68k-20090520.diff | patch -p1
                 ;;
-            ( linux-2.6.31 | linux-2.6.31-* )
+            ( linux-2.6.32 | linux-2.6.32-* )
                 patch -p1 < ${BTC_PATCHES}/linux-m68k-kuvyrkov-1-nptl-support.patch
-                patch -p1 < ${BTC_PATCHES}/linux-m68k-kuvyrkov-2-siginfo-layout.patch
+                patch -p1 < ${BTC_PATCHES}/linux-m68k-kuvyrkov-2-siginfo-layout-generic.patch
                 ;;
             esac
             case ${1} in

@@ -183,7 +183,7 @@ function install_mpfr () {
     untar $1 http://www.mpfr.org/mpfr-current
 
     cd $1
-    patch -p1 < ${BTC_PATCHES}/mpfr-2.4.1-gentoo.patch
+    patch -p1 < ${BTC_PATCHES}/mpfr-2.4.2-gentoo.patch
 
     echo building $1
 

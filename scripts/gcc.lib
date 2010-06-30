@@ -11,7 +11,7 @@ function prep_gcc_core () {
     mv $1 $c
     cd $c
 
-    # Debian m68k sources
+    # Debian m68k sources, etc
     if [ ${TARGET_CPU} = m68k ] ; then
       case ${1} in
       ( gcc-2.95.3 )
@@ -28,6 +28,10 @@ function prep_gcc_core () {
           ;;
       ( gcc-4.4.1 )
           decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.1-3-debian.diff | patch -p1
+          patch -p1 < ${BTC_PATCHES}/gcc-m68k-support-for-tls-backport.patch
+          ;;
+      ( gcc-4.4.4 )
+          decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.4-2-debian.diff | patch -p1
           patch -p1 < ${BTC_PATCHES}/gcc-m68k-support-for-tls-backport.patch
           ;;
       esac
@@ -62,9 +66,13 @@ function prep_gcc_core () {
         # Bug fix
         #patch -p1 < ${BTC_PATCHES}/gcc-4.0-pr20583.patch
         ;;
-    ( gcc-4.* )
+    ( gcc-4.[123][.-]* | gcc-4.4.[012] )
         # We build gcc-core before libc is built
         patch -p1 < ${BTC_PATCHES}/gcc-4-no-libc-yet.diff
+        ;;
+    ( gcc-4.* )
+        # We build gcc-core before libc is built
+        patch -p1 < ${BTC_PATCHES}/gcc-4.4.3-no-libc-yet.diff
         ;;
     esac
 
@@ -82,7 +90,7 @@ function prep_gcc () {
     untar $1 ftp://sourceware.org/pub/gcc/releases/$1 ftp://ftp.gnu.org/gnu/gcc/$1
     cd $1
 
-    # Debian m68k sources
+    # Debian m68k sources, etc
     if [ ${TARGET_CPU} = m68k ] ; then
       case ${1} in
       ( gcc-2.95.3 )
@@ -99,6 +107,10 @@ function prep_gcc () {
           ;;
       ( gcc-4.4.1 )
           decompress ${BTC_PATCHES}/gcc-4.4_4.4.1-3-debian.diff | patch -p1
+          patch -p1 < ${BTC_PATCHES}/gcc-m68k-support-for-tls-backport.patch
+          ;;
+      ( gcc-4.4.4 )
+          decompress ${BTC_PATCHES}/gcc-4.4_4.4.4-2-debian.diff | patch -p1
           patch -p1 < ${BTC_PATCHES}/gcc-m68k-support-for-tls-backport.patch
           ;;
       esac
@@ -176,7 +188,9 @@ function install_gcc_core_static () {
     make ${MAKE_OPTS} all-gcc
     make install-gcc 
     case ${GCC_DIST} in
-    ( gcc-4.[43][.-]* )
+    ( gcc-[23].* | gcc-4.[012][.-]* )
+        ;;
+    ( * )
         make all-target-libgcc
         make install-target-libgcc 
         ;;
@@ -215,7 +229,9 @@ function install_gcc_core_shared () {
     make ${MAKE_OPTS} all-gcc
     make install-gcc 
     case ${GCC_DIST} in
-    ( gcc-4.[43][.-]* )
+    ( gcc-[23].* | gcc-4.[012][.-]* )
+        ;;
+    ( * )
         make all-target-libgcc
         make install-target-libgcc 
         ;;

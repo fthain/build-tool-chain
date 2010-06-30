@@ -23,7 +23,7 @@ function prep_glibc () {
     case ${1} in
     ( glibc-2.2.5 )
         # Debian sources
-        decompress ${BTC_PATCHES}/glibc-2.2.5-11.8-debian.diff | patch -p1
+        decompress ${BTC_PATCHES}/glibc_2.2.5-11.8-debian-m68k.diff | patch -p1
         # Create the 2.2.5-11.8 symlink that patch can't
         ln -s . db/db1
         # Fix for glibc-2.2 with recent kernel headers (m68k)
@@ -108,13 +108,14 @@ function prep_glibc () {
         decompress ${BTC_PATCHES}/eglibc-source_2.10.1-6_all-debian.diff | patch -p1
         patch -p1 < ${BTC_PATCHES}/glibc-2.10-fix-fallocate64-on-32-bit-arches.patch
         patch -p1 < ${BTC_PATCHES}/glibc-2.10-arm-mips-m68k-fallocate64-exports.patch
+
         # m68k TLS/NPTL
-        patch -p1 < ${BTC_PATCHES}/eglibc-m68k-kuvyrkov-1-update-sysdep-h.patch
-        patch -p1 < ${BTC_PATCHES}/eglibc-m68k-kuvyrkov-2-add-cfi-information.patch
-        patch -p1 < ${BTC_PATCHES}/eglibc-m68k-kuvyrkov-3-update-jmpbuf-unwind-h.patch
-        patch -p1 < ${BTC_PATCHES}/eglibc-m68k-kuvyrkov-5-main-nptl-patch-i.patch
-        patch -p1 < ${BTC_PATCHES}/eglibc-m68k-kuvyrkov-5-main-nptl-patch-ii.patch
-        patch -p1 < ${BTC_PATCHES}/eglibc-m68k-kuvyrkov-6-add-tls-relocations.patch
+        patch -p1 -d ports < ${BTC_PATCHES}/glibc-ports-40111cb9e17a911c8913f00d9b913a71ceb6e609.patch
+        patch -p1 -d ports < ${BTC_PATCHES}/glibc-ports-42ae1878f326c413dd026373ebdb6bf6cd20e75d.patch
+        patch -p1 -d ports < ${BTC_PATCHES}/glibc-ports-d8e90a15fedd2660d02f5d8e4e7da17e01916d30.patch
+        patch -p1          < ${BTC_PATCHES}/glibc-0079dd2382eba185d22410a1d3088dc7146bc00a.patch
+        patch -p1          < ${BTC_PATCHES}/glibc-bbabf1f73f611b9101b42c3390a9ddd53e6dd7d4.patch
+
         # build failure
         patch -p1 < ${BTC_PATCHES}/glibc-2.5-m68k-fchownat.patch
         # darwin portability

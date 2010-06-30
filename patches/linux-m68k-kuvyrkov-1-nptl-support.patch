@@ -1,11 +1,12 @@
-From 5e74222fec124ea8d3c6d8b2514c638dc5622a25 Mon Sep 17 00:00:00 2001
+From f1e2bdaa191f08d33938bd42cf090f3d9466866e Mon Sep 17 00:00:00 2001
 From: Maxim Kuvyrkov <maxim@codesourcery.com>
-Date: Fri, 28 Aug 2009 14:46:21 +0400
-Subject: [PATCH] Add NPTL support for m68k.
+Date: Mon, 7 Dec 2009 00:24:27 -0800
+Subject: [PATCH 1/2] Add NPTL support for m68k
 
 This patch adds several syscalls, that provide necessary
 functionality to support NPTL on m68k/ColdFire.
-The syscalls are read_tp, write_tp, atomic_cmpxchg_32 and atomic_barrier.
+The syscalls are get_thread_area, set_thread_area, atomic_cmpxchg_32 and
+atomic_barrier.
 The cmpxchg syscall is required for ColdFire as it doesn't support 'cas'
 instruction.
 
@@ -21,43 +22,40 @@ Signed-off-by: Maxim Kuvyrkov <maxim@codesourcery.com>
  arch/m68k/kernel/process.c             |    4 ++
  arch/m68k/kernel/ptrace.c              |    5 ++
  arch/m68k/kernel/sys_m68k.c            |   81 ++++++++++++++++++++++++++++++++
- 7 files changed, 102 insertions(+), 1 deletions(-)
+ 8 files changed, 103 insertions(+), 2 deletions(-)
 
 diff --git a/arch/m68k/include/asm/ptrace.h b/arch/m68k/include/asm/ptrace.h
-index 8c9194b..6d76bba 100644
+index a6ab663..43ab86a 100644
 --- a/arch/m68k/include/asm/ptrace.h
 +++ b/arch/m68k/include/asm/ptrace.h
-@@ -71,6 +71,8 @@ struct switch_stack {
+@@ -71,3 +71,5 @@ struct switch_stack {
  #define PTRACE_GETFPREGS          14
  #define PTRACE_SETFPREGS          15
- 
-+#define PTRACE_GET_THREAD_AREA    25
 +
- #ifdef __KERNEL__
++#define PTRACE_GET_THREAD_AREA    25
  
- #ifndef PS_S
 diff --git a/arch/m68k/include/asm/thread_info_mm.h b/arch/m68k/include/asm/thread_info_mm.h
-index 6ea5c33..c24a353 100644
+index 5b754aa..b7b37a4 100644
 --- a/arch/m68k/include/asm/thread_info_mm.h
 +++ b/arch/m68k/include/asm/thread_info_mm.h
-@@ -10,6 +10,7 @@ struct thread_info {
+@@ -16,6 +16,7 @@ struct thread_info {
  	struct exec_domain	*exec_domain;	/* execution domain */
  	int			preempt_count;	/* 0 => preemptable, <0 => BUG */
  	__u32 cpu; /* should always be 0 on m68k */
-+	unsigned long tp_value;
++	unsigned long		tp_value;	/* thread pointer */
  	struct restart_block    restart_block;
  };
- 
+ #endif /* __ASSEMBLY__ */
 diff --git a/arch/m68k/include/asm/unistd.h b/arch/m68k/include/asm/unistd.h
-index 946d869..c035c8b 100644
+index 48b87f5..d72a71d 100644
 --- a/arch/m68k/include/asm/unistd.h
 +++ b/arch/m68k/include/asm/unistd.h
 @@ -336,10 +336,14 @@
  #define __NR_pwritev		330
  #define __NR_rt_tgsigqueueinfo	331
- #define __NR_perf_counter_open	332
-+#define __NR_read_tp		333
-+#define __NR_write_tp		334
+ #define __NR_perf_event_open	332
++#define __NR_get_thread_area	333
++#define __NR_set_thread_area	334
 +#define __NR_atomic_cmpxchg_32	335
 +#define __NR_atomic_barrier	336
  
@@ -69,20 +67,20 @@ index 946d869..c035c8b 100644
  #define __ARCH_WANT_IPC_PARSE_VERSION
  #define __ARCH_WANT_OLD_READDIR
 diff --git a/arch/m68k/kernel/entry.S b/arch/m68k/kernel/entry.S
-index c3735cd..bd168a1 100644
+index 77fc7c1..e136b8c 100644
 --- a/arch/m68k/kernel/entry.S
 +++ b/arch/m68k/kernel/entry.S
-@@ -757,4 +757,8 @@ sys_call_table:
+@@ -761,4 +761,8 @@ sys_call_table:
  	.long sys_pwritev		/* 330 */
  	.long sys_rt_tgsigqueueinfo
- 	.long sys_perf_counter_open
-+	.long sys_read_tp
-+	.long sys_write_tp
+ 	.long sys_perf_event_open
++	.long sys_get_thread_area
++	.long sys_set_thread_area
 +	.long sys_atomic_cmpxchg_32	/* 335 */
 +	.long sys_atomic_barrier
  
 diff --git a/arch/m68k/kernel/process.c b/arch/m68k/kernel/process.c
-index 72bad65..2e0ad07 100644
+index 0529659..17c3f32 100644
 --- a/arch/m68k/kernel/process.c
 +++ b/arch/m68k/kernel/process.c
 @@ -251,6 +251,10 @@ int copy_thread(unsigned long clone_flags, unsigned long usp,
@@ -97,26 +95,26 @@ index 72bad65..2e0ad07 100644
  	 * Must save the current SFC/DFC value, NOT the value when
  	 * the parent was last descheduled - RGH  10-08-96
 diff --git a/arch/m68k/kernel/ptrace.c b/arch/m68k/kernel/ptrace.c
-index 2075543..0cf7827 100644
+index 1fc217e..616e597 100644
 --- a/arch/m68k/kernel/ptrace.c
 +++ b/arch/m68k/kernel/ptrace.c
-@@ -265,6 +265,11 @@ long arch_ptrace(struct task_struct *child, long request, long addr, long data)
+@@ -245,6 +245,11 @@ long arch_ptrace(struct task_struct *child, long request, long addr, long data)
  			ret = -EFAULT;
  		break;
  
 +	case PTRACE_GET_THREAD_AREA:
 +		ret = put_user(task_thread_info(child)->tp_value,
-+				(unsigned long __user *) data);
++			       (unsigned long __user *)data);
 +		break;
 +
  	default:
  		ret = ptrace_request(child, request, addr, data);
  		break;
 diff --git a/arch/m68k/kernel/sys_m68k.c b/arch/m68k/kernel/sys_m68k.c
-index 7f54efa..c9ad4f9 100644
+index 7deb402..1f0db88 100644
 --- a/arch/m68k/kernel/sys_m68k.c
 +++ b/arch/m68k/kernel/sys_m68k.c
-@@ -29,6 +29,11 @@
+@@ -28,6 +28,11 @@
  #include <asm/traps.h>
  #include <asm/page.h>
  #include <asm/unistd.h>
@@ -124,23 +122,21 @@ index 7f54efa..c9ad4f9 100644
 +#include <asm/tlb.h>
 +
 +asmlinkage int do_page_fault(struct pt_regs *regs, unsigned long address,
-+			unsigned long error_code);
++			     unsigned long error_code);
  
  /* common code for old and new mmaps */
  static inline long do_mmap2(
-@@ -663,3 +668,79 @@ int kernel_execve(const char *filename, char *const argv[], char *const envp[])
+@@ -662,3 +667,79 @@ int kernel_execve(const char *filename, char *const argv[], char *const envp[])
  			: "d" (__a), "d" (__b), "d" (__c));
  	return __res;
  }
 +
-+asmlinkage unsigned long
-+sys_read_tp(void)
++asmlinkage unsigned long sys_get_thread_area(void)
 +{
 +	return current_thread_info()->tp_value;
 +}
 +
-+asmlinkage int
-+sys_write_tp(unsigned long tp)
++asmlinkage int sys_set_thread_area(unsigned long tp)
 +{
 +	current_thread_info()->tp_value = tp;
 +	return 0;
@@ -150,12 +146,14 @@ index 7f54efa..c9ad4f9 100644
 +   D1 (newval).  */
 +asmlinkage int
 +sys_atomic_cmpxchg_32(unsigned long newval, int oldval, int d3, int d4, int d5,
-+		unsigned long __user *mem)
++		      unsigned long __user * mem)
 +{
 +	/* This was borrowed from ARM's implementation.  */
 +	for (;;) {
 +		struct mm_struct *mm = current->mm;
-+		pgd_t *pgd; pmd_t *pmd; pte_t *pte;
++		pgd_t *pgd;
++		pmd_t *pmd;
++		pte_t *pte;
 +		spinlock_t *ptl;
 +		unsigned long mem_value;
 +
@@ -167,7 +165,8 @@ index 7f54efa..c9ad4f9 100644
 +		if (!pmd_present(*pmd))
 +			goto bad_access;
 +		pte = pte_offset_map_lock(mm, pmd, (unsigned long)mem, &ptl);
-+		if (!pte_present(*pte) || !pte_dirty(*pte)) {
++		if (!pte_present(*pte) || !pte_dirty(*pte)
++		    || !pte_write(*pte)) {
 +			pte_unmap_unlock(pte, ptl);
 +			goto bad_access;
 +		}
@@ -180,7 +179,7 @@ index 7f54efa..c9ad4f9 100644
 +		up_read(&mm->mmap_sem);
 +		return mem_value;
 +
-+bad_access:
++	      bad_access:
 +		up_read(&mm->mmap_sem);
 +		/* This is not necessarily a bad access, we can get here if
 +		   a memory we're trying to write to should be copied-on-write.
@@ -202,12 +201,11 @@ index 7f54efa..c9ad4f9 100644
 +	}
 +}
 +
-+asmlinkage int
-+sys_atomic_barrier(void)
++asmlinkage int sys_atomic_barrier(void)
 +{
 +	/* no code needed for uniprocs */
 +	return 0;
 +}
 -- 
-1.6.4
+1.6.2.4
 

@@ -30,7 +30,7 @@ HOST_TOOLS_PREFIX=${DIST_ROOT}/host_tools
 BTC_PREFIX=${DIST_ROOT}
 
 # options for make
-MAKE_OPTS=
+MAKE_OPTS=-j8
 
 # optional URL prefix for source tar file cache
 BTC_MIRRORS=
@@ -211,7 +211,7 @@ case ${GCC_DIST#*-} in
     ;;
 ( * )
     log install_gmp gmp-4.3.1
-    log install_mpfr mpfr-2.4.1
+    log install_mpfr mpfr-2.4.2
     GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-gmp=${HOST_TOOLS_PREFIX} --with-mpfr=${HOST_TOOLS_PREFIX}"
     ;;
 esac
@@ -221,7 +221,7 @@ case ${GCC_DIST#*-} in
 ( * )
     log install_host_tool m4-1.4.13 ftp://ftp.gnu.org/gnu/m4
     log install_ppl ppl-0.10.2
-    log install_cloog_ppl cloog-ppl-0.15.7
+    log install_cloog_ppl cloog-ppl-0.15.9
     GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-ppl=${HOST_TOOLS_PREFIX} --with-cloog=${HOST_TOOLS_PREFIX}"
     ;;
 esac

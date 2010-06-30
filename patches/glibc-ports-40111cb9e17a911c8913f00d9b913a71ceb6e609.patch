@@ -1,181 +1,70 @@
-From libc-ports-return-1361-listarch-libc-ports=sources dot redhat dot com at sourceware dot org Fri Oct 02 10:46:18 2009
-Return-Path: <libc-ports-return-1361-listarch-libc-ports=sources dot redhat dot com at sourceware dot org>
-Delivered-To: listarch-libc-ports at sources dot redhat dot com
-Received: (qmail 20278 invoked by alias); 2 Oct 2009 10:46:18 -0000
-Received: (qmail 20239 invoked by uid 22791); 2 Oct 2009 10:46:05 -0000
-X-SWARE-Spam-Status: No, hits=-2.0 required=5.0 	tests=AWL,BAYES_00,SPF_PASS
-X-Spam-Check-By: sourceware.org
-Received: from mail.codesourcery.com (HELO mail.codesourcery.com) (65.74.133.4)     by sourceware.org (qpsmtpd/0.43rc1) with ESMTP; Fri, 02 Oct 2009 10:45:53 +0000
-Received: (qmail 18462 invoked from network); 2 Oct 2009 10:45:49 -0000
-Received: from unknown (HELO ?172.16.1.24?) (maxim@127.0.0.2)   by mail.codesourcery.com with ESMTPA; 2 Oct 2009 10:45:49 -0000
-Message-ID: <4AC5D9D5.2060803@codesourcery.com>
-Date: Fri, 02 Oct 2009 14:45:41 +0400
-From: Maxim Kuvyrkov <maxim at codesourcery dot com>
-User-Agent: Thunderbird 2.0.0.23 (Macintosh/20090812)
-MIME-Version: 1.0
-To: libc-ports at sourceware dot org
-CC: Andreas Schwab <schwab at linux-m68k dot org>
-Subject: Re: [M68K/ColdFire patch 5/n] Main NPTL patch
-References: <4A93D885.3060004@codesourcery.com> <4A93E120.60204@codesourcery.com> <4A9ABEB3.7040601@codesourcery.com>
-In-Reply-To: <4A9ABEB3 dot 7040601 at codesourcery dot com>
-Content-Type: multipart/mixed;  boundary="------------000805080008040604080701"
-X-IsSubscribed: yes
-Mailing-List: contact libc-ports-help at sourceware dot org; run by ezmlm
-Precedence: bulk
-List-Id: <libc-ports.sourceware.org>
-List-Subscribe: <mailto:libc-ports-subscribe at sourceware dot org>
-List-Post: <mailto:libc-ports at sourceware dot org>
-List-Help: <mailto:libc-ports-help at sourceware dot org>, <http://sourceware dot org/lists dot html#faqs>
-Sender: libc-ports-owner at sourceware dot org
-Delivered-To: mailing list libc-ports at sourceware dot org
-
-This is a multi-part message in MIME format.
---------------000805080008040604080701
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-
-Maxim Kuvyrkov wrote:
-> Maxim Kuvyrkov wrote:
->> This is the main NPTL patch.  During development of this work I tried 
->> to make things work in the exactly same way as on other major 
->> architectures.
->>
->> I expect there will be comments on this one :)
-> 
-> After I did a clean rebuild of the work, I've caught several small 
-> issues that were introduced by the last-minute cleanups.  So here is an 
-> updated patch; I'm also attaching the difference between the patches for 
-> easier review.
-
-While investigating GLIBC testsuite failures I've fixed a bug in the 
-initialization of the vDSO pointers.  Attached are the patch that fixes 
-the bug and the whole updated NPTL patch.
-
-With this fix, a patch for mmap2 and fixes to sigcontext and siginfo 
-kernel headers (discussed on linux-m68k@) there are no unexpected 
-failures in the GLIBC testsuite.
-
-Regards,
-
---
-Maxim K.
-CodeSourcery
-
---------------000805080008040604080701
-Content-Type: text/plain; x-mac-type="0"; x-mac-creator="0";
- name="0001-Nptl-support-for-m68k-ColdFire.patch"
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline;
- filename="0001-Nptl-support-for-m68k-ColdFire.patch"
-
->From 34391d2bf5f2a5c0a15461fe0b412c6a60b0b3c1 Mon Sep 17 00:00:00 2001
 From: Maxim Kuvyrkov <maxim@codesourcery.com>
-Date: Tue, 25 Aug 2009 16:42:47 +0400
-Subject: [PATCH] Nptl support for m68k/ColdFire.
+Date: Fri, 12 Mar 2010 18:50:55 +0000 (+0100)
+Subject: NPTL support for m68k/ColdFire
+X-Git-Tag: glibc-2.12~38
+X-Git-Url: http://sourceware.org/git/?p=glibc-ports.git;a=commitdiff_plain;h=40111cb9e17a911c8913f00d9b913a71ceb6e609
 
-	* sysdeps/unix/sysv/linux/m68k/clone.S: Support RESET_PID.
-	* sysdeps/unix/sysv/linux/m68k/m68k-helpers.S: New.
-	* sysdeps/unix/sysv/linux/m68k/Makefile: Add new files to lists.
-	* sysdeps/unix/sysv/linux/m68k/vfork.S: Add SAVE_PID/RESTORE_PID.
-	* sysdeps/unix/sysv/linux/m68k/m68k-vdso.c: New.
-	* sysdeps/unix/sysv/linux/m68k/bits/m68k-vdso.h: New.
-	* sysdeps/unix/sysv/linux/m68k/coldfire/nptl/bits/atomic.h: New.
-	* sysdeps/unix/sysv/linux/m68k/Versions: Add symbols for NPTL support.
-	* sysdeps/unix/sysv/linux/m68k/init-first.c: New.
-	* sysdeps/unix/sysv/linux/m68k/nptl/sysdep-cancel.h: New.
-	* sysdeps/unix/sysv/linux/m68k/nptl/bits/pthreadtypes.h: New.
-	* sysdeps/unix/sysv/linux/m68k/nptl/bits/semaphore.h: New.
-	* sysdeps/unix/sysv/linux/m68k/nptl/clone.S: New.
-	* sysdeps/unix/sysv/linux/m68k/nptl/fork.c: New.
-	* sysdeps/unix/sysv/linux/m68k/nptl/lowlevellock.h: New.
-	* sysdeps/unix/sysv/linux/m68k/nptl/vfork.S: New.
-	* sysdeps/unix/sysv/linux/m68k/nptl/pt-vfork.S: New.
-	* sysdeps/unix/sysv/linux/m68k/nptl/createthread.c: New.
-	* sysdeps/unix/sysv/linux/m68k/nptl/pthread_once.c: New.
-	* sysdeps/unix/sysv/linux/m68k/socket.S: Update cancelation code.
-	* sysdeps/m68k/dl-tls.h: New.
-	* sysdeps/m68k/libc-tls.c: New.
-	* sysdeps/m68k/tls-macros.h: New.
-	* sysdeps/m68k/dl-machine.h: Handle TLS relocations.
-	* sysdeps/m68k/nptl/tcb-offsets.sym: New.
-	* sysdeps/m68k/nptl/pthread_spin_trylock.c: New.
-	* sysdeps/m68k/nptl/tls.h: New.
-	* sysdeps/m68k/nptl/pthread_spin_lock.c: New.
-	* sysdeps/m68k/nptl/pthreaddef.h: New.
-	* sysdeps/m68k/nptl/Makefile: New.
-
-This patch contains the main code of m68k/ColdFire NPTL support.
-Please note that several additional fixes (see subsequent patches)
-are necessary to make GLIBC build and work properly.
-
-Signed-off-by: Maxim Kuvyrkov <maxim@codesourcery.com>
+NPTL support for m68k/ColdFire
 ---
- sysdeps/m68k/dl-machine.h                          |   23 ++-
- sysdeps/m68k/dl-tls.h                              |   47 ++++
- sysdeps/m68k/libc-tls.c                            |   37 +++
- sysdeps/m68k/nptl/Makefile                         |   21 ++
- sysdeps/m68k/nptl/pthread_spin_lock.c              |   30 ++
- sysdeps/m68k/nptl/pthread_spin_trylock.c           |   27 ++
- sysdeps/m68k/nptl/pthreaddef.h                     |   38 +++
- sysdeps/m68k/nptl/tcb-offsets.sym                  |   11 +
- sysdeps/m68k/nptl/tls.h                            |  170 ++++++++++++
- sysdeps/m68k/tls-macros.h                          |   69 +++++
- sysdeps/unix/sysv/linux/m68k/Makefile              |    6 +
- sysdeps/unix/sysv/linux/m68k/Versions              |   12 +
- sysdeps/unix/sysv/linux/m68k/bits/m68k-vdso.h      |   60 +++++
- sysdeps/unix/sysv/linux/m68k/clone.S               |   52 ++++-
- .../sysv/linux/m68k/coldfire/nptl/bits/atomic.h    |  104 ++++++++
- sysdeps/unix/sysv/linux/m68k/init-first.c          |   73 +++++
- sysdeps/unix/sysv/linux/m68k/libc-m68k-vdso.c      |    1 +
- sysdeps/unix/sysv/linux/m68k/m68k-helpers.S        |  104 ++++++++
- sysdeps/unix/sysv/linux/m68k/m68k-vdso.c           |   34 +++
- .../unix/sysv/linux/m68k/nptl/bits/pthreadtypes.h  |  171 ++++++++++++
- sysdeps/unix/sysv/linux/m68k/nptl/bits/semaphore.h |   35 +++
- sysdeps/unix/sysv/linux/m68k/nptl/clone.S          |    2 +
- sysdeps/unix/sysv/linux/m68k/nptl/createthread.c   |   24 ++
- sysdeps/unix/sysv/linux/m68k/nptl/fork.c           |   29 ++
- sysdeps/unix/sysv/linux/m68k/nptl/lowlevellock.h   |  280 ++++++++++++++++++++
- sysdeps/unix/sysv/linux/m68k/nptl/pt-vfork.S       |   35 +++
- sysdeps/unix/sysv/linux/m68k/nptl/pthread_once.c   |   90 +++++++
- sysdeps/unix/sysv/linux/m68k/nptl/sysdep-cancel.h  |  140 ++++++++++
- sysdeps/unix/sysv/linux/m68k/nptl/vfork.S          |   37 +++
- sysdeps/unix/sysv/linux/m68k/socket.S              |   28 ++-
- sysdeps/unix/sysv/linux/m68k/vfork.S               |   18 ++-
- 31 files changed, 1794 insertions(+), 14 deletions(-)
- create mode 100644 sysdeps/m68k/dl-tls.h
- create mode 100644 sysdeps/m68k/libc-tls.c
- create mode 100644 sysdeps/m68k/nptl/Makefile
- create mode 100644 sysdeps/m68k/nptl/pthread_spin_lock.c
- create mode 100644 sysdeps/m68k/nptl/pthread_spin_trylock.c
- create mode 100644 sysdeps/m68k/nptl/pthreaddef.h
- create mode 100644 sysdeps/m68k/nptl/tcb-offsets.sym
- create mode 100644 sysdeps/m68k/nptl/tls.h
- create mode 100644 sysdeps/m68k/tls-macros.h
- create mode 100644 sysdeps/unix/sysv/linux/m68k/bits/m68k-vdso.h
- create mode 100644 sysdeps/unix/sysv/linux/m68k/coldfire/nptl/bits/atomic.h
- create mode 100644 sysdeps/unix/sysv/linux/m68k/init-first.c
- create mode 100644 sysdeps/unix/sysv/linux/m68k/libc-m68k-vdso.c
- create mode 100644 sysdeps/unix/sysv/linux/m68k/m68k-helpers.S
- create mode 100644 sysdeps/unix/sysv/linux/m68k/m68k-vdso.c
- create mode 100644 sysdeps/unix/sysv/linux/m68k/nptl/bits/pthreadtypes.h
- create mode 100644 sysdeps/unix/sysv/linux/m68k/nptl/bits/semaphore.h
- create mode 100644 sysdeps/unix/sysv/linux/m68k/nptl/clone.S
- create mode 100644 sysdeps/unix/sysv/linux/m68k/nptl/createthread.c
- create mode 100644 sysdeps/unix/sysv/linux/m68k/nptl/fork.c
- create mode 100644 sysdeps/unix/sysv/linux/m68k/nptl/lowlevellock.h
- create mode 100644 sysdeps/unix/sysv/linux/m68k/nptl/pt-vfork.S
- create mode 100644 sysdeps/unix/sysv/linux/m68k/nptl/pthread_once.c
- create mode 100644 sysdeps/unix/sysv/linux/m68k/nptl/sysdep-cancel.h
- create mode 100644 sysdeps/unix/sysv/linux/m68k/nptl/vfork.S
 
+#diff --git a/ChangeLog.m68k b/ChangeLog.m68k
+#index d63b88e..32681ff 100644
+#--- a/ChangeLog.m68k
+#+++ b/ChangeLog.m68k
+#@@ -1,5 +1,45 @@
+# 2010-03-09  Maxim Kuvyrkov  <maxim@codesourcery.com>
+# 
+#+	NPTL support for m68k/ColdFire
+#+	* sysdeps/unix/sysv/linux/m68k/sysdep.h (tls.h): Include.
+#+	(INTERNAL_SYSCALL): Convert to INTERNAL_SYSCALL_NCS.
+#+	(PTR_MANGLE, PTR_DEMANGLE): Define.
+#+	(NEED_STATIC_SYSINFO_DSO): Define.
+#+	* sysdeps/unix/sysv/linux/m68k/clone.S: Support RESET_PID.
+#+	* sysdeps/unix/sysv/linux/m68k/m68k-helpers.S: New.
+#+	* sysdeps/unix/sysv/linux/m68k/Makefile: Add new files to lists.
+#+	* sysdeps/unix/sysv/linux/m68k/vfork.S: Add SAVE_PID/RESTORE_PID.
+#+	* sysdeps/unix/sysv/linux/m68k/m68k-vdso.c: New.
+#+	* sysdeps/unix/sysv/linux/m68k/libc-m68k-vdso.c: New.
+#+	* sysdeps/unix/sysv/linux/m68k/bits/m68k-vdso.h: New.
+#+	* sysdeps/unix/sysv/linux/m68k/coldfire/nptl/bits/atomic.h: New.
+#+	* sysdeps/unix/sysv/linux/m68k/Versions: Add symbols for NPTL support.
+#+	* sysdeps/unix/sysv/linux/m68k/init-first.c: New.
+#+	* sysdeps/unix/sysv/linux/m68k/nptl/sysdep-cancel.h: New.
+#+	* sysdeps/unix/sysv/linux/m68k/nptl/bits/pthreadtypes.h: New.
+#+	* sysdeps/unix/sysv/linux/m68k/nptl/bits/semaphore.h: New.
+#+	* sysdeps/unix/sysv/linux/m68k/nptl/clone.S: New.
+#+	* sysdeps/unix/sysv/linux/m68k/nptl/fork.c: New.
+#+	* sysdeps/unix/sysv/linux/m68k/nptl/lowlevellock.h: New.
+#+	* sysdeps/unix/sysv/linux/m68k/nptl/vfork.S: New.
+#+	* sysdeps/unix/sysv/linux/m68k/nptl/pt-vfork.S: New.
+#+	* sysdeps/unix/sysv/linux/m68k/nptl/createthread.c: New.
+#+	* sysdeps/unix/sysv/linux/m68k/nptl/pthread_once.c: New.
+#+	* sysdeps/unix/sysv/linux/m68k/socket.S: Update cancelation code.
+#+	* sysdeps/m68k/dl-tls.h: New.
+#+	* sysdeps/m68k/libc-tls.c: New.
+#+	* sysdeps/m68k/tls-macros.h: New.
+#+	* sysdeps/m68k/dl-machine.h (RTLD_START): Terminate stack frame to
+#+	generate better backtraces.
+#+	(elf_machine_type_class, elf_machine_rela): Handle TLS relocations.
+#+	* sysdeps/m68k/dl-machine.h: Handle TLS relocations.
+#+	* sysdeps/m68k/nptl/tcb-offsets.sym: New.
+#+	* sysdeps/m68k/nptl/pthread_spin_trylock.c: New.
+#+	* sysdeps/m68k/nptl/tls.h: New.
+#+	* sysdeps/m68k/nptl/pthread_spin_lock.c: New.
+#+	* sysdeps/m68k/nptl/pthreaddef.h: New.
+#+	* sysdeps/m68k/nptl/Makefile: New.
+#+
+# 	* sysdeps/unix/sysv/linux/m68k/bits/sigcontext.h: Remove.
+# 	* sysdeps/unix/sysv/linux/m68k/register-dump.h: Update.
+# 
 diff --git a/sysdeps/m68k/dl-machine.h b/sysdeps/m68k/dl-machine.h
-index 08a4396..098dc8d 100644
---- a/ports/sysdeps/m68k/dl-machine.h
-+++ b/ports/sysdeps/m68k/dl-machine.h
+index 08a4396..9bc35e7 100644
+--- a/sysdeps/m68k/dl-machine.h
++++ b/sysdeps/m68k/dl-machine.h
 @@ -1,5 +1,6 @@
  /* Machine-dependent ELF dynamic relocation inline functions.  m68k version.
 -   Copyright (C) 1996-2001, 2002, 2003, 2004, 2005 Free Software Foundation, Inc.
-+   Copyright (C) 1996-2001, 2002, 2003, 2004, 2005, 2009
++   Copyright (C) 1996-2001, 2002, 2003, 2004, 2005, 2010
 +   Free Software Foundation, Inc.
     This file is part of the GNU C Library.
  
@@ -188,7 +77,35 @@ index 08a4396..098dc8d 100644
  
  /* Return nonzero iff ELF header is compatible with the running host.  */
  static inline int
-@@ -262,6 +264,25 @@ elf_machine_rela (struct link_map *map, const Elf32_Rela *reloc,
+@@ -121,6 +123,7 @@ elf_machine_runtime_setup (struct link_map *l, int lazy, int profile)
+ 	.globl _start\n\
+ 	.type _start,@function\n\
+ _start:\n\
++	sub.l %fp, %fp\n\
+ 	move.l %sp, -(%sp)\n\
+ 	jbsr _dl_start\n\
+ 	addq.l #4, %sp\n\
+@@ -159,12 +162,16 @@ _dl_start_user:\n\
+ 	.size _dl_start_user, . - _dl_start_user\n\
+ 	.previous");
+ 
+-/* ELF_RTYPE_CLASS_PLT iff TYPE describes relocation of a PLT entry, so
+-   PLT entries should not be allowed to define the value.
++/* ELF_RTYPE_CLASS_PLT iff TYPE describes relocation of a PLT entry or
++   TLS variable, so undefined references should not be allowed to
++   define the value.
+    ELF_RTYPE_CLASS_NOCOPY iff TYPE should not be allowed to resolve to one
+    of the main executable's symbols, as for a COPY reloc.  */
+ #define elf_machine_type_class(type) \
+-  ((((type) == R_68K_JMP_SLOT) * ELF_RTYPE_CLASS_PLT)	\
++  ((((type) == R_68K_JMP_SLOT	     \
++     || (type) == R_68K_TLS_DTPMOD32 \
++     || (type) == R_68K_TLS_DTPREL32 \
++     || (type) == R_68K_TLS_TPREL32) * ELF_RTYPE_CLASS_PLT)	\
+    | (((type) == R_68K_COPY) * ELF_RTYPE_CLASS_COPY))
+ 
+ /* A reloc type used for ld.so cmdline arg lookups to reject PLT entries.  */
+@@ -262,6 +269,25 @@ elf_machine_rela (struct link_map *map, const Elf32_Rela *reloc,
  	case R_68K_PC32:
  	  *reloc_addr = value + reloc->r_addend - (Elf32_Addr) reloc_addr;
  	  break;
@@ -216,13 +133,14 @@ index 08a4396..098dc8d 100644
  	default:
 diff --git a/sysdeps/m68k/dl-tls.h b/sysdeps/m68k/dl-tls.h
 new file mode 100644
-index 0000000..249e0e2
+index 0000000..f2ce998
 --- /dev/null
-+++ b/ports/sysdeps/m68k/dl-tls.h
-@@ -0,0 +1,47 @@
++++ b/sysdeps/m68k/dl-tls.h
+@@ -0,0 +1,48 @@
 +/* Thread-local storage handling in the ELF dynamic linker.  M68K version.
-+   Copyright (C) 2009 Free Software Foundation, Inc.
++   Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -269,13 +187,14 @@ index 0000000..249e0e2
 +#define __TLS_GET_ADDR(__ti)	(__tls_get_addr (__ti) - TLS_DTV_OFFSET)
 diff --git a/sysdeps/m68k/libc-tls.c b/sysdeps/m68k/libc-tls.c
 new file mode 100644
-index 0000000..b4e5129
+index 0000000..e865fac
 --- /dev/null
-+++ b/ports/sysdeps/m68k/libc-tls.c
-@@ -0,0 +1,37 @@
++++ b/sysdeps/m68k/libc-tls.c
+@@ -0,0 +1,38 @@
 +/* Thread-local storage handling in the ELF dynamic linker.  m68k version.
-+   Copyright (C) 2009 Free Software Foundation, Inc.
++   Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -312,12 +231,13 @@ index 0000000..b4e5129
 +#endif
 diff --git a/sysdeps/m68k/nptl/Makefile b/sysdeps/m68k/nptl/Makefile
 new file mode 100644
-index 0000000..f0bcefb
+index 0000000..f36fc8f
 --- /dev/null
-+++ b/ports/sysdeps/m68k/nptl/Makefile
-@@ -0,0 +1,21 @@
-+# Copyright (C) 2009 Free Software Foundation, Inc.
++++ b/sysdeps/m68k/nptl/Makefile
+@@ -0,0 +1,22 @@
++# Copyright (C) 2010 Free Software Foundation, Inc.
 +# This file is part of the GNU C Library.
++# Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +#
 +# The GNU C Library is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU Lesser General Public
@@ -339,12 +259,13 @@ index 0000000..f0bcefb
 +endif
 diff --git a/sysdeps/m68k/nptl/pthread_spin_lock.c b/sysdeps/m68k/nptl/pthread_spin_lock.c
 new file mode 100644
-index 0000000..413e8cc
+index 0000000..1cc16c8
 --- /dev/null
-+++ b/ports/sysdeps/m68k/nptl/pthread_spin_lock.c
-@@ -0,0 +1,30 @@
-+/* Copyright (C) 2009 Free Software Foundation, Inc.
++++ b/sysdeps/m68k/nptl/pthread_spin_lock.c
+@@ -0,0 +1,31 @@
++/* Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -375,12 +296,13 @@ index 0000000..413e8cc
 +}
 diff --git a/sysdeps/m68k/nptl/pthread_spin_trylock.c b/sysdeps/m68k/nptl/pthread_spin_trylock.c
 new file mode 100644
-index 0000000..d2b4870
+index 0000000..831bffb
 --- /dev/null
-+++ b/ports/sysdeps/m68k/nptl/pthread_spin_trylock.c
-@@ -0,0 +1,27 @@
-+/* Copyright (C) 2009 Free Software Foundation, Inc.
++++ b/sysdeps/m68k/nptl/pthread_spin_trylock.c
+@@ -0,0 +1,28 @@
++/* Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -408,12 +330,13 @@ index 0000000..d2b4870
 +}
 diff --git a/sysdeps/m68k/nptl/pthreaddef.h b/sysdeps/m68k/nptl/pthreaddef.h
 new file mode 100644
-index 0000000..e52694d
+index 0000000..0a54907
 --- /dev/null
-+++ b/ports/sysdeps/m68k/nptl/pthreaddef.h
-@@ -0,0 +1,38 @@
-+/* Copyright (C) 2009 Free Software Foundation, Inc.
++++ b/sysdeps/m68k/nptl/pthreaddef.h
+@@ -0,0 +1,39 @@
++/* Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -454,7 +377,7 @@ diff --git a/sysdeps/m68k/nptl/tcb-offsets.sym b/sysdeps/m68k/nptl/tcb-offsets.s
 new file mode 100644
 index 0000000..b1bba65
 --- /dev/null
-+++ b/ports/sysdeps/m68k/nptl/tcb-offsets.sym
++++ b/sysdeps/m68k/nptl/tcb-offsets.sym
 @@ -0,0 +1,11 @@
 +#include <sysdep.h>
 +#include <tls.h>
@@ -469,13 +392,14 @@ index 0000000..b1bba65
 +TID_OFFSET			thread_offsetof (tid)
 diff --git a/sysdeps/m68k/nptl/tls.h b/sysdeps/m68k/nptl/tls.h
 new file mode 100644
-index 0000000..5b9817e
+index 0000000..c29824c
 --- /dev/null
-+++ b/ports/sysdeps/m68k/nptl/tls.h
-@@ -0,0 +1,170 @@
++++ b/sysdeps/m68k/nptl/tls.h
+@@ -0,0 +1,171 @@
 +/* Definition for thread-local data handling.  NPTL/m68k version.
-+   Copyright (C) 2009 Free Software Foundation, Inc.
++   Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -585,7 +509,7 @@ index 0000000..5b9817e
 +    INTERNAL_SYSCALL_DECL (err);					\
 +    int _sys_result;							\
 +									\
-+    _sys_result = INTERNAL_SYSCALL (write_tp, err, 1,			\
++    _sys_result = INTERNAL_SYSCALL (set_thread_area, err, 1,		\
 +				    ((void *) (tcbp)) + TLS_TCB_OFFSET); \
 +    INTERNAL_SYSCALL_ERROR_P (_sys_result, err) ? "unknown error" : NULL; })
 +
@@ -645,13 +569,14 @@ index 0000000..5b9817e
 +#endif	/* tls.h */
 diff --git a/sysdeps/m68k/tls-macros.h b/sysdeps/m68k/tls-macros.h
 new file mode 100644
-index 0000000..a15f8b9
+index 0000000..d03d7b9
 --- /dev/null
-+++ b/ports/sysdeps/m68k/tls-macros.h
-@@ -0,0 +1,69 @@
++++ b/sysdeps/m68k/tls-macros.h
+@@ -0,0 +1,70 @@
 +/* Macros for accessing thread-local storage.  m68k version.
-+   Copyright (C) 2009 Free Software Foundation, Inc.
++   Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -720,8 +645,8 @@ index 0000000..a15f8b9
 +
 diff --git a/sysdeps/unix/sysv/linux/m68k/Makefile b/sysdeps/unix/sysv/linux/m68k/Makefile
 index 6bb4f6b..97d9584 100644
---- a/ports/sysdeps/unix/sysv/linux/m68k/Makefile
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/Makefile
+--- a/sysdeps/unix/sysv/linux/m68k/Makefile
++++ b/sysdeps/unix/sysv/linux/m68k/Makefile
 @@ -2,12 +2,18 @@
  
  m68k-syntax-flag = -DMOTOROLA_SYNTAX
@@ -742,13 +667,14 @@ index 6bb4f6b..97d9584 100644
  install-bin += lddlibc4
  endif
 diff --git a/sysdeps/unix/sysv/linux/m68k/Versions b/sysdeps/unix/sysv/linux/m68k/Versions
-index 5650f7f..152f7aa 100644
---- a/ports/sysdeps/unix/sysv/linux/m68k/Versions
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/Versions
-@@ -31,5 +31,17 @@ libc {
-   }
+index 5650f7f..8a941f8 100644
+--- a/sysdeps/unix/sysv/linux/m68k/Versions
++++ b/sysdeps/unix/sysv/linux/m68k/Versions
+@@ -32,4 +32,18 @@ libc {
    GLIBC_2.11 {
      fallocate64;
+   }
++  GLIBC_2.12 {
 +    __m68k_read_tp;
 +  }
 +  GLIBC_PRIVATE {
@@ -761,17 +687,18 @@ index 5650f7f..152f7aa 100644
 +    __rtld___vdso_read_tp;
 +    __rtld___vdso_atomic_cmpxchg_32;
 +    __rtld___vdso_atomic_barrier;
-   }
++  }
  }
 diff --git a/sysdeps/unix/sysv/linux/m68k/bits/m68k-vdso.h b/sysdeps/unix/sysv/linux/m68k/bits/m68k-vdso.h
 new file mode 100644
-index 0000000..3d809cf
+index 0000000..c361060
 --- /dev/null
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/bits/m68k-vdso.h
-@@ -0,0 +1,60 @@
++++ b/sysdeps/unix/sysv/linux/m68k/bits/m68k-vdso.h
+@@ -0,0 +1,61 @@
 +/* Resolve function pointers to VDSO functions.
-+   Copyright (C) 2009 Free Software Foundation, Inc.
++   Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -830,12 +757,12 @@ index 0000000..3d809cf
 +
 +#endif /* _M68K_VDSO_H */
 diff --git a/sysdeps/unix/sysv/linux/m68k/clone.S b/sysdeps/unix/sysv/linux/m68k/clone.S
-index a179f8e..4135cd0 100644
---- a/ports/sysdeps/unix/sysv/linux/m68k/clone.S
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/clone.S
+index a179f8e..401e2ef 100644
+--- a/sysdeps/unix/sysv/linux/m68k/clone.S
++++ b/sysdeps/unix/sysv/linux/m68k/clone.S
 @@ -1,4 +1,4 @@
 -/* Copyright (C) 1996,97,98,2002 Free Software Foundation, Inc.
-+/* Copyright (C) 1996,97,98,2002,2009 Free Software Foundation, Inc.
++/* Copyright (C) 1996,97,98,2002,2010 Free Software Foundation, Inc.
     This file is part of the GNU C Library.
     Contributed by Andreas Schwab (schwab@issan.informatik.uni-dortmund.de)
  
@@ -930,12 +857,13 @@ index a179f8e..4135cd0 100644
  
 diff --git a/sysdeps/unix/sysv/linux/m68k/coldfire/nptl/bits/atomic.h b/sysdeps/unix/sysv/linux/m68k/coldfire/nptl/bits/atomic.h
 new file mode 100644
-index 0000000..972eb17
+index 0000000..1198bb9
 --- /dev/null
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/coldfire/nptl/bits/atomic.h
-@@ -0,0 +1,104 @@
-+/* Copyright (C) 2009 Free Software Foundation, Inc.
++++ b/sysdeps/unix/sysv/linux/m68k/coldfire/nptl/bits/atomic.h
+@@ -0,0 +1,105 @@
++/* Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -1040,12 +968,13 @@ index 0000000..972eb17
 +#endif
 diff --git a/sysdeps/unix/sysv/linux/m68k/init-first.c b/sysdeps/unix/sysv/linux/m68k/init-first.c
 new file mode 100644
-index 0000000..8b0ad05
+index 0000000..f8168d1
 --- /dev/null
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/init-first.c
-@@ -0,0 +1,73 @@
-+/* Copyright (C) 2009 Free Software Foundation, Inc.
++++ b/sysdeps/unix/sysv/linux/m68k/init-first.c
+@@ -0,0 +1,74 @@
++/* Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -1121,17 +1050,18 @@ diff --git a/sysdeps/unix/sysv/linux/m68k/libc-m68k-vdso.c b/sysdeps/unix/sysv/l
 new file mode 100644
 index 0000000..45982e9
 --- /dev/null
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/libc-m68k-vdso.c
++++ b/sysdeps/unix/sysv/linux/m68k/libc-m68k-vdso.c
 @@ -0,0 +1 @@
 +#include "m68k-vdso.c"
 diff --git a/sysdeps/unix/sysv/linux/m68k/m68k-helpers.S b/sysdeps/unix/sysv/linux/m68k/m68k-helpers.S
 new file mode 100644
-index 0000000..d9ccb4f
+index 0000000..00db4bb
 --- /dev/null
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/m68k-helpers.S
-@@ -0,0 +1,104 @@
-+/* Copyright (C) 2009 Free Software Foundation, Inc.
++++ b/sysdeps/unix/sysv/linux/m68k/m68k-helpers.S
+@@ -0,0 +1,105 @@
++/* Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -1173,7 +1103,7 @@ index 0000000..d9ccb4f
 +	.hidden __vdso_read_tp_stub
 +ENTRY (__vdso_read_tp_stub)
 +	cfi_startproc
-+	move.l	#__NR_read_tp, %d0
++	move.l	#__NR_get_thread_area, %d0
 +	trap	#0
 +	move.l	%d0, %a0
 +	rts
@@ -1236,12 +1166,13 @@ index 0000000..d9ccb4f
 +# endif /* SHARED */
 diff --git a/sysdeps/unix/sysv/linux/m68k/m68k-vdso.c b/sysdeps/unix/sysv/linux/m68k/m68k-vdso.c
 new file mode 100644
-index 0000000..a605039
+index 0000000..73b2570
 --- /dev/null
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/m68k-vdso.c
-@@ -0,0 +1,34 @@
-+/* Copyright (C) 2009 Free Software Foundation, Inc.
++++ b/sysdeps/unix/sysv/linux/m68k/m68k-vdso.c
+@@ -0,0 +1,35 @@
++/* Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -1276,12 +1207,13 @@ index 0000000..a605039
 +#endif /* SHARED */
 diff --git a/sysdeps/unix/sysv/linux/m68k/nptl/bits/pthreadtypes.h b/sysdeps/unix/sysv/linux/m68k/nptl/bits/pthreadtypes.h
 new file mode 100644
-index 0000000..b3c719c
+index 0000000..0140810
 --- /dev/null
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/nptl/bits/pthreadtypes.h
-@@ -0,0 +1,171 @@
-+/* Copyright (C) 2009 Free Software Foundation, Inc.
++++ b/sysdeps/unix/sysv/linux/m68k/nptl/bits/pthreadtypes.h
+@@ -0,0 +1,172 @@
++/* Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -1453,12 +1385,13 @@ index 0000000..b3c719c
 +#endif	/* bits/pthreadtypes.h */
 diff --git a/sysdeps/unix/sysv/linux/m68k/nptl/bits/semaphore.h b/sysdeps/unix/sysv/linux/m68k/nptl/bits/semaphore.h
 new file mode 100644
-index 0000000..c72ddcc
+index 0000000..2950cc9
 --- /dev/null
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/nptl/bits/semaphore.h
-@@ -0,0 +1,35 @@
-+/* Copyright (C) 2009 Free Software Foundation, Inc.
++++ b/sysdeps/unix/sysv/linux/m68k/nptl/bits/semaphore.h
+@@ -0,0 +1,36 @@
++/* Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -1496,18 +1429,19 @@ diff --git a/sysdeps/unix/sysv/linux/m68k/nptl/clone.S b/sysdeps/unix/sysv/linux
 new file mode 100644
 index 0000000..e7388fe
 --- /dev/null
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/nptl/clone.S
++++ b/sysdeps/unix/sysv/linux/m68k/nptl/clone.S
 @@ -0,0 +1,2 @@
 +#define RESET_PID
 +#include "../clone.S"
 diff --git a/sysdeps/unix/sysv/linux/m68k/nptl/createthread.c b/sysdeps/unix/sysv/linux/m68k/nptl/createthread.c
 new file mode 100644
-index 0000000..537a5e9
+index 0000000..be11444
 --- /dev/null
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/nptl/createthread.c
-@@ -0,0 +1,24 @@
-+/* Copyright (C) 2009 Free Software Foundation, Inc.
++++ b/sysdeps/unix/sysv/linux/m68k/nptl/createthread.c
+@@ -0,0 +1,25 @@
++/* Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -1532,12 +1466,13 @@ index 0000000..537a5e9
 +#include <nptl/sysdeps/pthread/createthread.c>
 diff --git a/sysdeps/unix/sysv/linux/m68k/nptl/fork.c b/sysdeps/unix/sysv/linux/m68k/nptl/fork.c
 new file mode 100644
-index 0000000..1e4de36
+index 0000000..dc1584e
 --- /dev/null
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/nptl/fork.c
-@@ -0,0 +1,29 @@
-+/* Copyright (C) 2009 Free Software Foundation, Inc.
++++ b/sysdeps/unix/sysv/linux/m68k/nptl/fork.c
+@@ -0,0 +1,30 @@
++/* Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -1567,12 +1502,13 @@ index 0000000..1e4de36
 +#include <sysdeps/unix/sysv/linux/fork.c>
 diff --git a/sysdeps/unix/sysv/linux/m68k/nptl/lowlevellock.h b/sysdeps/unix/sysv/linux/m68k/nptl/lowlevellock.h
 new file mode 100644
-index 0000000..8ab444b
+index 0000000..926077d
 --- /dev/null
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/nptl/lowlevellock.h
-@@ -0,0 +1,280 @@
-+/* Copyright (C) 2009 Free Software Foundation, Inc.
++++ b/sysdeps/unix/sysv/linux/m68k/nptl/lowlevellock.h
+@@ -0,0 +1,281 @@
++/* Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -1853,12 +1789,13 @@ index 0000000..8ab444b
 +#endif	/* lowlevellock.h */
 diff --git a/sysdeps/unix/sysv/linux/m68k/nptl/pt-vfork.S b/sysdeps/unix/sysv/linux/m68k/nptl/pt-vfork.S
 new file mode 100644
-index 0000000..087a3bb
+index 0000000..36c9270
 --- /dev/null
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/nptl/pt-vfork.S
-@@ -0,0 +1,35 @@
-+/* Copyright (C) 2009 Free Software Foundation, Inc.
++++ b/sysdeps/unix/sysv/linux/m68k/nptl/pt-vfork.S
+@@ -0,0 +1,36 @@
++/* Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -1894,12 +1831,13 @@ index 0000000..087a3bb
 +#include <sysdeps/unix/sysv/linux/m68k/vfork.S>
 diff --git a/sysdeps/unix/sysv/linux/m68k/nptl/pthread_once.c b/sysdeps/unix/sysv/linux/m68k/nptl/pthread_once.c
 new file mode 100644
-index 0000000..6ef86b2
+index 0000000..415045f
 --- /dev/null
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/nptl/pthread_once.c
-@@ -0,0 +1,90 @@
-+/* Copyright (C) 2009 Free Software Foundation, Inc.
++++ b/sysdeps/unix/sysv/linux/m68k/nptl/pthread_once.c
+@@ -0,0 +1,91 @@
++/* Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -1990,12 +1928,13 @@ index 0000000..6ef86b2
 +strong_alias (__pthread_once, __pthread_once_internal)
 diff --git a/sysdeps/unix/sysv/linux/m68k/nptl/sysdep-cancel.h b/sysdeps/unix/sysv/linux/m68k/nptl/sysdep-cancel.h
 new file mode 100644
-index 0000000..4bfb068
+index 0000000..87e2d55
 --- /dev/null
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/nptl/sysdep-cancel.h
-@@ -0,0 +1,140 @@
-+/* Copyright (C) 2009 Free Software Foundation, Inc.
++++ b/sysdeps/unix/sysv/linux/m68k/nptl/sysdep-cancel.h
+@@ -0,0 +1,141 @@
++/* Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -2136,12 +2075,13 @@ index 0000000..4bfb068
 +#endif
 diff --git a/sysdeps/unix/sysv/linux/m68k/nptl/vfork.S b/sysdeps/unix/sysv/linux/m68k/nptl/vfork.S
 new file mode 100644
-index 0000000..d7fd1de
+index 0000000..8599c3d
 --- /dev/null
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/nptl/vfork.S
-@@ -0,0 +1,37 @@
-+/* Copyright (C) 2009 Free Software Foundation, Inc.
++++ b/sysdeps/unix/sysv/linux/m68k/nptl/vfork.S
+@@ -0,0 +1,38 @@
++/* Copyright (C) 2010 Free Software Foundation, Inc.
 +   This file is part of the GNU C Library.
++   Contributed by Maxim Kuvyrkov <maxim@codesourcery.com>, 2010.
 +
 +   The GNU C Library is free software; you can redistribute it and/or
 +   modify it under the terms of the GNU Lesser General Public
@@ -2178,12 +2118,12 @@ index 0000000..d7fd1de
 +
 +#include <sysdeps/unix/sysv/linux/m68k/vfork.S>
 diff --git a/sysdeps/unix/sysv/linux/m68k/socket.S b/sysdeps/unix/sysv/linux/m68k/socket.S
-index 2690f18..d895e94 100644
---- a/ports/sysdeps/unix/sysv/linux/m68k/socket.S
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/socket.S
+index 2690f18..147a3b2 100644
+--- a/sysdeps/unix/sysv/linux/m68k/socket.S
++++ b/sysdeps/unix/sysv/linux/m68k/socket.S
 @@ -1,4 +1,4 @@
 -/* Copyright (C) 1996, 1997, 1998 Free Software Foundation, Inc.
-+/* Copyright (C) 1996, 1997, 1998, 2009 Free Software Foundation, Inc.
++/* Copyright (C) 1996, 1997, 1998, 2010 Free Software Foundation, Inc.
     This file is part of the GNU C Library.
  
     The GNU C Library is free software; you can redistribute it and/or
@@ -2252,13 +2192,87 @@ index 2690f18..d895e94 100644
  
  	/* Successful; return the syscall's value.  */
  	rts
+diff --git a/sysdeps/unix/sysv/linux/m68k/sysdep.h b/sysdeps/unix/sysv/linux/m68k/sysdep.h
+index 12687d8..e3aed15 100644
+--- a/sysdeps/unix/sysv/linux/m68k/sysdep.h
++++ b/sysdeps/unix/sysv/linux/m68k/sysdep.h
+@@ -1,4 +1,5 @@
+-/* Copyright (C) 1996, 1997, 1998, 2000, 2003, 2004, 2006 Free Software Foundation, Inc.
++/* Copyright (C) 1996, 1997, 1998, 2000, 2003, 2004, 2006, 2010
++   Free Software Foundation, Inc.
+    This file is part of the GNU C Library.
+    Written by Andreas Schwab, <schwab@issan.informatik.uni-dortmund.de>,
+    December 1995.
+@@ -23,6 +24,7 @@
+ 
+ #include <sysdeps/unix/sysdep.h>
+ #include <sysdeps/m68k/sysdep.h>
++#include <tls.h>
+ 
+ /* Defines RTLD_PRIVATE_ERRNO.  */
+ #include <dl-sysdep.h>
+@@ -148,9 +150,11 @@ SYSCALL_ERROR_LABEL:							      \
+ 	arg 3		%d3	     call-saved
+ 	arg 4		%d4	     call-saved
+ 	arg 5		%d5	     call-saved
++	arg 6		%a0	     call-clobbered
+ 
+    The stack layout upon entering the function is:
+ 
++	24(%sp)		Arg# 6
+ 	20(%sp)		Arg# 5
+ 	16(%sp)		Arg# 4
+ 	12(%sp)		Arg# 3
+@@ -229,7 +233,7 @@ SYSCALL_ERROR_LABEL:							      \
+    normally.  It will never touch errno.  This returns just what the kernel
+    gave back.  */
+ #undef INTERNAL_SYSCALL
+-#define INTERNAL_SYSCALL(name, err, nr, args...)	\
++#define INTERNAL_SYSCALL_NCS(name, err, nr, args...)	\
+   ({ unsigned int _sys_result;				\
+      {							\
+        /* Load argument values in temporary variables
+@@ -237,7 +241,7 @@ SYSCALL_ERROR_LABEL:							      \
+ 	  before the call used registers are set.  */	\
+        LOAD_ARGS_##nr (args)				\
+        LOAD_REGS_##nr					\
+-       register int _d0 asm ("%d0") = __NR_##name;	\
++       register int _d0 asm ("%d0") = name;		\
+        asm volatile ("trap #0"				\
+ 		     : "=d" (_d0)			\
+ 		     : "0" (_d0) ASM_ARGS_##nr		\
+@@ -245,6 +249,8 @@ SYSCALL_ERROR_LABEL:							      \
+        _sys_result = _d0;				\
+      }							\
+      (int) _sys_result; })
++#define INTERNAL_SYSCALL(name, err, nr, args...)	\
++  INTERNAL_SYSCALL_NCS (__NR_##name, err, nr, ##args)
+ 
+ #undef INTERNAL_SYSCALL_ERROR_P
+ #define INTERNAL_SYSCALL_ERROR_P(val, err)		\
+@@ -300,4 +306,15 @@ SYSCALL_ERROR_LABEL:							      \
+ #define ASM_ARGS_6	ASM_ARGS_5, "a" (_a0)
+ 
+ #endif /* not __ASSEMBLER__ */
++
++/* Pointer mangling is not yet supported for M68K.  */
++#define PTR_MANGLE(var) (void) (var)
++#define PTR_DEMANGLE(var) (void) (var)
++
++#if defined NEED_DL_SYSINFO || defined NEED_DL_SYSINFO_DSO
++/* M68K needs system-supplied DSO to access TLS helpers
++   even when statically linked.  */
++# define NEED_STATIC_SYSINFO_DSO 1
++#endif
++
+ #endif
 diff --git a/sysdeps/unix/sysv/linux/m68k/vfork.S b/sysdeps/unix/sysv/linux/m68k/vfork.S
-index 8027b2f..5084a85 100644
---- a/ports/sysdeps/unix/sysv/linux/m68k/vfork.S
-+++ b/ports/sysdeps/unix/sysv/linux/m68k/vfork.S
+index 8027b2f..61bbf2f 100644
+--- a/sysdeps/unix/sysv/linux/m68k/vfork.S
++++ b/sysdeps/unix/sysv/linux/m68k/vfork.S
 @@ -1,4 +1,4 @@
 -/* Copyright (C) 1999, 2002, 2003 Free Software Foundation, Inc.
-+/* Copyright (C) 1999, 2002, 2003, 2009 Free Software Foundation, Inc.
++/* Copyright (C) 1999, 2002, 2003, 2010 Free Software Foundation, Inc.
     This file is part of the GNU C Library.
     Contributed by Andreas Schwab <schwab@gnu.org>.
  
@@ -2298,8 +2312,3 @@ index 8027b2f..5084a85 100644
  	tstl	%d0
  	jmi	.Lerror		/* Branch forward if it failed.  */
  
--- 
-1.6.4
-
-
---------------000805080008040604080701--

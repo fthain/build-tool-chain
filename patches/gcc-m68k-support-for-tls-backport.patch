@@ -1,14 +1,8 @@
-From gcc-patches-return-240889-listarch-gcc-patches=gcc dot gnu dot org at gcc dot gnu dot org Sat May 16 18:03:48 2009
-Return-Path: <gcc-patches-return-240889-listarch-gcc-patches=gcc dot gnu dot org at gcc dot gnu dot org>
-Delivered-To: listarch-gcc-patches at gcc dot gnu dot org
-Received: (qmail 16209 invoked by alias); 16 May 2009 18:03:42 -0000
-Received: (qmail 14545 invoked by uid 22791); 16 May 2009 18:03:35 -0000
-X-SWARE-Spam-Status: No, hits=1.3 required=5.0 	tests=AWL,BAYES_20,J_CHICKENPOX_31,J_CHICKENPOX_41,J_CHICKENPOX_74,J_CHICKENPOX_92,KAM_STOCKGEN,SPF_FAIL
-X-Spam-Check-By: sourceware.org
-Received: from mx20.gnu.org (HELO mx20.gnu.org) (199.232.41.8)     by sourceware.org (qpsmtpd/0.43rc1) with ESMTP; Sat, 16 May 2009 18:03:26 +0000
-Received: from mail.codesourcery.com ([65.74.133.4]) 	by mx20.gnu.org with esmtp (Exim 4.60) 	(envelope-from <maxim@codesourcery.com>) 	id 1M5OEE-0001Eo-Qd 	for gcc-patches@gcc.gnu.org; Sat, 16 May 2009 14:03:23 -0400
-Received: (qmail 3615 invoked from network); 16 May 2009 18:03:17 -0000
-Received: from unknown (HELO mbp.local) (maxim@127.0.0.2)   by mail.codesourcery.com with ESMTPA; 16 May 2009 18:03:17 -0000
+This is not the original patch: it has been backported to gcc-4.4 and the calls.c stuff commented out since that was not yet submitted.
+
+C.f. http://gcc.gnu.org/viewcvs?view=revision&revision=147654
+
+
 Message-ID: <4A0EFFDA.7010809@codesourcery.com>
 Date: Sat, 16 May 2009 22:03:06 +0400
 From: Maxim Kuvyrkov <maxim at codesourcery dot com>
@@ -399,34 +393,34 @@ Index: gcc-mainline/gcc/configure.ac
    powerpc-*-*)
      conftest_s='
  	.section ".tdata","awT",@progbits
-Index: gcc-mainline/gcc/calls.c
-===================================================================
---- gcc-mainline/gcc/calls.c	(revision 147467)
-+++ gcc-mainline/gcc/calls.c	(working copy)
-@@ -3412,11 +3412,6 @@ emit_library_call_value_1 (int retval, r
- 
-       nargs++;
- 
--      /* Make sure it is a reasonable operand for a move or push insn.  */
--      if (!REG_P (addr) && !MEM_P (addr)
--	  && ! (CONSTANT_P (addr) && LEGITIMATE_CONSTANT_P (addr)))
--	addr = force_operand (addr, NULL_RTX);
--
-       argvec[count].value = addr;
-       argvec[count].mode = Pmode;
-       argvec[count].partial = 0;
-@@ -3452,11 +3447,6 @@ emit_library_call_value_1 (int retval, r
-       gcc_assert (mode != BLKmode
- 		  && (GET_MODE (val) == mode || GET_MODE (val) == VOIDmode));
- 
--      /* Make sure it is a reasonable operand for a move or push insn.  */
--      if (!REG_P (val) && !MEM_P (val)
--	  && ! (CONSTANT_P (val) && LEGITIMATE_CONSTANT_P (val)))
--	val = force_operand (val, NULL_RTX);
--
-       if (pass_by_reference (&args_so_far, mode, NULL_TREE, 1))
- 	{
- 	  rtx slot;
+#Index: gcc-mainline/gcc/calls.c
+#===================================================================
+#--- gcc-mainline/gcc/calls.c	(revision 147467)
+#+++ gcc-mainline/gcc/calls.c	(working copy)
+#@@ -3412,11 +3412,6 @@ emit_library_call_value_1 (int retval, r
+# 
+#       nargs++;
+# 
+#-      /* Make sure it is a reasonable operand for a move or push insn.  */
+#-      if (!REG_P (addr) && !MEM_P (addr)
+#-	  && ! (CONSTANT_P (addr) && LEGITIMATE_CONSTANT_P (addr)))
+#-	addr = force_operand (addr, NULL_RTX);
+#-
+#       argvec[count].value = addr;
+#       argvec[count].mode = Pmode;
+#       argvec[count].partial = 0;
+#@@ -3452,11 +3447,6 @@ emit_library_call_value_1 (int retval, r
+#       gcc_assert (mode != BLKmode
+# 		  && (GET_MODE (val) == mode || GET_MODE (val) == VOIDmode));
+# 
+#-      /* Make sure it is a reasonable operand for a move or push insn.  */
+#-      if (!REG_P (val) && !MEM_P (val)
+#-	  && ! (CONSTANT_P (val) && LEGITIMATE_CONSTANT_P (val)))
+#-	val = force_operand (val, NULL_RTX);
+#-
+#       if (pass_by_reference (&args_so_far, mode, NULL_TREE, 1))
+# 	{
+# 	  rtx slot;
 Index: gcc-mainline/gcc/config/m68k/predicates.md
 ===================================================================
 --- gcc-mainline/gcc/config/m68k/predicates.md	(revision 147467)

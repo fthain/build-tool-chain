@@ -52,9 +52,17 @@ function prep_binutils () {
         # Darwin build failure, fixes i386-darwin too
         patch -p1 < ${BTC_PATCHES}/binutils-2.18-link-bfd-with-libiberty.patch
         ;;
-    ( * )
+    ( binutils-2.19.51 )
         # Debian
         patch -p1 < ${BTC_PATCHES}/binutils-2.19.51-debian.diff
+        # Avoid fatal compiler warnings
+        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        # Darwin build failure
+        patch -p1 < ${BTC_PATCHES}/binutils-2.18.50.0.4-opcodes-bfd-dylib.diff
+        ;;
+    ( binutils-2.20.1 )
+        # Debian
+        decompress ${BTC_PATCHES}/binutils_2.20.1-9-debian.diff | patch -p1
         # Avoid fatal compiler warnings
         patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         # Darwin build failure
