@@ -5,12 +5,10 @@ make[1]: *** [elf/subdir_lib] Error 2
 make[1]: Leaving directory `/Volumes/btc-0.11/build/glibc-2.10.1'
 make: *** [all] Error 2
 
+From glibc git commit 0079dd2382eba185d22410a1d3088dc7146bc00a.
+(eglibc svn revision 9281).
 
-From commit 0079dd2382eba185d22410a1d3088dc7146bc00a
-This change appears in eglibc svn revision 9281.
-
-It is needed to avoid the above error when backporting
-subsequent m68k TLS commits.
+It is needed to avoid the above error when backporting m68k TLS calls.
 
 diff --git a/Versions.def b/Versions.def
 index a8a9cd2..70de1c1 100644

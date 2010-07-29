@@ -1,0 +1,6 @@
+. ${BTC_PROFILES}/C
+. ${BTC_PROFILES}/3.4
+TARGET=m68k-linux-gnu
+TARGET_CPU=m68k
+BINUTILS_DIST=binutils-2.17
+LINUX_DIST=linux-2.4.36

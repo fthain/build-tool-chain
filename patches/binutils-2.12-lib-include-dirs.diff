@@ -1,0 +1,29 @@
+
+Hack to move some directories, to get a result like this patch...
+http://cygwin.ru/ml/binutils/2002-05/msg00383.html
+
+diff -ru binutils-2.12.90.0.1orig/configure binutils-2.12.90.0.1/configure
+--- binutils-2.12.90.0.1/configure	2002-02-04 06:22:29.000000000 +1100
++++ binutils-2.12.90.0.1/configure	2010-07-08 12:57:48.000000000 +1000
+@@ -95,8 +95,8 @@
+ sysconfdir='${prefix}/etc'
+ sharedstatedir='${prefix}/com'
+ localstatedir='${prefix}/var'
+-libdir='${exec_prefix}/lib'
+-includedir='${prefix}/include'
++libdir='${prefix}/${host_alias}/${target_alias}/lib'
++includedir='${prefix}/${host_alias}/${target_alias}/include'
+ oldincludedir='/usr/include'
+ infodir='${prefix}/info'
+ mandir='${prefix}/man'
+--- binutils-2.12.90.0.1/ld/Makefile.in	2010-07-13 15:11:42.000000000 +1000
++++ binutils-2.12.90.0.1/ld/Makefile.in	2010-07-13 15:15:05.000000000 +1000
+@@ -123,7 +123,7 @@
+ # We put the scripts in the directory $(scriptdir)/ldscripts.
+ # We can't put the scripts in $(datadir) because the SEARCH_DIR
+ # directives need to be different for native and cross linkers.
+-scriptdir = $(libdir)
++scriptdir = $(prefix)/lib
+ 
+ EMUL = @EMUL@
+ EMULATION_OFILES = @EMULATION_OFILES@

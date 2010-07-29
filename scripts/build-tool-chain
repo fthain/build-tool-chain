@@ -1,0 +1,305 @@
+#!/bin/bash
+
+# Cross-tool-chain build script, for hosting on Mac OS X or Linux, targeting Linux.
+# Copyright (c) 2004-2010 Finn Thain <fthain@telegraphics.com.au>
+
+set -o pipefail 2>/dev/null
+set -e -u
+
+##############################################
+#
+# Definitions of what and where
+
+# This is to be set to the location of the unpacked tarball or work area
+BTC_DIST=${HOME}/btc
+
+# Where to find sources etc.
+BTC_SOURCES=${HOME}/btc-sources
+
+# This is where the tool-chain will be installed
+#BTC_PRODUCE=/opt/btc-0.12
+BTC_PRODUCE=/Volumes/btc-0.12
+
+# Missing host tools needed for the build are to be installed here
+HOST_TOOLS_PREFIX=${BTC_PRODUCE}/host_tools
+
+# Logs will be left here
+BTC_LOGS=${BTC_LOGS:-${BTC_PRODUCE}/logs}
+
+# Scratch area
+BTC_BUILD=${BTC_PRODUCE}/build
+
+# Options for make
+MAKE_OPTS=-j2
+
+# Optional URL prefix for source tar file cache
+BTC_MIRRORS=
+
+##############################################
+#
+# Define internal functions and variables
+
+for f in ${BTC_DIST}/scripts/*.lib; do . $f; done
+
+BTC_CONFIGS=${BTC_DIST}/configs
+BTC_PATCHES=${BTC_DIST}/patches
+BTC_PROFILES=${BTC_DIST}/profiles
+
+##############################################
+#
+# Profile definitions
+
+# Source the profile
+if [ "${1:-}" == "-p" -a "${2:-}" != "" ]; then
+    . ${BTC_PROFILES}/${2}
+else
+    echo usage: $0 '-p <profile> [ -c command ]'
+    exit 1
+fi
+
+# Profile must set these
+echo TARGET: $TARGET
+echo TARGET_CPU: $TARGET_CPU
+echo METHOD: $METHOD
+echo GLIBC_ADD_ONS: $GLIBC_ADD_ONS
+
+# Tool chain prefix
+TC_PREFIX=${BTC_PRODUCE}/${PROFILE_NAME}
+
+mkdir -p ${TC_PREFIX}/${TARGET} ${BTC_BUILD} ${HOST_TOOLS_PREFIX}/bin
+
+# The filesystem must be case-sensitive.
+rm -f {${BTC_BUILD},${TC_PREFIX}}/{a,A}
+touch {${BTC_BUILD},${TC_PREFIX}}/{a,A}
+rm -f {${BTC_BUILD},${TC_PREFIX}}/A
+if [ -e ${BTC_BUILD}/a -a -e ${TC_PREFIX}/a ]; then
+    rm -f {${BTC_BUILD},${TC_PREFIX}}/a
+else
+    echo BTC_BUILD or TC_PREFIX is case-insensitive.
+    exit 1
+fi
+
+export PATH=${TC_PREFIX}/bin:${HOST_TOOLS_PREFIX}/bin:/bin:/sbin:/usr/bin:/usr/sbin
+if [ "${MANPATH:+set}" = set ] ; then
+    export MANPATH=${MANPATH}:${TC_PREFIX}/share/man:${HOST_TOOLS_PREFIX}/share/man
+fi
+export INFOPATH=${INFOPATH:-}${INFOPATH:+:}${TC_PREFIX}/share/info:${HOST_TOOLS_PREFIX}/share/info
+
+##############################################
+#
+# Set up build environment according to profile
+#
+# $METHOD controls how kernel headers and binaries are made, also how gcc gets
+# patched & built, since NPTL => shared gcc => early build of glibc crt
+# objects. Current glibc seems to require gcc method 3, even for linuxthreads.
+# Also, older tools don't support sysroot, so they need the old method.
+
+case $METHOD in
+( A )
+    SYSROOT=
+    BINUTILS_CONFIG_OPTS=
+    GLIBC_PREFIX=${TC_PREFIX}/${TARGET}/libc
+    GLIBC_INSTALL_ROOT=/
+    GLIBC_HEADERS=${GLIBC_PREFIX}/include
+    glibc_enable_add_ons=linuxthreads
+    GLIBC_CONFIG_OPTS=""
+    GCC_CONFIG_OPTS="--with-local-prefix=${TC_PREFIX}/${TARGET}/local --with-headers=${GLIBC_HEADERS}"
+    GLIBC_NEEDS_SHARED_GCC=no
+    ln -nsf libc/{lib,include} ${TC_PREFIX}/${TARGET}
+    ;;
+( B )
+    SYSROOT=${TC_PREFIX}/${TARGET}/sysroot
+    BINUTILS_CONFIG_OPTS="--with-sysroot=${SYSROOT}"
+    GLIBC_PREFIX=/usr
+    GLIBC_INSTALL_ROOT=${SYSROOT}
+    GLIBC_HEADERS=${SYSROOT}/usr/include
+    glibc_enable_add_ons=linuxthreads
+    GLIBC_CONFIG_OPTS=
+    GCC_CONFIG_OPTS="--with-sysroot=${SYSROOT}"
+    GLIBC_NEEDS_SHARED_GCC=no
+    ;;
+( * )
+    SYSROOT=${TC_PREFIX}/${TARGET}/sysroot
+    BINUTILS_CONFIG_OPTS="--with-sysroot=${SYSROOT}"
+    GLIBC_PREFIX=/usr
+    GLIBC_INSTALL_ROOT=${SYSROOT}
+    GLIBC_HEADERS=${SYSROOT}/usr/include
+    case ${METHOD}-${TARGET} in
+    ( C-m68k-* | C-mipsel-* )
+        glibc_enable_add_ons=linuxthreads
+        GLIBC_CONFIG_OPTS=
+        ;;
+    ( * )
+        glibc_enable_add_ons=nptl
+        GLIBC_CONFIG_OPTS="--with-tls --enable-bind-now --with-__thread"
+        ;;
+    esac
+    GCC_CONFIG_OPTS="--with-sysroot=${SYSROOT} --enable-altivec"
+    GLIBC_NEEDS_SHARED_GCC=yes
+    ;;
+esac
+
+for add_on in ${GLIBC_ADD_ONS}; do
+    # GLIBC_ADD_ONS will be unpacked, but only --enabled-add-ons will be used.
+    if [ $add_on != nptl -a $add_on != linuxthreads ] ; then
+        glibc_enable_add_ons="${add_on},${glibc_enable_add_ons}"
+    fi
+done
+GLIBC_CONFIG_OPTS="${GLIBC_CONFIG_OPTS} --enable-add-ons=${glibc_enable_add_ons}"
+
+GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --infodir=${TC_PREFIX}/share/info --mandir=${TC_PREFIX}/share/man"
+
+##############################################
+#
+# Non-profile definitions
+
+PATH_TO_AM=$(/bin/ls -d /usr/share/automake-*/ | tail -n 1)
+
+# The build and host machine tuples
+BUILD=$(${PATH_TO_AM}/config.guess)
+
+# Sometimes useful for tricking configure into cross compiling
+if [ $(${PATH_TO_AM}/config.sub $TARGET) = ${BUILD} ] ; then
+    BUILD=${BUILD}x
+fi
+
+if [ ${BUILD} != ${BUILD%-apple-darwin*} ] ; then
+    # Build binaries backward compatible to tiger
+    export MACOSX_DEPLOYMENT_TARGET=10.4
+    # Turn off Apple's pre-compiled headers
+    HOST_CFLAGS='-no-cpp-precomp'
+else
+    # This works for Linux hosts
+    HOST_CFLAGS=''
+fi
+
+export LANGUAGE=C LANG=C LC_ALL=C
+export CPP="gcc -E $HOST_CFLAGS"
+export CC=gcc
+
+##############################################
+#
+# Stop here and start an interactive shell?
+
+if [ "${3:-}" == "-c" ] ; then
+    export -f fetch untar decompress prep_linux build_linux package_linux
+    export BTC_PRODUCE HOST_TOOLS_PREFIX BTC_LOGS
+    export BTC_BUILD BTC_SOURCES BTC_PATCHES BTC_CONFIGS BTC_MIRRORS
+    export BUILD TARGET TARGET_CPU
+    cd $BTC_BUILD
+    exec bash -c "$4"
+fi
+
+##############################################
+#
+# install host tools
+
+if [ ${BUILD} != ${BUILD%-apple-darwin*} ] ; then
+    log install_sed       sed-4.2.1
+    log install_make      make-3.81
+    log install_gettext   gettext-0.16.1
+    log install_coreutils coreutils-8.5
+    log install_loadkeys  kbd-1.12
+    log install_find_pl   find.pl
+fi
+log install_gawk      gawk-3.1.8
+log install_bison     bison-1.28
+log install_flex      flex-2.5.4a 
+case ${GCC_DIST#*-} in
+( 2.* | 3.* | 4.[012].* )
+    ;;
+( * )
+    log install_gmp       gmp-4.3.2
+    log install_mpfr      mpfr-2.4.2
+    GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-gmp=${HOST_TOOLS_PREFIX} --with-mpfr=${HOST_TOOLS_PREFIX}"
+    ;;
+esac
+case ${GCC_DIST#*-} in
+( 2.* | 3.* | 4.[0123].* )
+    ;;
+( * )
+    log install_m4        m4-1.4.13
+    log install_ppl       ppl-0.10.2
+    log install_cloog_ppl cloog-ppl-0.15.9
+    GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-ppl=${HOST_TOOLS_PREFIX} --with-cloog=${HOST_TOOLS_PREFIX}"
+    ;;
+esac
+log install_depmod depmod.pl-1_15_stable
+
+##############################################
+#
+# build and install binutils
+
+log prep_binutils ${BINUTILS_DIST}
+log build_binutils binutils-${TARGET}
+
+# When restarting a build, you needn't remove the binutils build directory
+# if it built okay. Just remove all the other build directories and the
+# $TC_PREFIX directory. Then binutils will just reinstall. (This works
+# because binutils has no deps in $TC_PREFIX).
+
+log install_binutils binutils-${TARGET}
+
+##############################################
+#
+# install kernel headers
+
+log prep_linux ${LINUX_DIST}
+log install_linux_headers ${LINUX_DIST}
+
+##############################################
+#
+# glibc pass 1: install the headers
+
+log prep_glibc ${GLIBC_DIST}
+log install_glibc_headers glibc-${TARGET}-1
+
+##############################################
+#
+# gcc-core pass 1: static compiler
+
+log prep_gcc_core ${GCC_DIST}
+log install_gcc_core_static gcc-${TARGET}-1
+
+##############################################
+#
+# (omitted unless using NPTL in glibc pass 3)
+# glibc pass 2: csu/subdir_lib for crt[1in].o
+# gcc-core pass 2: first non-static compiler;
+# build and install the required libgcc_s.so and libgcc_eh.a
+
+if [ "x${GLIBC_NEEDS_SHARED_GCC}" = xyes ]; then
+    log make_glibc_runtime glibc-${TARGET}-2
+    log install_gcc_core_shared gcc-${TARGET}-2
+fi
+
+##############################################
+#
+# glibc pass 3: final build
+#
+
+log install_glibc glibc-${TARGET}-3
+
+##############################################
+#
+# GCC: final build and install
+
+log prep_gcc ${GCC_DIST}
+log install_gcc gcc-${TARGET}-3
+
+##############################################
+#
+# gdb: build and install
+
+if [ ${GDB_DIST:-none} != none ] ; then
+    log prep_gdb ${GDB_DIST}
+    log install_gdb gdb-${TARGET}
+fi
+
+##############################################
+#
+# test the compiler
+
+log build_linux ${LINUX_DIST}
+
+##############################################

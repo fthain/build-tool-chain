@@ -1,0 +1,423 @@
+#! /bin/sh -e
+
+# DP: versioned gcc names
+
+if [ $# -eq 3 -a "$2" = '-d' ]; then
+    pdir="-d $3"
+elif [ $# -ne 1 ]; then
+    echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+    exit 1
+fi
+case "$1" in
+    -patch) patch $pdir -f --no-backup-if-mismatch -p1 < $0;;
+    -unpatch) patch $pdir -f --no-backup-if-mismatch -R -p1 < $0;;
+    *)
+	echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+	exit 1
+esac
+exit 0
+
+--- src-native/gcc/ch/chill.texi~	Wed Dec 16 21:59:05 1998
++++ src-native/gcc/ch/chill.texi	Tue Dec 19 21:49:54 2000
+@@ -6,7 +6,7 @@
+ @ifinfo
+ @format
+ START-INFO-DIR-ENTRY
+-* Chill::                       Chill compiler
++* Chill-2.95::                       Chill compiler (Version 2.95.x).
+ END-INFO-DIR-ENTRY
+ @end format
+ @end ifinfo
+ 
+--- src-native/gcc/ch/Make-lang.in~	Fri Jun 25 10:26:19 1999
++++ src-native/gcc/ch/Make-lang.in	Tue Dec 19 21:49:33 2000
+@@ -107,10 +107,10 @@
+ CHILL.rest.encap:
+ CHILL.dvi: chill.dvi
+ 
+-CHILL.info: ch/chill.info
++CHILL.info: ch/chill-2.95.info
+ 
+-ch/chill.info: $(srcdir)/ch/chill.texi
+-	$(MAKEINFO) -I$(srcdir)/ch -o ch/chill.info $(srcdir)/ch/chill.texi
++ch/chill-2.95.info: $(srcdir)/ch/chill.texi
++	$(MAKEINFO) -I$(srcdir)/ch -o ch/chill-2.95.info $(srcdir)/ch/chill.texi
+ 
+ chill.dvi: $(srcdir)/ch/chill.texi $(srcdir)/extend.texi $(srcdir)/invoke.texi $(srcdir)/md.texi $(srcdir)/rtl.texi $(srcdir)/tm.texi
+ 	cd ch ; \
+@@ -144,8 +144,8 @@
+ # Don't delete $(infodir)/ch.info* unless there's actually new
+ # docs to install (in case LANGUAGES didn't contain chill earlier).
+ CHILL.install-info:
+-	-for i in ch/chill.info*; do \
+-	  rm -f $(infodir)/chill.info*; \
++	-for i in ch/chill-2.95.info*; do \
++	  rm -f $(infodir)/chill-2.95.info*; \
+ 	  realfile=`echo $$i | sed -e 's|.*/\([^/]*\)$$|\1|'`; \
+ 	  $(INSTALL_DATA) $$i $(infodir)/$$realfile; \
+ 	done
+@@ -168,7 +168,7 @@
+ CHILL.extraclean:
+ CHILL.maintainer-clean:
+ 	-rm -f ch/TAGS
+-	-rm -f ch/chill.info* ch/chill.dvi ch/chill.??s ch/chill.*aux
++	-rm -f ch/chill*.info* ch/chill.dvi ch/chill.??s ch/chill.*aux
+ # CYGNUS LOCAL: Delete locally created file.
+ 	-rm -f ch/hash.h
+ #
+#! /bin/sh -e
+
+# DP: versioned g77 names
+
+if [ $# -eq 3 -a "$2" = '-d' ]; then
+    pdir="-d $3"
+elif [ $# -ne 1 ]; then
+    echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+    exit 1
+fi
+case "$1" in
+    -patch) patch $pdir -f --no-backup-if-mismatch -p1 < $0;;
+    -unpatch) patch $pdir -f --no-backup-if-mismatch -R -p1 < $0;;
+    *)
+	echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+	exit 1
+esac
+exit 0
+
+--- src-old/gcc/f/g77.texi	Mon Jun 21 13:58:54 1999
++++ src-native/gcc/f/g77.texi	Tue Dec 19 21:04:58 2000
+@@ -73,7 +73,7 @@
+ @ifinfo
+ @dircategory Programming
+ @direntry
+-* g77: (g77).                  The GNU Fortran compiler.
++* g77-2.95: (g77-2.95).          The GNU Fortran compiler (Version 2.95.x).
+ @end direntry
+ @ifset INTERNALS
+ @ifset USING
+
+--- ../cvs/egcs/gcc/f/Make-lang.in	Mon Jun  7 08:44:57 1999
++++ src-native/gcc/f/Make-lang.in	Tue Dec 19 23:20:45 2000
+@@ -215,11 +215,11 @@
+ f77.start.encap: g77$(exeext)
+ f77.rest.encap:
+ 
+-f77.info: f/g77.info
++f77.info: f/g77-2.95.info
+ f77.dvi: f/g77.dvi
+ 
+ # g77 documentation.
+-f/g77.info: $(srcdir)/f/g77.texi $(srcdir)/f/bugs.texi \
++f/g77-2.95.info: $(srcdir)/f/g77.texi $(srcdir)/f/bugs.texi \
+ 	    $(srcdir)/f/ffe.texi \
+ 	    $(srcdir)/f/g77install.texi $(srcdir)/f/news.texi \
+ 	    $(srcdir)/f/intdoc.texi $(srcdir)/f/root.texi
+@@ -228,8 +228,8 @@
+ 	  *) rm -f lang-f77;; \
+ 	esac
+ 	if [ -f lang-f77 ]; then \
+-	  rm -f $(srcdir)/f/g77.info-*; \
+-	  $(MAKEINFO) -I$(srcdir)/f -o f/g77.info $(srcdir)/f/g77.texi; \
++	  rm -f $(srcdir)/f/g77-2.95.info-*; \
++	  $(MAKEINFO) -I$(srcdir)/f -o f/g77-2.95.info $(srcdir)/f/g77.texi; \
+ 	else true; fi
+ 
+ f/g77.dvi: $(srcdir)/f/g77.texi $(srcdir)/f/bugs.texi \
+@@ -297,7 +297,7 @@
+ 	cd $(srcdir)/f; $(MAKEINFO) -D NEWSONLY --no-header --no-split \
+ 	  --no-validate -o NEWS news0.texi
+ 
+-f77.rebuilt: f/g77.info $(srcdir)/f/BUGS $(srcdir)/f/INSTALL \
++f77.rebuilt: f/g77-2.95.info $(srcdir)/f/BUGS $(srcdir)/f/INSTALL \
+   $(srcdir)/f/NEWS 
+ 
+ #
+@@ -346,18 +346,18 @@
+ 	  *[fF]77*) touch $(libsubdir)/lang-f77;; \
+ 	  *) rm -f $(libsubdir)/lang-f77;; \
+ 	esac
+-	if [ -f $(libsubdir)/lang-f77 -a -f f/g77.info ] ; then \
+-	  rm -f $(infodir)/g77.info*; \
+-	  for f in f/g77.info*; do \
++	if [ -f $(libsubdir)/lang-f77 -a -f f/g77-2.95.info ] ; then \
++	  rm -f $(infodir)/g77-2.95.info*; \
++	  for f in f/g77-2.95.info*; do \
+ 	      realfile=`echo $$f | sed -e 's|.*/\([^/]*\)$$|\1|'`; \
+ 	      $(INSTALL_DATA) $$f $(infodir)/$$realfile; \
+ 	  done; \
+-	  chmod a-x $(infodir)/g77.info*; \
++	  chmod a-x $(infodir)/g77-2.95.info*; \
+ 	else true; fi
+-	@if [ -f $(libsubdir)/lang-f77 -a -f $(srcdir)/f/g77.info ] ; then \
++	@if [ -f $(libsubdir)/lang-f77 -a -f $(srcdir)/f/g77-2.95.info ] ; then \
+ 	  if $(SHELL) -c 'install-info --version | sed 1q | fgrep -s -v -i debian' >/dev/null 2>&1; then \
+-	    echo " install-info --info-dir=$(infodir) $(infodir)/g77.info"; \
+-	    install-info --info-dir=$(infodir) $(infodir)/g77.info || : ; \
++	    echo " install-info --info-dir=$(infodir) $(infodir)/g77-2.95.info"; \
++	    install-info --info-dir=$(infodir) $(infodir)/g77-2.95.info || : ; \
+ 	  else : ; fi; \
+ 	else : ; fi
+ 	rm -f $(libsubdir)/lang-f77
+@@ -401,6 +401,7 @@
+ 	  rm -rf $(man1dir)/$(G77_INSTALL_NAME)$(manext); \
+ 	  rm -rf $(man1dir)/$(G77_CROSS_NAME)$(manext); \
+ 	  rm -rf $(infodir)/g77.info*; \
++	  rm -rf $(infodir)/g77-2.95.info*; \
+ 	fi
+ 	rm -f $(libsubdir)/lang-f77
+ #
+@@ -420,7 +421,7 @@
+ 	-rm -f lang-f77 f/Makefile
+ f77.extraclean:
+ f77.maintainer-clean:
+-	-rm -f f/g77.info* f/g77.*aux f/TAGS f/BUGS f/INSTALL f/NEWS f/intdoc.texi
++	-rm -f f/g77*.info* f/g77.*aux f/TAGS f/BUGS f/INSTALL f/NEWS f/intdoc.texi
+ #
+ # Stage hooks:
+ # The main makefile has already created stage?/f.
+#! /bin/sh -e
+
+# DP: versioned gcc names
+
+if [ $# -eq 3 -a "$2" = '-d' ]; then
+    pdir="-d $3"
+elif [ $# -ne 1 ]; then
+    echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+    exit 1
+fi
+case "$1" in
+    -patch) patch $pdir -f --no-backup-if-mismatch -p1 < $0;;
+    -unpatch) patch $pdir -f --no-backup-if-mismatch -R -p1 < $0;;
+    *)
+	echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+	exit 1
+esac
+exit 0
+
+diff -r -u src-old/gcc/Makefile.in src-native/gcc/Makefile.in
+--- src-old/gcc/Makefile.in	Mon Dec 18 16:38:16 2000
++++ src-native/gcc/Makefile.in	Tue Dec 19 20:53:48 2000
+@@ -2265,15 +2265,15 @@
+ # Remake the info files.
+ 
+ doc: info
+-info: cpp.info gcc.info lang.info
++info: cpp-2.95.info gcc-2.95.info lang.info
+ 
+-cpp.info: $(srcdir)/cpp.texi
+-	$(MAKEINFO) $(MAKEINFOFLAGS) -I$(srcdir) -o cpp.info $(srcdir)/cpp.texi
++cpp-2.95.info: $(srcdir)/cpp.texi
++	$(MAKEINFO) $(MAKEINFOFLAGS) -I$(srcdir) -o cpp-2.95.info $(srcdir)/cpp.texi
+ 
+-gcc.info: $(srcdir)/gcc.texi $(srcdir)/extend.texi $(srcdir)/install.texi \
++gcc-2.95.info: $(srcdir)/gcc.texi $(srcdir)/extend.texi $(srcdir)/install.texi \
+ 	  $(srcdir)/invoke.texi $(srcdir)/md.texi $(srcdir)/rtl.texi \
+ 	  $(srcdir)/tm.texi $(srcdir)/gcov.texi
+-	$(MAKEINFO) $(MAKEINFOFLAGS) -I$(srcdir) -o gcc.info $(srcdir)/gcc.texi
++	$(MAKEINFO) $(MAKEINFOFLAGS) -I$(srcdir) -o gcc-2.95.info $(srcdir)/gcc.texi
+ 
+ dvi: gcc.dvi cpp.dvi lang.dvi
+ 
+@@ -2420,6 +2420,8 @@
+ 	-rm -f cexp.c cexp.output TAGS 
+ 	-rm -f cpp.info* cpp.??s cpp.*aux
+ 	-rm -f gcc.info* gcc.??s gcc.*aux
++	-rm -f gcc-2.95.info* gcc-2.95.??s gcc-2.95.*aux
++	-rm -f cpp-2.95.info* cpp-2.95.??s cpp-2.95.*aux
+ #
+ # Entry points `install' and `uninstall'.
+ # Also use `install-collect2' to install collect2 when the config files don't.
+@@ -2575,18 +2577,18 @@
+ # $(INSTALL_DATA) might be a relative pathname, so we can't cd into srcdir
+ # to do the install.
+ install-info: doc installdirs lang.install-info
+-	-rm -f $(infodir)/cpp.info* $(infodir)/gcc.info*
+-	for f in cpp.info* gcc.info*; do \
++	-rm -f $(infodir)/cpp-2.95.info* $(infodir)/gcc-2.95.info*
++	for f in cpp-2.95.info* gcc-2.95.info*; do \
+ 	    $(INSTALL_DATA) $$f $(infodir)/$$f; \
+ 	done
+ 	-if $(SHELL) -c 'install-info --version' >/dev/null 2>&1; then \
+ 	  if [ -f $(infodir)/dir ] ; then \
+-	    for f in cpp.info gcc.info; do \
++	    for f in cpp-2.95.info gcc-2.95.info; do \
+ 		install-info --dir-file=$(infodir)/dir $(infodir)/$$f; \
+ 	    done; \
+ 	  else true; fi; \
+ 	else true; fi;
+-	-chmod a-x $(infodir)/cpp.info* $(infodir)/gcc.info*
++	-chmod a-x $(infodir)/cpp-2.95.info* $(infodir)/gcc-2.95.info*
+ 
+ # Install the man pages.
+ install-man: installdirs $(srcdir)/gcc.1 $(srcdir)/cccp.1 lang.install-man
+diff -r -u src-old/gcc/cpp.texi src-native/gcc/cpp.texi
+--- src-old/gcc/cpp.texi	Tue May 18 01:37:18 1999
++++ src-native/gcc/cpp.texi	Tue Dec 19 20:56:05 2000
+@@ -5,7 +5,7 @@
+ @ifinfo
+ @dircategory Programming
+ @direntry
+-* Cpp: (cpp).		       The GNU C preprocessor.
++* Cpp-2.95: (cpp-2.95).	The GNU C preprocessor (Version 2.95.x).
+ @end direntry
+ @end ifinfo
+ 
+diff -r -u src-old/gcc/gcc.texi src-native/gcc/gcc.texi
+--- src-old/gcc/gcc.texi	Fri Feb 18 18:19:28 2000
++++ src-native/gcc/gcc.texi	Tue Dec 19 20:56:03 2000
+@@ -82,7 +82,7 @@
+ @ifinfo
+ @dircategory Programming
+ @direntry
+-* gcc: (gcc).                  The GNU Compiler Collection.
++* gcc-2.95: (gcc-2.95).         The GNU Compiler Collection (Version 2.95.x).
+ @end direntry
+ @ifset INTERNALS
+ @ifset USING
+#! /bin/sh -e
+
+# DP: versioned gpc names
+
+if [ $# -eq 3 -a "$2" = '-d' ]; then
+    pdir="-d $3"
+elif [ $# -ne 1 ]; then
+    echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+    exit 1
+fi
+case "$1" in
+    -patch) patch $pdir -f --no-backup-if-mismatch -p1 < $0;;
+    -unpatch) patch $pdir -f --no-backup-if-mismatch -R -p1 < $0;;
+    *)
+	echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+	exit 1
+esac
+exit 0
+
+--- src-old/gcc/p/doc/en/gpc.texi	Mon Oct  9 09:32:26 2000
++++ src-native/gcc/p/doc/en/gpc.texi	Tue Dec 19 21:04:21 2000
+@@ -28,11 +28,11 @@
+ 
+ @dircategory GNU programming tools
+ @direntry
+-* GPC: (gpc).                   The GNU Pascal Compiler.
++* GPC-2.95: (gpc-2.95).                 The GNU Pascal Compiler.
+ @end direntry
+ @dircategory Individual utilities
+ @direntry
+-* GPC: (gpc)Invoking GPC.       The GNU Pascal Compiler.
++* GPC-2.95: (gpc-2.95)Invoking GPC. The GNU Pascal Compiler.
+ @end direntry
+ 
+ @c Version numbers appear twice: in lowercase and capitalized for headlines.
+
+--- src/gcc/p/Make-lang.in~	2003-08-31 10:13:01.000000000 +0200
++++ src/gcc/p/Make-lang.in	2003-08-31 10:20:51.000000000 +0200
+@@ -711,42 +711,42 @@
+ pascal.start.encap:
+ pascal.rest.encap:
+ 
+-pascal.info: $(srcdir)/p/doc/info/gpc.info \
+-             $(srcdir)/p/doc/info/gpcs.info \
+-             $(srcdir)/p/doc/info/gpcs-de.info \
+-             $(srcdir)/p/doc/info/gpc-hr.info \
+-             $(srcdir)/p/doc/info/gpcs-hr.info \
+-             $(srcdir)/p/doc/info/gpc-es.info \
+-             $(srcdir)/p/doc/info/gpcs-es.info
++pascal.info: $(srcdir)/p/doc/info/gpc-2.95.info \
++             $(srcdir)/p/doc/info/gpcs-2.95.info \
++             $(srcdir)/p/doc/info/gpcs-de-2.95.info \
++             $(srcdir)/p/doc/info/gpc-hr-2.95.info \
++             $(srcdir)/p/doc/info/gpcs-hr-2.95.info \
++             $(srcdir)/p/doc/info/gpc-es-2.95.info \
++             $(srcdir)/p/doc/info/gpcs-es-2.95.info
+ pascal.dvi: gpc.dvi
+ 
+-$(srcdir)/p/doc/info/gpc.info: $(GPC_TEXI_EN)
++$(srcdir)/p/doc/info/gpc-2.95.info: $(GPC_TEXI_EN)
+ 	[ -d "$(srcdir)/p/doc/info" ] || $(srcdir)/p/script/mkdir-p "$(srcdir)/p/doc/info"
+-	$(MAKEINFO_EN) -o $(srcdir)/p/doc/info/gpc.info gpc.texi
++	$(MAKEINFO_EN) -o $(srcdir)/p/doc/info/gpc-2.95.info gpc.texi
+ 
+-$(srcdir)/p/doc/info/gpcs.info: $(GPC_TEXI_EN)
++$(srcdir)/p/doc/info/gpcs-2.95.info: $(GPC_TEXI_EN)
+ 	[ -d "$(srcdir)/p/doc/info" ] || $(srcdir)/p/script/mkdir-p "$(srcdir)/p/doc/info"
+-	$(MAKEINFO_EN) --no-split -o $(srcdir)/p/doc/info/gpcs.info gpcs.texi
++	$(MAKEINFO_EN) --no-split -o $(srcdir)/p/doc/info/gpcs-2.95.info gpcs.texi
+ 
+-$(srcdir)/p/doc/info/gpcs-de.info: $(GPC_TEXI_DE)
++$(srcdir)/p/doc/info/gpcs-de-2.95.info: $(GPC_TEXI_DE)
+ 	[ -d "$(srcdir)/p/doc/info" ] || $(srcdir)/p/script/mkdir-p "$(srcdir)/p/doc/info"
+-	$(MAKEINFO_DE) --no-split -o $(srcdir)/p/doc/info/gpcs-de.info gpcs.texi
++	$(MAKEINFO_DE) --no-split -o $(srcdir)/p/doc/info/gpcs-de-2.95.info gpcs.texi
+ 
+-$(srcdir)/p/doc/info/gpc-hr.info: $(GPC_TEXI_HR)
++$(srcdir)/p/doc/info/gpc-hr-2.95.info: $(GPC_TEXI_HR)
+ 	[ -d "$(srcdir)/p/doc/info" ] || $(srcdir)/p/script/mkdir-p "$(srcdir)/p/doc/info"
+-	$(MAKEINFO_HR) -o $(srcdir)/p/doc/info/gpc-hr.info gpc.texi
++	$(MAKEINFO_HR) -o $(srcdir)/p/doc/info/gpc-hr-2.95.info gpc.texi
+ 
+-$(srcdir)/p/doc/info/gpcs-hr.info: $(GPC_TEXI_HR)
++$(srcdir)/p/doc/info/gpcs-hr-2.95.info: $(GPC_TEXI_HR)
+ 	[ -d "$(srcdir)/p/doc/info" ] || $(srcdir)/p/script/mkdir-p "$(srcdir)/p/doc/info"
+-	$(MAKEINFO_HR) --no-split -o $(srcdir)/p/doc/info/gpcs-hr.info gpcs.texi
++	$(MAKEINFO_HR) --no-split -o $(srcdir)/p/doc/info/gpcs-hr-2.95.info gpcs.texi
+ 
+-$(srcdir)/p/doc/info/gpc-es.info: $(GPC_TEXI_ES)
++$(srcdir)/p/doc/info/gpc-es-2.95.info: $(GPC_TEXI_ES)
+ 	[ -d "$(srcdir)/p/doc/info" ] || $(srcdir)/p/script/mkdir-p "$(srcdir)/p/doc/info"
+-	$(MAKEINFO_ES) -o $(srcdir)/p/doc/info/gpc-es.info gpc.texi
++	$(MAKEINFO_ES) -o $(srcdir)/p/doc/info/gpc-es-2.95.info gpc.texi
+ 
+-$(srcdir)/p/doc/info/gpcs-es.info: $(GPC_TEXI_ES)
++$(srcdir)/p/doc/info/gpcs-es-2.95.info: $(GPC_TEXI_ES)
+ 	[ -d "$(srcdir)/p/doc/info" ] || $(srcdir)/p/script/mkdir-p "$(srcdir)/p/doc/info"
+-	$(MAKEINFO_ES) --no-split -o $(srcdir)/p/doc/info/gpcs-es.info gpcs.texi
++	$(MAKEINFO_ES) --no-split -o $(srcdir)/p/doc/info/gpcs-es-2.95.info gpcs.texi
+ 
+ gpc.dvi: $(GPC_TEXI_EN)
+ 	TEXINPUTS=$(srcdir)/p/doc:$(srcdir)/p/doc/images:$$TEXINPUTS \
+@@ -942,11 +942,11 @@
+ 	fi
+ 
+ pascal.install-info: pascal.install-info-man-dirs pascal.info
+-	rm -f $(DESTDIR)$(infodir)/gpc.info* $(DESTDIR)$(infodir)/gpcs.info* $(DESTDIR)$(infodir)/gpcs-de.info* $(DESTDIR)$(infodir)/gpcs-hr.info* $(DESTDIR)$(infodir)/gpcs-es.info*
+-	for f in `cd $(srcdir)/p/doc/info && echo gpc.info* gpcs*.info*`; do \
++	rm -f $(DESTDIR)$(infodir)/gpc*.info* $(DESTDIR)$(infodir)/gpcs*.info* $(DESTDIR)$(infodir)/gpcs-de*.info* $(DESTDIR)$(infodir)/gpcs-hr*.info* $(DESTDIR)$(infodir)/gpcs-es*.info*
++	for f in `cd $(srcdir)/p/doc/info && echo gpc-2.95.info* gpcs*.info*`; do \
+ 	  $(INSTALL_DATA) $(srcdir)/p/doc/info/$$f $(DESTDIR)$(infodir)/$$f || exit 1; \
+ 	done
+-	chmod a-x $(DESTDIR)$(infodir)/gpc.info* $(DESTDIR)$(infodir)/gpcs.info* $(DESTDIR)$(infodir)/gpcs-de.info* $(DESTDIR)$(infodir)/gpcs-hr.info* $(DESTDIR)$(infodir)/gpcs-es.info*
++	chmod a-x $(DESTDIR)$(infodir)/gpc*.info* $(DESTDIR)$(infodir)/gpcs*.info* $(DESTDIR)$(infodir)/gpcs-de*.info* $(DESTDIR)$(infodir)/gpcs-hr*.info* $(DESTDIR)$(infodir)/gpcs-es*.info*
+ 
+ pascal.install-man: pascal.install-info-man-dirs $(srcdir)/p/doc/en/gpc.1 $(srcdir)/p/doc/generated/gpc-run.1
+ 	-if [ -f gpc1$(exeext) ]; then \
+#! /bin/sh -e
+
+# DP: versioned iostream info names
+
+if [ $# -eq 3 -a "$2" = '-d' ]; then
+    pdir="-d $3"
+elif [ $# -ne 1 ]; then
+    echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+    exit 1
+fi
+case "$1" in
+    -patch) patch $pdir -f --no-backup-if-mismatch -p0 < $0;;
+    -unpatch) patch $pdir -f --no-backup-if-mismatch -R -p0 < $0;;
+    *)
+	echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+	exit 1
+esac
+exit 0
+
+--- a/libio/iostream.texi	Wed May  6 23:08:51 1998
++++ b/libio/iostream.texi	Fri Dec 22 12:04:40 2000
+@@ -10,7 +10,7 @@
+ @ifinfo
+ @format
+ START-INFO-DIR-ENTRY
+-* iostream: (iostream).                    The C++ input/output facility.
++* iostream-2.95: (iostream-2.95).  The C++ input/output facility (GCC 2.95.x).
+ END-INFO-DIR-ENTRY
+ @end format
+ 

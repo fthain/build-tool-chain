@@ -1,0 +1,6 @@
+. ${BTC_PROFILES}/C
+. ${BTC_PROFILES}/4.1
+TARGET=mipsel-linux-gnu
+TARGET_CPU=mips
+
+#LINUX_DIST=linux-2.6.20

@@ -1,6 +1,0 @@
-# Method 4 subprofile for gcc-4.4
-. ${PROFILES}/4
-
-
-
-GCC_DIST=gcc-4.4.4

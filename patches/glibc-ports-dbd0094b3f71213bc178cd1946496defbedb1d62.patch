@@ -1,0 +1,80 @@
+From: Andreas Schwab <schwab@linux-m68k.org>
+Date: Sat, 13 Mar 2010 00:00:03 +0000 (+0100)
+Subject: m68k: TLS reference to errno in syscall stubs
+X-Git-Tag: glibc-2.12~34
+X-Git-Url: http://sourceware.org/git/?p=glibc-ports.git;a=commitdiff_plain;h=dbd0094b3f71213bc178cd1946496defbedb1d62
+
+m68k: TLS reference to errno in syscall stubs
+---
+
+#diff --git a/ChangeLog.m68k b/ChangeLog.m68k
+#index 712651d..b16fde2 100644
+#--- a/ChangeLog.m68k
+#+++ b/ChangeLog.m68k
+#@@ -1,3 +1,8 @@
+#+2010-03-13  Andreas Schwab  <schwab@linux-m68k.org>
+#+
+#+	* sysdeps/unix/sysv/linux/m68k/sysdep.h (SYSCALL_ERROR_HANDLER):
+#+	Add variant for USE__THREAD.
+#+
+# 2010-03-12  Andreas Schwab  <schwab@linux-m68k.org>
+# 
+# 	* sysdeps/unix/sysv/linux/m68k/nptl/lowlevellock.h: Don't include
+diff --git a/sysdeps/unix/sysv/linux/m68k/sysdep.h b/sysdeps/unix/sysv/linux/m68k/sysdep.h
+index e3aed15..8bd188b 100644
+--- a/sysdeps/unix/sysv/linux/m68k/sysdep.h
++++ b/sysdeps/unix/sysv/linux/m68k/sysdep.h
+@@ -111,10 +111,27 @@ SYSCALL_ERROR_LABEL:							      \
+        a pointer (e.g., mmap).  */					      \
+     move.l %d0, %a0;							      \
+     rts;
+-# else /* !RTLD_PRIVATE_ERRNO */
+-/* Store (- %d0) into errno through the GOT.  */
+-#  if defined _LIBC_REENTRANT
+-#   define SYSCALL_ERROR_HANDLER					      \
++# elif USE___THREAD
++#  ifndef NOT_IN_libc
++#   define SYSCALL_ERROR_ERRNO __libc_errno
++#  else
++#   define SYSCALL_ERROR_ERRNO errno
++#  endif
++#  define SYSCALL_ERROR_HANDLER						      \
++SYSCALL_ERROR_LABEL:							      \
++    neg.l %d0;								      \
++    move.l %d0, -(%sp);							      \
++    jbsr __m68k_read_tp@PLTPC;						      \
++    lea (_GLOBAL_OFFSET_TABLE_@GOTPC, %pc), %a1;			      \
++    add.l (SYSCALL_ERROR_ERRNO@TLSIE, %a1), %a0;			      \
++    move.l (%sp)+, (%a0);						      \
++    move.l &-1, %d0;							      \
++    /* Copy return value to %a0 for syscalls that are declared to return      \
++       a pointer (e.g., mmap).  */					      \
++    move.l %d0, %a0;							      \
++    rts;
++# elif defined _LIBC_REENTRANT
++#  define SYSCALL_ERROR_HANDLER						      \
+ SYSCALL_ERROR_LABEL:							      \
+     neg.l %d0;								      \
+     move.l %d0, -(%sp);							      \
+@@ -125,8 +142,9 @@ SYSCALL_ERROR_LABEL:							      \
+        a pointer (e.g., mmap).  */					      \
+     move.l %d0, %a0;							      \
+     rts;
+-#  else /* !_LIBC_REENTRANT */
+-#   define SYSCALL_ERROR_HANDLER					      \
++# else /* !_LIBC_REENTRANT */
++/* Store (- %d0) into errno through the GOT.  */
++#  define SYSCALL_ERROR_HANDLER						      \
+ SYSCALL_ERROR_LABEL:							      \
+     move.l (errno@GOTPC, %pc), %a0;					      \
+     neg.l %d0;								      \
+@@ -136,8 +154,7 @@ SYSCALL_ERROR_LABEL:							      \
+        a pointer (e.g., mmap).  */					      \
+     move.l %d0, %a0;							      \
+     rts;
+-#  endif /* _LIBC_REENTRANT */
+-# endif /* RTLD_PRIVATE_ERRNO */
++# endif /* _LIBC_REENTRANT */
+ #else
+ # define SYSCALL_ERROR_HANDLER	/* Nothing here; code in sysdep.S is used.  */
+ #endif /* PIC */

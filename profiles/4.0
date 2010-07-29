@@ -1,0 +1,6 @@
+# Sub-profile for gcc-4.0
+PROFILE_NAME=gcc-4.0
+
+
+
+GCC_DIST=gcc-4.0.4

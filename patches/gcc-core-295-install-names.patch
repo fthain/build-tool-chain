@@ -1,0 +1,99 @@
+#! /bin/sh -e
+
+# DP: versioned gcc names
+
+if [ $# -eq 3 -a "$2" = '-d' ]; then
+    pdir="-d $3"
+elif [ $# -ne 1 ]; then
+    echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+    exit 1
+fi
+case "$1" in
+    -patch) patch $pdir -f --no-backup-if-mismatch -p1 < $0;;
+    -unpatch) patch $pdir -f --no-backup-if-mismatch -R -p1 < $0;;
+    *)
+	echo >&2 "`basename $0`: script expects -patch|-unpatch as argument"
+	exit 1
+esac
+exit 0
+
+diff -r -u src-old/gcc/Makefile.in src-native/gcc/Makefile.in
+--- src-old/gcc/Makefile.in	Mon Dec 18 16:38:16 2000
++++ src-native/gcc/Makefile.in	Tue Dec 19 20:53:48 2000
+@@ -2265,15 +2265,15 @@
+ # Remake the info files.
+ 
+ doc: info
+-info: cpp.info gcc.info lang.info
++info: cpp-2.95.info gcc-2.95.info lang.info
+ 
+-cpp.info: $(srcdir)/cpp.texi
+-	$(MAKEINFO) $(MAKEINFOFLAGS) -I$(srcdir) -o cpp.info $(srcdir)/cpp.texi
++cpp-2.95.info: $(srcdir)/cpp.texi
++	$(MAKEINFO) $(MAKEINFOFLAGS) -I$(srcdir) -o cpp-2.95.info $(srcdir)/cpp.texi
+ 
+-gcc.info: $(srcdir)/gcc.texi $(srcdir)/extend.texi $(srcdir)/install.texi \
++gcc-2.95.info: $(srcdir)/gcc.texi $(srcdir)/extend.texi $(srcdir)/install.texi \
+ 	  $(srcdir)/invoke.texi $(srcdir)/md.texi $(srcdir)/rtl.texi \
+ 	  $(srcdir)/tm.texi $(srcdir)/gcov.texi
+-	$(MAKEINFO) $(MAKEINFOFLAGS) -I$(srcdir) -o gcc.info $(srcdir)/gcc.texi
++	$(MAKEINFO) $(MAKEINFOFLAGS) -I$(srcdir) -o gcc-2.95.info $(srcdir)/gcc.texi
+ 
+ dvi: gcc.dvi cpp.dvi lang.dvi
+ 
+@@ -2420,6 +2420,8 @@
+ 	-rm -f cexp.c cexp.output TAGS 
+ 	-rm -f cpp.info* cpp.??s cpp.*aux
+ 	-rm -f gcc.info* gcc.??s gcc.*aux
++	-rm -f gcc-2.95.info* gcc-2.95.??s gcc-2.95.*aux
++	-rm -f cpp-2.95.info* cpp-2.95.??s cpp-2.95.*aux
+ #
+ # Entry points `install' and `uninstall'.
+ # Also use `install-collect2' to install collect2 when the config files don't.
+@@ -2575,18 +2577,18 @@
+ # $(INSTALL_DATA) might be a relative pathname, so we can't cd into srcdir
+ # to do the install.
+ install-info: doc installdirs lang.install-info
+-	-rm -f $(infodir)/cpp.info* $(infodir)/gcc.info*
+-	for f in cpp.info* gcc.info*; do \
++	-rm -f $(infodir)/cpp-2.95.info* $(infodir)/gcc-2.95.info*
++	for f in cpp-2.95.info* gcc-2.95.info*; do \
+ 	    $(INSTALL_DATA) $$f $(infodir)/$$f; \
+ 	done
+ 	-if $(SHELL) -c 'install-info --version' >/dev/null 2>&1; then \
+ 	  if [ -f $(infodir)/dir ] ; then \
+-	    for f in cpp.info gcc.info; do \
++	    for f in cpp-2.95.info gcc-2.95.info; do \
+ 		install-info --dir-file=$(infodir)/dir $(infodir)/$$f; \
+ 	    done; \
+ 	  else true; fi; \
+ 	else true; fi;
+-	-chmod a-x $(infodir)/cpp.info* $(infodir)/gcc.info*
++	-chmod a-x $(infodir)/cpp-2.95.info* $(infodir)/gcc-2.95.info*
+ 
+ # Install the man pages.
+ install-man: installdirs $(srcdir)/gcc.1 $(srcdir)/cccp.1 lang.install-man
+diff -r -u src-old/gcc/cpp.texi src-native/gcc/cpp.texi
+--- src-old/gcc/cpp.texi	Tue May 18 01:37:18 1999
++++ src-native/gcc/cpp.texi	Tue Dec 19 20:56:05 2000
+@@ -5,7 +5,7 @@
+ @ifinfo
+ @dircategory Programming
+ @direntry
+-* Cpp: (cpp).		       The GNU C preprocessor.
++* Cpp-2.95: (cpp-2.95).	The GNU C preprocessor (Version 2.95.x).
+ @end direntry
+ @end ifinfo
+ 
+diff -r -u src-old/gcc/gcc.texi src-native/gcc/gcc.texi
+--- src-old/gcc/gcc.texi	Fri Feb 18 18:19:28 2000
++++ src-native/gcc/gcc.texi	Tue Dec 19 20:56:03 2000
+@@ -82,7 +82,7 @@
+ @ifinfo
+ @dircategory Programming
+ @direntry
+-* gcc: (gcc).                  The GNU Compiler Collection.
++* gcc-2.95: (gcc-2.95).         The GNU Compiler Collection (Version 2.95.x).
+ @end direntry
+ @ifset INTERNALS
+ @ifset USING

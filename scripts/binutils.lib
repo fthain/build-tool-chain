@@ -1,4 +1,5 @@
 ##############################################
+#
 # Functions relating to binutils
 
 function prep_binutils () {
@@ -12,20 +13,32 @@ function prep_binutils () {
     case ${1} in
     ( binutils-2.12.90.0.1 )
         # Debian source package
-        decompress ${BTC_PATCHES}/binutils-2.12.90.0.1-4-debian.diff | patch -p1
+        decompress ${BTC_PATCHES}/binutils_2.12.90.0.1-4-debian-all.diff | patch -p1
         # Fix for recent gcc
         patch -p1 < ${BTC_PATCHES}/binutils-2.12.90.0.1-4-btc-gcc4.diff
         # Fix for recent glibc
         patch -p0 < ${BTC_PATCHES}/binutils-2.12-_bfd_ar_spacepad.patch
+        # Move lib, include and ldscripts directories
+        patch -p1 < ${BTC_PATCHES}/binutils-2.12-lib-include-dirs.diff
         ;;
-    ( binutils-2.15 | binutils-2.15.* | binutils-2.16 | binutils-2.16.* )
+    ( binutils-2.15 | binutils-2.15.* )
+        # Debian source package
+        decompress ${BTC_PATCHES}/binutils_2.15-6-debian-all.diff | patch -p1
+        # Fix to support April '04 glibc asm (m68k/arm/cris)
+        patch -p1 < ${BTC_PATCHES}/binutils-2.15-NO_APP-mode-line-comment.patch
+        patch -p1 < ${BTC_PATCHES}/702-binutils-skip-comments.patch
+        ;;
+    ( binutils-2.16 | binutils-2.16.* )
         # Fix to support April '04 glibc asm (m68k/arm/cris)
         patch -p1 < ${BTC_PATCHES}/binutils-2.15-NO_APP-mode-line-comment.patch
         patch -p1 < ${BTC_PATCHES}/702-binutils-skip-comments.patch
         ;;
     ( binutils-2.17 )
-        # Debian
-        patch -p1 < ${BTC_PATCHES}/binutils-2.17-3.diff
+        # Debian source package
+        decompress ${BTC_PATCHES}/binutils_2.17-3+etch1-debian-all.diff | patch -p1
+        # Build failure
+        patch -p1 < ${BTC_PATCHES}/binutils-2.17-configure-makeinfo-version-test.diff
+        # Avoid fatal compiler warnings
         patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         ;;
     ( binutils-2.17.50.0.2 )
@@ -39,8 +52,8 @@ function prep_binutils () {
         patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.18-fix-warning.diff
         ;;
     ( binutils-2.18 )
-        # Debian
-        decompress ${BTC_PATCHES}/binutils-2.18.1~cvs20080103-debian.diff | patch -p1
+        # Debian source package
+        decompress ${BTC_PATCHES}/binutils_2.18.1~cvs20080103-7-debian-all.diff | patch -p1
         # Avoid fatal compiler warnings
         patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         # Darwin build failure
@@ -53,16 +66,16 @@ function prep_binutils () {
         patch -p1 < ${BTC_PATCHES}/binutils-2.18-link-bfd-with-libiberty.patch
         ;;
     ( binutils-2.19.51 )
-        # Debian
-        patch -p1 < ${BTC_PATCHES}/binutils-2.19.51-debian.diff
         # Avoid fatal compiler warnings
         patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         # Darwin build failure
         patch -p1 < ${BTC_PATCHES}/binutils-2.18.50.0.4-opcodes-bfd-dylib.diff
+        # Move ldscripts directory
+        patch -p1 < ${BTC_PATCHES}/binutils-2.19.51-scriptdir.diff
         ;;
     ( binutils-2.20.1 )
-        # Debian
-        decompress ${BTC_PATCHES}/binutils_2.20.1-9-debian.diff | patch -p1
+        # Debian source package
+        decompress ${BTC_PATCHES}/binutils_2.20.1-11-debian-all.diff | patch -p1
         # Avoid fatal compiler warnings
         patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         # Darwin build failure
@@ -84,7 +97,11 @@ function build_binutils () {
     CFLAGS="-O2 $HOST_CFLAGS" ../${BINUTILS_DIST}/configure \
     --prefix=${TC_PREFIX} --target=${TARGET} \
     ${BINUTILS_CONFIG_OPTS} \
-    --enable-64-bit-bfd --disable-nls --enable-shared --disable-werror
+    --infodir=${TC_PREFIX}/share/info \
+    --mandir=${TC_PREFIX}/share/man \
+    --enable-64-bit-bfd \
+    --enable-shared \
+    --disable-werror
 
     case ${BINUTILS_DIST} in
     ( binutils-2.?.* | binutils-2.1[012].* )
@@ -101,10 +118,18 @@ function install_binutils () {
     cd ${BTC_BUILD}/${1}
 
     make install
+
     # There's no readelf on Darwin & glibc configure won't use ${TARGET}-readelf
     # See http://sources.redhat.com/bugzilla/show_bug.cgi?id=3004
     # wherein his highness determines that a cross binutils is not "sane".
-    ln -fs ${TARGET}-readelf ${TC_PREFIX}/bin/readelf
+    ln -nsf ${TARGET}-readelf ${TC_PREFIX}/bin/readelf
+
+    find ${TC_PREFIX} -type f \( -name '*.la' -o -name '*.a' \) -print0 | xargs -0 rm -fv
+
+    rm -f ${TC_PREFIX}/lib/libiberty.a
+
+    # The link is sufficient for man AUTOPATH
+    ln -nsf share/man ${TC_PREFIX}/man
 
     manifest install_binutils
 }

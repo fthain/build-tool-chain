@@ -1,0 +1,11 @@
+--- binutils-2.19.51/ld/Makefile.in.orig        2010-07-13 19:05:56.000000000 +1000
++++ binutils-2.19.51/ld/Makefile.in     2010-07-13 19:06:22.000000000 +1000
+@@ -333,7 +333,7 @@
+ # We put the scripts in the directory $(scriptdir)/ldscripts.
+ # We can't put the scripts in $(datadir) because the SEARCH_DIR
+ # directives need to be different for native and cross linkers.
+-scriptdir = $(tooldir)/lib
++scriptdir = $(prefix)/lib
+ BASEDIR = $(srcdir)/..
+ BFDDIR = $(BASEDIR)/bfd
+ INCDIR = $(BASEDIR)/include

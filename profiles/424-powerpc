@@ -1,3 +1,0 @@
-. ${PROFILES}/424
-TARGET=powerpc-linux-gnu
-TARGET_CPU=powerpc

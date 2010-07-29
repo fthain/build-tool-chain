@@ -1,17 +1,8 @@
 ##############################################
+#
 # Functions relating to host-native tools
 
-function is_installed () {
-    if [ $(which $1 | grep -c ${HOST_TOOLS_PREFIX}/bin/$1) -eq 1 ]; then
-        echo $1 already installed
-        return
-    fi
-    return 1
-}
-
 function install_host_tool () {
-    is_installed ${1/-*} && return
-
     echo unpacking $1
     cd $BTC_BUILD
     untar "$@"
@@ -25,42 +16,54 @@ function install_host_tool () {
     make ${MAKE_OPTS}
 
     echo installing $1
-    make install
+
+    rm -rf ${BTC_BUILD}/image
+    make DESTDIR=${BTC_BUILD}/image install
+}
+
+function merge_host_tool () {
+    pushd ${BTC_BUILD}/image/${HOST_TOOLS_PREFIX} >/dev/null
+
+    test -d share/man && ln -nsf share/man ${BTC_BUILD}/image/man
+
+    rm -f share/info/dir
+
+    if test -d lib ; then
+        find lib -type f \( -name '*.la' -o -name '*.a' \) -print0 | xargs -0 rm -fv
+        rmdir lib || true
+    fi
+
+    tar -c "$@" | tar -C ${HOST_TOOLS_PREFIX} -xpv
+
+    popd >/dev/null
+    rm -rf ${BTC_BUILD}/image
 }
 
 function install_sed () {
-    is_installed ${1/-*} && return
+    test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
 
-    # gnu sed-4.1.5 won't build without gnu sed ... duh
-    if [ $1 = sed-4.1.5 ] ; then
-        install_host_tool sed-4.1.4 ftp://ftp.gnu.org/gnu/sed
-    fi
-
-    echo unpacking $1
-    cd $BTC_BUILD
-    untar $1 ftp://ftp.gnu.org/gnu/sed
-
-    cd $1
-    echo building $1
-
-    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
-                             --infodir=${HOST_TOOLS_PREFIX}/share/info \
-                             --mandir=${HOST_TOOLS_PREFIX}/share/man
-    make ${MAKE_OPTS}
-
-    echo installing $1
-    make install
+    install_host_tool $1 ftp://ftp.gnu.org/gnu/sed
+    ln -nsf sed ${BTC_BUILD}/image/${HOST_TOOLS_PREFIX}/bin/gsed
+    merge_host_tool bin share/{info,man}
 }
 
 function install_make () {
-    is_installed ${1/-*} && return
+    test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
 
     install_host_tool $1 ftp://ftp.gnu.org/gnu/make
-    ln -fs make ${HOST_TOOLS_PREFIX}/bin/gnumake
+    ln -nsf make ${BTC_BUILD}/image/${HOST_TOOLS_PREFIX}/bin/gnumake
+    merge_host_tool bin share/{info,man}
+}
+
+function install_gettext () {
+    test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
+
+    install_host_tool $1 ftp://ftp.gnu.org/gnu/gettext
+    merge_host_tool bin lib include share/{info,man}
 }
 
 function install_coreutils () {
-    is_installed readlink && return
+    test -e ${HOST_TOOLS_PREFIX}/bin/readlink && return
 
     echo unpacking $1
     cd $BTC_BUILD
@@ -73,59 +76,15 @@ function install_coreutils () {
     make ${MAKE_OPTS}
 
     echo installing $1
-    dst=/tmp/junk$$
-    make DESTDIR=$dst install
-    cp -p $dst/${HOST_TOOLS_PREFIX}/bin/{readlink,expr,install} \
-          ${HOST_TOOLS_PREFIX}/bin
-    rm -fr $dst
-}
 
-function install_flex () {
-    is_installed ${1/-*} && return
+    rm -rf ${BTC_BUILD}/image
+    make DESTDIR=${BTC_BUILD}/image install
 
-    echo unpacking $1
-    cd $BTC_BUILD
-    untar $1 http://prdownloads.sourceforge.net/flex
-    cd ${1%a}
-    patch -p1 < ${BTC_PATCHES}/flex-2.5.4a-r6.diff
-
-    echo building $1
-
-    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX}
-    make ${MAKE_OPTS}
-
-    echo installing $1
-    make install
-}
-
-function install_depmod () {
-    is_installed ${1/-*} && return
-
-    echo installing $1
-    if ! test -f ${BTC_SOURCES}/${1}.bz2 ; then
-        fetch_stdout http://git.busybox.net/busybox/plain/examples/depmod.pl?h=${1#*-} | bzip2 -c > ${BTC_SOURCES}/${1}.bz2
-    fi
-    cd ${HOST_TOOLS_PREFIX}/bin
-    decompress ${BTC_SOURCES}/${1} > depmod.pl
-    chmod 755 depmod.pl
-}
-
-function install_find_pl () {
-    local pn
-    pn=find.pl
-    is_installed $pn && return
-
-    echo installing $pn
-    if ! test -f ${BTC_SOURCES}/${pn}.bz2 ; then
-        fetch_stdout http://www.telegraphics.com.au/~fthain/sw/${pn} | bzip2 -c > ${BTC_SOURCES}/${pn}.bz2
-    fi
-    cd ${HOST_TOOLS_PREFIX}/bin
-    decompress ${BTC_SOURCES}/${pn} > ${pn}
-    chmod 755 ${pn}
+    merge_host_tool bin/{readlink,expr,install}
 }
 
 function install_loadkeys () {
-    is_installed loadkeys && return
+    test -e ${HOST_TOOLS_PREFIX}/bin/loadkeys && return
     
     echo unpacking $1
     cd $BTC_BUILD
@@ -144,8 +103,61 @@ function install_loadkeys () {
     cp -p loadkeys ${HOST_TOOLS_PREFIX}/bin
 }
 
+function install_find_pl () {
+    local pn
+    pn=find.pl
+    test -e ${HOST_TOOLS_PREFIX}/bin/${pn} && return
+
+    echo installing $pn
+
+    if ! test -f ${BTC_SOURCES}/${pn}.bz2 ; then
+        fetch_stdout http://www.telegraphics.com.au/~fthain/sw/${pn} \
+            | bzip2 -c > ${BTC_SOURCES}/${pn}.bz2
+    fi
+    cd ${HOST_TOOLS_PREFIX}/bin
+    decompress ${BTC_SOURCES}/${pn} > ${pn}
+    chmod 755 ${pn}
+}
+
+function install_gawk () {
+    test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
+
+    install_host_tool $1 ftp://ftp.gnu.org/gnu/gawk
+    ln -nsf gawk ${BTC_BUILD}/image/${HOST_TOOLS_PREFIX}/bin/awk
+    merge_host_tool bin/{gawk,awk} share/info/gawk.info share/man/man1/gawk.1
+}
+
+function install_bison () {
+    test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
+
+    install_host_tool $1 ftp://ftp.gnu.org/gnu/bison
+    merge_host_tool bin share
+}
+
+function install_flex () {
+    test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
+
+    echo unpacking $1
+    cd $BTC_BUILD
+    untar $1 http://prdownloads.sourceforge.net/flex
+    cd ${1%a}
+    patch -p1 < ${BTC_PATCHES}/flex-2.5.4a-r6.diff
+
+    echo building $1
+
+    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX}
+    make ${MAKE_OPTS}
+
+    echo installing $1
+
+    rm -rf ${BTC_BUILD}/image
+    make DESTDIR=${BTC_BUILD}/image install
+
+    merge_host_tool bin include share/man
+}
+
 function install_gmp () {
-    test -e ${HOST_TOOLS_PREFIX}/lib/libgmp.a && return
+    test -e ${HOST_TOOLS_PREFIX}/include/gmp.h && return
 
     echo unpacking $1
     cd $BTC_BUILD
@@ -157,9 +169,10 @@ function install_gmp () {
     (
         local opts
         if [ ${BUILD} != "${BUILD#powerpc-apple-darwin}" ] ; then
-            export CFLAGS="-Wa,-force_cpusubtype_ALL"
+            export CFLAGS="-Wa,-force_cpusubtype_ALL -std=gnu89"
             opts="--with-pic"
         elif [ ${BUILD} != "${BUILD#i386-apple-darwin9}" ] ; then
+            export CFLAGS="-std=gnu89"
             opts="--build=none-apple-darwin"
         else
             opts=
@@ -172,15 +185,19 @@ function install_gmp () {
     make ${MAKE_OPTS}
 
     echo installing $1
-    make install
+
+    rm -rf ${BTC_BUILD}/image
+    make DESTDIR=${BTC_BUILD}/image install
+
+    merge_host_tool include lib share/info
 }
 
 function install_mpfr () {
-    test -e ${HOST_TOOLS_PREFIX}/lib/libmpfr.a && return
+    test -e ${HOST_TOOLS_PREFIX}/include/mpfr.h && return
 
     echo unpacking $1
     cd $BTC_BUILD
-    untar $1 http://www.mpfr.org/mpfr-current
+    untar $1 http://www.mpfr.org/$1
 
     cd $1
     patch -p1 < ${BTC_PATCHES}/mpfr-2.4.2-gentoo.patch
@@ -199,11 +216,22 @@ function install_mpfr () {
     make ${MAKE_OPTS}
 
     echo installing $1
-    make install
+
+    rm -rf ${BTC_BUILD}/image
+    make DESTDIR=${BTC_BUILD}/image install
+
+    merge_host_tool include lib share/info
+}
+
+function install_m4 () {
+    test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
+
+    install_host_tool $1 ftp://ftp.gnu.org/gnu/m4
+    merge_host_tool bin share
 }
 
 function install_ppl () {
-    is_installed ppl-config && return
+    test -e ${HOST_TOOLS_PREFIX}/include/ppl_c.h && return
 
     echo unpacking $1
     cd $BTC_BUILD
@@ -218,11 +246,15 @@ function install_ppl () {
     make ${MAKE_OPTS}
 
     echo installing $1
-    make install
+
+    rm -rf ${BTC_BUILD}/image
+    make DESTDIR=${BTC_BUILD}/image install
+
+    merge_host_tool include lib share/man/man3
 }
 
 function install_cloog_ppl () {
-    is_installed cloog && return
+    test -e ${HOST_TOOLS_PREFIX}/include/cloog && return
 
     echo unpacking $1
     cd $BTC_BUILD
@@ -237,5 +269,23 @@ function install_cloog_ppl () {
     make ${MAKE_OPTS}
 
     echo installing $1
-    make install
+
+    rm -rf ${BTC_BUILD}/image
+    make DESTDIR=${BTC_BUILD}/image install
+
+    merge_host_tool include lib
+}
+
+function install_depmod () {
+    test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
+
+    echo installing $1
+
+    if ! test -f ${BTC_SOURCES}/${1}.bz2 ; then
+        fetch_stdout http://git.busybox.net/busybox/plain/examples/depmod.pl?h=${1#*-} \
+            | bzip2 -c > ${BTC_SOURCES}/${1}.bz2
+    fi
+    cd ${HOST_TOOLS_PREFIX}/bin
+    decompress ${BTC_SOURCES}/${1} > depmod.pl
+    chmod 755 depmod.pl
 }

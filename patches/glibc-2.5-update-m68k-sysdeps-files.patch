@@ -1,0 +1,508 @@
+In file included from ../ports/sysdeps/unix/sysv/linux/m68k/sys/procfs.h:34,
+                 from ../linuxthreads_db/proc_service.h:20,
+                 from ../linuxthreads_db/thread_dbP.h:7,
+                 from ../linuxthreads/descr.h:44,
+                 from ../linuxthreads/internals.h:30,
+                 from ../linuxthreads/sysdeps/pthread/bits/libc-lock.h:27,
+                 from ../sysdeps/generic/ldsodefs.h:38,
+                 from ../ports/sysdeps/m68k/ldsodefs.h:41,
+                 from ../sysdeps/unix/sysv/linux/ldsodefs.h:25,
+                 from ../sysdeps/unix/sysv/linux/init-first.c:30:
+../sysdeps/unix/sysv/linux/sys/user.h:1:24: error: linux/user.h: No such file or directory
+In file included from ../linuxthreads_db/proc_service.h:20,
+                 from ../linuxthreads_db/thread_dbP.h:7,
+                 from ../linuxthreads/descr.h:44,
+                 from ../linuxthreads/internals.h:30,
+                 from ../linuxthreads/sysdeps/pthread/bits/libc-lock.h:27,
+                 from ../sysdeps/generic/ldsodefs.h:38,
+                 from ../ports/sysdeps/m68k/ldsodefs.h:41,
+                 from ../sysdeps/unix/sysv/linux/ldsodefs.h:25,
+                 from ../sysdeps/unix/sysv/linux/init-first.c:30:
+../ports/sysdeps/unix/sysv/linux/m68k/sys/procfs.h:46: error: invalid application of 'sizeof' to incomplete type 'struct user_regs_struct' 
+make[2]: *** [/Volumes/btc-0.12/build/glibc-m68k-linux-gnu-2/csu/init-first.o] Error 1
+make[2]: Leaving directory `/Volumes/btc-0.12/build/glibc-2.5/csu'
+make[1]: *** [csu/subdir_lib] Error 2
+make[1]: Leaving directory `/Volumes/btc-0.12/build/glibc-2.5'
+make: *** [csu/subdir_lib] Error 2
+
+
+
+X-Git-Url: http://sourceware.org/git/?p=glibc-ports.git;a=commitdiff_plain;h=d0a39e1daf2a06bada8990e352aa890f3929df1c
+
+...adapted for debian glibc-2.5 source package.
+
+See also
+
+http://sourceware.org/ml/libc-ports/2008-08/msg00005.html
+
+---
+
+#diff --git a/ChangeLog.m68k b/ChangeLog.m68k
+#index b6aa316..c399a48 100644
+#--- a/ChangeLog.m68k
+#+++ b/ChangeLog.m68k
+#@@ -1,3 +1,29 @@
+#+2008-08-10  Joseph Myers  <joseph@codesourcery.com>
+#+
+#+	* sysdeps/m68k/bits/byteswap.h: Allow inclusion from <endian.h>.
+#+	(__bswap_constant_16): Define.
+#+	(__bswap_16): Allow arguments with side effects.
+#+	(__bswap_constant_32): Ensure result is unsigned.
+#+	(__bswap_32): Define as inline function in fallback case.
+#+	(__bswap_constant_64): Define.
+#+	(__bswap_64): Use it for constant arguments.
+#+	* sysdeps/m68k/bits/setjmp.h (__jmp_buf): Give name to structure
+#+	type.
+#+	* sysdeps/m68k/m680x0/fpu/bits/mathinline.h: Only allow inclusion
+#+	from <math.h>.  Do not use extern inline directly.
+#+	* sysdeps/unix/sysv/linux/m68k/bits/fcntl.h: Include <bits/uio.h>.
+#+	(O_CLOEXEC, SYNC_FILE_RANGE_WAIT_BEFORE, SYNC_FILE_RANGE_WRITE,
+#+	SYNC_FILE_RANGE_WAIT_AFTER, SPLICE_F_MOVE, SPLICE_F_NONBLOCK,
+#+	SPLICE_F_MORE, SPLICE_F_GIFT): Define.
+#+	(sync_file_range, vmsplice, splice, tee): Declare.
+#+	* sysdeps/unix/sysv/linux/m68k/bits/mman.h (MADV_REMOVE): Define.
+#+	* sysdeps/unix/sysv/linux/m68k/bits/poll.h (POLLMSG, POLLREMOVE,
+#+	POLLRDHUP): Define.
+#+	* sysdeps/unix/sysv/linux/m68k/bits/stat.h (UTIME_NOW,
+#+	UTIME_OMIT): Define.
+#+	* sysdeps/unix/sysv/linux/m68k/kernel-features.h: New.
+#+	* sysdeps/unix/sysv/linux/m68k/sys/user.h: New.
+#+
+# 2008-03-28  Maxim Kuvyrkov  <maxim@codesourcery.com>
+# 
+# 	Explicitly get address of _DYNAMIC.
+diff --git a/sysdeps/m68k/bits/byteswap.h b/sysdeps/m68k/bits/byteswap.h
+index 41b386b..a2546c9 100644
+--- a/ports/sysdeps/m68k/bits/byteswap.h
++++ b/ports/sysdeps/m68k/bits/byteswap.h
+@@ -1,5 +1,5 @@
+ /* Macros to swap the order of bytes in integer values.  m68k version.
+-   Copyright (C) 1997, 2002 Free Software Foundation, Inc.
++   Copyright (C) 1997, 2002, 2008 Free Software Foundation, Inc.
+    This file is part of the GNU C Library.
+ 
+    The GNU C Library is free software; you can redistribute it and/or
+@@ -17,7 +17,7 @@
+    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+    02111-1307 USA.  */
+ 
+-#if !defined _BYTESWAP_H && !defined _NETINET_IN_H
++#if !defined _BYTESWAP_H && !defined _NETINET_IN_H && !defined _ENDIAN_H
+ # error "Never use <bits/byteswap.h> directly; include <byteswap.h> instead."
+ #endif
+ 
+@@ -27,13 +27,25 @@
+ /* Swap bytes in 16 bit value.  We don't provide an assembler version
+    because GCC is smart enough to generate optimal assembler output, and
+    this allows for better cse.  */
+-#define __bswap_16(x) \
+-  ((((x) >> 8) & 0xff) | (((x) & 0xff) << 8))
++#define __bswap_constant_16(x) \
++     ((((x) >> 8) & 0xffu) | (((x) & 0xffu) << 8))
++
++#ifdef __GNUC__
++# define __bswap_16(x) \
++    (__extension__							      \
++     ({ unsigned short int __bsx = (x); __bswap_constant_16 (__bsx); }))
++#else
++static __inline unsigned short int
++__bswap_16 (unsigned short int __bsx)
++{
++  return __bswap_constant_16 (__bsx);
++}
++#endif
+ 
+ /* Swap bytes in 32 bit value.  */
+ #define __bswap_constant_32(x) \
+-  ((((x) & 0xff000000) >> 24) | (((x) & 0x00ff0000) >>  8) | \
+-   (((x) & 0x0000ff00) <<  8) | (((x) & 0x000000ff) << 24))
++     ((((x) & 0xff000000u) >> 24) | (((x) & 0x00ff0000u) >>  8) |	      \
++      (((x) & 0x0000ff00u) <<  8) | (((x) & 0x000000ffu) << 24))
+ 
+ #if defined __GNUC__ && __GNUC__ >= 2 && !defined(__mcoldfire__)
+ # define __bswap_32(x) \
+@@ -49,18 +61,38 @@
+ 			     : "0" ((unsigned int) (x)));	\
+      __bswap_32_v; })
+ #else
+-# define __bswap_32(x) __bswap_constant_32 (x)
++static __inline unsigned int
++__bswap_32 (unsigned int __bsx)
++{
++  return __bswap_constant_32 (__bsx);
++}
+ #endif
+ 
+ #if defined __GNUC__ && __GNUC__ >= 2
+ /* Swap bytes in 64 bit value.  */
++# define __bswap_constant_64(x) \
++     ((((x) & 0xff00000000000000ull) >> 56)				      \
++      | (((x) & 0x00ff000000000000ull) >> 40)				      \
++      | (((x) & 0x0000ff0000000000ull) >> 24)				      \
++      | (((x) & 0x000000ff00000000ull) >> 8)				      \
++      | (((x) & 0x00000000ff000000ull) << 8)				      \
++      | (((x) & 0x0000000000ff0000ull) << 24)				      \
++      | (((x) & 0x000000000000ff00ull) << 40)				      \
++      | (((x) & 0x00000000000000ffull) << 56))
++
++/* Swap bytes in 64 bit value.  */
+ # define __bswap_64(x) \
+   __extension__								\
+   ({ union { unsigned long long int __ll;				\
+ 	     unsigned long int __l[2]; } __bswap_64_v, __bswap_64_r;	\
+-     __bswap_64_v.__ll = (x);						\
+-     __bswap_64_r.__l[0] = __bswap_32 (__bswap_64_v.__l[1]);		\
+-     __bswap_64_r.__l[1] = __bswap_32 (__bswap_64_v.__l[0]);		\
++     if (__builtin_constant_p (x))					\
++       __bswap_64_r.__ll = __bswap_constant_64 (x);			\
++     else								\
++       {								\
++	 __bswap_64_v.__ll = (x);					\
++	 __bswap_64_r.__l[0] = __bswap_32 (__bswap_64_v.__l[1]);	\
++	 __bswap_64_r.__l[1] = __bswap_32 (__bswap_64_v.__l[0]);	\
++       }								\
+      __bswap_64_r.__ll; })
+ #endif
+ 
+diff --git a/sysdeps/m68k/bits/setjmp.h b/sysdeps/m68k/bits/setjmp.h
+index 27ec051..b2d8b2e 100644
+--- a/ports/sysdeps/m68k/bits/setjmp.h
++++ b/ports/sysdeps/m68k/bits/setjmp.h
+@@ -1,4 +1,4 @@
+-/* Copyright (C) 1997,1998,2005,2006 Free Software Foundation, Inc.
++/* Copyright (C) 1997,1998,2005,2006,2008 Free Software Foundation, Inc.
+    This file is part of the GNU C Library.
+ 
+    The GNU C Library is free software; you can redistribute it and/or
+@@ -24,7 +24,7 @@
+ # error "Never include <bits/setjmp.h> directly; use <setjmp.h> instead."
+ #endif
+ 
+-typedef struct
++typedef struct __jmp_buf_internal_tag
+   {
+     /* There are eight 4-byte data registers, but D0 is not saved.  */
+     long int __dregs[7];
+#diff --git a/sysdeps/m68k/m680x0/fpu/bits/mathinline.h b/sysdeps/m68k/m680x0/fpu/bits/mathinline.h
+#index acbac47..6b69f7a 100644
+#--- a/ports/sysdeps/m68k/fpu/bits/mathinline.h
+#+++ b/ports/sysdeps/m68k/fpu/bits/mathinline.h
+#@@ -1,5 +1,5 @@
+# /* Definitions of inline math functions implemented by the m68881/2.
+#-   Copyright (C) 1991,92,93,94,96,97,98,99,2000,2002, 2003, 2004
+#+   Copyright (C) 1991,92,93,94,96,97,98,99,2000,2002, 2003, 2004, 2008
+#      Free Software Foundation, Inc.
+#    This file is part of the GNU C Library.
+# 
+#@@ -18,6 +18,16 @@
+#    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+#    02111-1307 USA.  */
+# 
+#+#ifndef _MATH_H
+#+# error "Never use <bits/mathinline.h> directly; include <math.h> instead."
+#+#endif
+#+
+#+#ifndef __extern_inline
+#+# define __MATH_INLINE __inline
+#+#else
+#+# define __MATH_INLINE __extern_inline
+#+#endif
+#+
+# #ifdef	__GNUC__
+# 
+# #ifdef __USE_ISOC99
+#@@ -89,11 +99,7 @@
+# # define __m81_inline		static __inline
+# #else
+# # define __m81_u(x)		x
+#-# ifdef __cplusplus
+#-#  define __m81_inline		__inline
+#-# else
+#-#  define __m81_inline		extern __inline
+#-# endif
+#+# define __m81_inline __MATH_INLINE
+# # define __M81_MATH_INLINES	1
+# #endif
+# 
+#@@ -351,14 +357,14 @@ __inline_functions (long double,l)
+# /* Note that there must be no whitespace before the argument passed for
+#    NAME, to make token pasting work correctly with -traditional.  */
+# # define __inline_forward_c(rettype, name, args1, args2)	\
+#-extern __inline rettype __attribute__((__const__))		\
+#+__MATH_INLINE rettype __attribute__((__const__))		\
+#   __NTH(name args1)						\
+# {								\
+#   return __CONCAT(__,name) args2;				\
+# }
+# 
+# # define __inline_forward(rettype, name, args1, args2)	\
+#-extern __inline rettype __NTH(name args1)		\
+#+__MATH_INLINE rettype __NTH(name args1)		\
+# {							\
+#   return __CONCAT(__,name) args2;			\
+# }
+diff --git a/sysdeps/unix/sysv/linux/m68k/bits/fcntl.h b/sysdeps/unix/sysv/linux/m68k/bits/fcntl.h
+index 169a24b..203d5a1 100644
+--- a/ports/sysdeps/unix/sysv/linux/m68k/bits/fcntl.h
++++ b/ports/sysdeps/unix/sysv/linux/m68k/bits/fcntl.h
+@@ -1,5 +1,5 @@
+ /* O_*, F_*, FD_* bit values for Linux.
+-   Copyright (C) 2000, 2004 Free Software Foundation, Inc.
++   Copyright (C) 2000, 2004, 2008 Free Software Foundation, Inc.
+    This file is part of the GNU C Library.
+ 
+    The GNU C Library is free software; you can redistribute it and/or
+@@ -21,8 +21,11 @@
+ # error "Never use <bits/fcntl.h> directly; include <fcntl.h> instead."
+ #endif
+ 
+-
+ #include <sys/types.h>
++#ifdef __USE_GNU
++# include <bits/uio.h>
++#endif
++
+ 
+ /* open/fcntl - O_SYNC is only implemented on blocks devices and on files
+    located on an ext2 file system */
+@@ -46,6 +49,7 @@
+ # define O_NOFOLLOW	0100000	/* Do not follow links.	 */
+ # define O_DIRECT	0200000	/* Direct disk access.	*/
+ # define O_NOATIME	01000000 /* Do not set atime.  */
++# define O_CLOEXEC     02000000 /* Set close_on_exec.  */
+ #endif
+ 
+ /* For now Linux has synchronisity options for data and read operations.
+@@ -181,10 +185,55 @@ struct flock64
+ # define POSIX_FADV_NOREUSE	5 /* Data will be accessed once.  */
+ #endif
+ 
++
++#ifdef __USE_GNU
++/* Flags for SYNC_FILE_RANGE.  */
++# define SYNC_FILE_RANGE_WAIT_BEFORE	1 /* Wait upon writeout of all pages
++					     in the range before performing the
++					     write.  */
++# define SYNC_FILE_RANGE_WRITE		2 /* Initiate writeout of all those
++					     dirty pages in the range which are
++					     not presently under writeback.  */
++# define SYNC_FILE_RANGE_WAIT_AFTER	4 /* Wait upon writeout of all pages in
++					     the range after performing the
++					     write.  */
++
++/* Flags for SPLICE and VMSPLICE.  */
++# define SPLICE_F_MOVE		1	/* Move pages instead of copying.  */
++# define SPLICE_F_NONBLOCK	2	/* Don't block on the pipe splicing
++					   (but we may still block on the fd
++					   we splice from/to).  */
++# define SPLICE_F_MORE		4	/* Expect more data.  */
++# define SPLICE_F_GIFT		8	/* Pages passed in are a gift.  */
++#endif
++
+ __BEGIN_DECLS
+ 
++#ifdef __USE_GNU
++
+ /* Provide kernel hint to read ahead.  */
+ extern ssize_t readahead (int __fd, __off64_t __offset, size_t __count)
+     __THROW;
+ 
++
++/* Selective file content synch'ing.  */
++extern int sync_file_range (int __fd, __off64_t __from, __off64_t __to,
++			    unsigned int __flags);
++
++
++/* Splice address range into a pipe.  */
++extern ssize_t vmsplice (int __fdout, const struct iovec *__iov,
++			 size_t __count, unsigned int __flags);
++
++/* Splice two files together.  */
++extern ssize_t splice (int __fdin, __off64_t *__offin, int __fdout,
++		       __off64_t *__offout, size_t __len,
++		       unsigned int __flags);
++
++/* In-kernel implementation of tee for pipe buffers.  */
++extern ssize_t tee (int __fdin, int __fdout, size_t __len,
++		    unsigned int __flags);
++
++#endif
++
+ __END_DECLS
+diff --git a/sysdeps/unix/sysv/linux/m68k/bits/mman.h b/sysdeps/unix/sysv/linux/m68k/bits/mman.h
+index fbec1a0..ab99176 100644
+--- a/ports/sysdeps/unix/sysv/linux/m68k/bits/mman.h
++++ b/ports/sysdeps/unix/sysv/linux/m68k/bits/mman.h
+@@ -1,5 +1,5 @@
+ /* Definitions for POSIX memory map interface.  Linux/m68k version.
+-   Copyright (C) 1997, 2000, 2003, 2005 Free Software Foundation, Inc.
++   Copyright (C) 1997, 2000, 2003, 2005, 2008 Free Software Foundation, Inc.
+    This file is part of the GNU C Library.
+ 
+    The GNU C Library is free software; you can redistribute it and/or
+@@ -88,6 +88,7 @@
+ # define MADV_SEQUENTIAL 2	/* Expect sequential page references.  */
+ # define MADV_WILLNEED	 3	/* Will need these pages.  */
+ # define MADV_DONTNEED	 4	/* Don't need these pages.  */
++# define MADV_REMOVE	 9	/* Remove these pages and resources.  */
+ # define MADV_DONTFORK	 10	/* Do not inherit across fork.  */
+ # define MADV_DOFORK	 11	/* Do inherit across fork.  */
+ #endif
+diff --git a/sysdeps/unix/sysv/linux/m68k/bits/poll.h b/sysdeps/unix/sysv/linux/m68k/bits/poll.h
+index f7a7393..bc28579 100644
+--- a/ports/sysdeps/unix/sysv/linux/m68k/bits/poll.h
++++ b/ports/sysdeps/unix/sysv/linux/m68k/bits/poll.h
+@@ -1,4 +1,4 @@
+-/* Copyright (C) 1997, 2001 Free Software Foundation, Inc.
++/* Copyright (C) 1997, 2001, 2008 Free Software Foundation, Inc.
+    This file is part of the GNU C Library.
+ 
+    The GNU C Library is free software; you can redistribute it and/or
+@@ -35,6 +35,13 @@
+ # define POLLWRBAND	0x100		/* Priority data may be written.  */
+ #endif
+ 
++#ifdef __USE_GNU
++/* These are extensions for Linux.  */
++# define POLLMSG	0x400
++# define POLLREMOVE	0x1000
++# define POLLRDHUP	0x2000
++#endif
++
+ /* Event types always implicitly polled for.  These bits need not be set in
+    `events', but they will appear in `revents' to indicate the status of
+    the file descriptor.  */
+diff --git a/sysdeps/unix/sysv/linux/m68k/bits/stat.h b/sysdeps/unix/sysv/linux/m68k/bits/stat.h
+index dc06b13..6b69240 100644
+--- a/ports/sysdeps/unix/sysv/linux/m68k/bits/stat.h
++++ b/ports/sysdeps/unix/sysv/linux/m68k/bits/stat.h
+@@ -1,4 +1,4 @@
+-/* Copyright (C) 1992,95,96,97,98,99,2000,2001,2002
++/* Copyright (C) 1992,95,96,97,98,99,2000,2001,2002,2008
+      Free Software Foundation, Inc.
+    This file is part of the GNU C Library.
+ 
+@@ -162,3 +162,9 @@ struct stat64
+ #define	__S_IREAD	0400	/* Read by owner.  */
+ #define	__S_IWRITE	0200	/* Write by owner.  */
+ #define	__S_IEXEC	0100	/* Execute by owner.  */
++
++#if defined __USE_ATFILE || defined __USE_GNU
++/* XXX This will change to the macro for the next 2008 POSIX revision.  */
++# define UTIME_NOW	((1l << 30) - 1l)
++# define UTIME_OMIT	((1l << 30) - 2l)
++#endif
+diff --git a/sysdeps/unix/sysv/linux/m68k/kernel-features.h b/sysdeps/unix/sysv/linux/m68k/kernel-features.h
+new file mode 100644
+index 0000000..9a6d23d
+--- /dev/null
++++ b/ports/sysdeps/unix/sysv/linux/m68k/kernel-features.h
+@@ -0,0 +1,41 @@
++/* Set flags signalling availability of kernel features based on given
++   kernel version number.
++   Copyright (C) 2008 Free Software Foundation, Inc.
++   This file is part of the GNU C Library.
++
++   The GNU C Library is free software; you can redistribute it and/or
++   modify it under the terms of the GNU Lesser General Public
++   License as published by the Free Software Foundation; either
++   version 2.1 of the License, or (at your option) any later version.
++
++   The GNU C Library is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   Lesser General Public License for more details.
++
++   You should have received a copy of the GNU Lesser General Public
++   License along with the GNU C Library; if not, write to the Free
++   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
++   02111-1307 USA.  */
++
++/* These features were surely available with 2.4.12.  */
++#if __LINUX_KERNEL_VERSION >= 132108
++# define __ASSUME_MMAP2_SYSCALL		1
++# define __ASSUME_TRUNCATE64_SYSCALL	1
++# define __ASSUME_STAT64_SYSCALL	1
++# define __ASSUME_FCNTL64		1
++# define __ASSUME_VFORK_SYSCALL		1
++#endif
++
++/* Many syscalls were added in 2.6.10 for m68k.  */
++#if __LINUX_KERNEL_VERSION >= 132618
++# define __ASSUME_TGKILL	1
++# define __ASSUME_UTIMES	1
++# define __ASSUME_FADVISE64_64_SYSCALL	1
++#endif
++
++#include_next <kernel-features.h>
++
++/* These syscalls are not implemented yet for m68k.  */
++#undef __ASSUME_PSELECT
++#undef __ASSUME_PPOLL
+diff --git a/sysdeps/unix/sysv/linux/m68k/sys/user.h b/sysdeps/unix/sysv/linux/m68k/sys/user.h
+new file mode 100644
+index 0000000..f8b19fc
+--- /dev/null
++++ b/ports/sysdeps/unix/sysv/linux/m68k/sys/user.h
+@@ -0,0 +1,61 @@
++/* Copyright (C) 2008 Free Software Foundation, Inc.
++   This file is part of the GNU C Library.
++
++   The GNU C Library is free software; you can redistribute it and/or
++   modify it under the terms of the GNU Lesser General Public
++   License as published by the Free Software Foundation; either
++   version 2.1 of the License, or (at your option) any later version.
++
++   The GNU C Library is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   Lesser General Public License for more details.
++
++   You should have received a copy of the GNU Lesser General Public
++   License along with the GNU C Library; if not, write to the Free
++   Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
++   02111-1307 USA.  */
++
++#ifndef _SYS_USER_H
++#define _SYS_USER_H	1
++
++/* The whole purpose of this file is for GDB and GDB only.  Don't read
++   too much into it.  Don't use it for anything other than GDB unless
++   you know what you are doing.  */
++
++struct user_m68kfp_struct {
++	unsigned long fpregs[8*3];
++	unsigned long fpcntl[3];
++};
++
++struct user_regs_struct {
++	long d1, d2, d3, d4, d5, d6, d7;
++	long a0, a1, a2, a3, a4, a5, a6;
++	long d0;
++	long usp;
++	long orig_d0;
++	short stkadj;
++	short sr;
++	long pc;
++	short fmtvec;
++	short __fill;
++};
++
++struct user {
++	struct user_regs_struct regs;
++	int u_fpvalid;
++	struct user_m68kfp_struct m68kfp;
++	unsigned long int u_tsize;
++	unsigned long int u_dsize;
++	unsigned long int u_ssize;
++	unsigned long start_code;
++	unsigned long start_stack;
++	long int signal;
++	int reserved;
++	unsigned long u_ar0;
++	struct user_m68kfp_struct *u_fpstate;
++	unsigned long magic;
++	char u_comm[32];
++};
++
++#endif

@@ -1,0 +1,4 @@
+. ${BTC_PROFILES}/C
+. ${BTC_PROFILES}/4.0
+TARGET=i686-linux-gnu
+TARGET_CPU=i386

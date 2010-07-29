@@ -1,0 +1,8 @@
+# Method D base profile
+# Same as method C, but uses NPTL on all architectures
+METHOD=D
+BINUTILS_DIST=binutils-2.20.1
+LINUX_DIST=linux-2.6.34
+
+GLIBC_DIST=glibc-2.11
+GLIBC_ADD_ONS=ports # "ports libidn"

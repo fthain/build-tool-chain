@@ -28,12 +28,15 @@ diff --git a/arch/m68k/include/asm/ptrace.h b/arch/m68k/include/asm/ptrace.h
 index a6ab663..43ab86a 100644
 --- a/arch/m68k/include/asm/ptrace.h
 +++ b/arch/m68k/include/asm/ptrace.h
-@@ -71,3 +71,5 @@ struct switch_stack {
+@@ -71,6 +71,8 @@ struct switch_stack {
  #define PTRACE_GETFPREGS          14
  #define PTRACE_SETFPREGS          15
-+
-+#define PTRACE_GET_THREAD_AREA    25
  
++#define PTRACE_GET_THREAD_AREA    25
++
+ #define PTRACE_SINGLEBLOCK	33	/* resume execution until next branch */
+ 
+ #ifdef __KERNEL__
 diff --git a/arch/m68k/include/asm/thread_info_mm.h b/arch/m68k/include/asm/thread_info_mm.h
 index 5b754aa..b7b37a4 100644
 --- a/arch/m68k/include/asm/thread_info_mm.h

@@ -1,0 +1,8 @@
+# Method C base profile
+# Allows glibc > 2.3.3 and NPTL (given TLS support) or linuxthreads (depending on arch)
+METHOD=C
+BINUTILS_DIST=binutils-2.19.51
+LINUX_DIST=linux-2.6.18
+
+GLIBC_DIST=glibc-2.3.6
+GLIBC_ADD_ONS=linuxthreads

@@ -1,3 +1,0 @@
-. ${PROFILES}/411
-TARGET=alpha-linux-gnu
-TARGET_CPU=alpha

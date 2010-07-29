@@ -1,3 +1,0 @@
-. ${PROFILES}/1
-TARGET=i686-linux-gnu
-TARGET_CPU=i386

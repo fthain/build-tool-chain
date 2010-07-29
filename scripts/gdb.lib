@@ -1,4 +1,5 @@
 ##############################################
+#
 # Functions relating to gdb
 
 function prep_gdb () {
@@ -12,7 +13,7 @@ function prep_gdb () {
     ( gdb-6.6 )
         patch -p1 < ${BTC_PATCHES}/gdb-6.6-sim-ppc-libintl-link.diff
         ;;
-    ( gdb-6.8 | gdb-6.8.* )
+    ( gdb-6.8 | gdb-6.8.* | gdb-7.* )
         patch -p1 < ${BTC_PATCHES}/gdb-6.8-sim-ppc-no-lz-target.diff
         ;;
     esac
@@ -27,11 +28,15 @@ function install_gdb () {
     mkdir intl
     echo 'am_cv_func_iconv=${am_cv_func_iconv=no}' >intl/config.cache
 
-    CFLAGS="$HOST_CFLAGS -O2" AR=ar RANLIB=ranlib \
-    ../${GDB_DIST}/configure --prefix=${TC_PREFIX} --target=${TARGET} \
+    CFLAGS="-O2 $HOST_CFLAGS" AR=ar RANLIB=ranlib \
+    ../${GDB_DIST}/configure --prefix=${TC_PREFIX}/${1} --target=${TARGET} \
+    --cache-file=config.cache \
     --build=${BUILD} \
-    --disable-werror \
-    --cache-file=config.cache
+    --without-python \
+    --disable-expat \
+    --disable-static \
+    --disable-shared \
+    --disable-werror
 
     make ${MAKE_OPTS}
     make install

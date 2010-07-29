@@ -1,0 +1,120 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+use Digest::MD5;
+
+sub list {
+  my @result;
+  opendir(D, ".") or die "opendir: $!\n";
+  while ($_ = readdir D) {
+    next if -d;
+    push @result, $_
+  }
+  closedir D;
+  return @result
+}
+
+sub md5 {
+  my $fn = shift;
+  local *FH;
+  open(FH, "<$fn") or die "$fn: $!\n";
+  binmode FH;
+  my $result = Digest::MD5->new->addfile(*FH)->hexdigest;
+  close FH;
+  $result
+}
+
+my %checked;
+my %digest;
+
+sub check_digest {
+  my $fn = shift;
+  return unless defined $digest{$fn};
+  my $d = shift;
+  $d eq $digest{$fn} or die "bad digest: $fn\n";
+  $checked{$fn} = 1;
+}
+
+chdir($ENV{HOME}.'/btc-sources') or die "chdir: $!\n";
+
+grep { $digest{$_} = md5 $_ } list();
+
+END {
+  grep {
+    print "check_digest '$_', '$digest{$_}';\n" unless $checked{$_}
+  } keys %digest;
+}
+
+check_digest 'binutils-2.12.90.0.1.tar.bz2', '426c30debcb338cb2dcad2f7ec7e61e7';
+check_digest 'binutils-2.17.tar.bz2', 'e26e2e06b6e4bf3acf1dc8688a94c0d1';
+check_digest 'binutils-2.18.tar.bz2', '9d22ee4dafa3a194457caf4706f9cf01';
+check_digest 'binutils-2.18.50.0.9.tar.bz2', '68e3510d9c790b134450c0a243c251cd';
+check_digest 'binutils-2.19.51.tar.bz2', 'fd59f36022f6ea802d1c844a2576e616';
+check_digest 'binutils-2.20.1.tar.bz2', '9cdfb9d6ec0578c166d3beae5e15c4e5';
+check_digest 'bison-1.28.tar.gz', '4afb3989f2270043c47c3daa1fa7ffab';
+check_digest 'cloog-ppl-0.15.7.tar.gz', '6455e7875daac5bd885545c71c3f2001';
+check_digest 'cloog-ppl-0.15.9.tar.gz', '806e001d1b1a6b130069ff6274900af5';
+check_digest 'coreutils-7.6.tar.gz', '3d82f979229365f880da750642e67cf3';
+check_digest 'coreutils-8.5.tar.gz', 'c1ffe586d001e87d66cd80c4536ee823';
+check_digest 'depmod.pl-1_15_stable.bz2', '5eb1864c8dc13dcd628b6a54d73ec294';
+check_digest 'flex-2.5.4a.tar.gz', 'bd8753d0b22e1f4ec87a553a73021adf';
+check_digest 'gawk-3.1.5.tar.bz2', '5703f72d0eea1d463f735aad8222655f';
+check_digest 'gawk-3.1.8.tar.bz2', '52b41c6c4418b3226dfb8f82076193bb';
+check_digest 'gcc-2.95.3.tar.bz2', '87ee083a830683e2aaa57463940a0c3c';
+check_digest 'gcc-3.3.6.tar.bz2', '6936616a967da5a0b46f1e7424a06414';
+check_digest 'gcc-3.4.6.tar.bz2', '4a21ac777d4b5617283ce488b808da7b';
+check_digest 'gcc-4.0.4.tar.bz2', '8970debbc55bea85ee80961d733080f0';
+check_digest 'gcc-4.1.1.tar.bz2', 'ad9f97a4d04982ccf4fd67cb464879f3';
+check_digest 'gcc-4.1.2.tar.bz2', 'a4a3eb15c96030906d8494959eeda23c';
+check_digest 'gcc-4.2.4.tar.bz2', 'd79f553e7916ea21c556329eacfeaa16';
+check_digest 'gcc-4.3.4.tar.bz2', '60df63222dbffd53ca11492a2545044f';
+check_digest 'gcc-4.3.5.tar.bz2', 'e588cfde3bf323f82918589b94f14a15';
+check_digest 'gcc-4.4.1.tar.bz2', '927eaac3d44b22f31f9c83df82f26436';
+check_digest 'gcc-4.4.4.tar.bz2', '7ff5ce9e5f0b088ab48720bbd7203530';
+check_digest 'gcc-core-2.95.3.tar.bz2', '56dc4de966a54e4c511f65e525f9c0fe';
+check_digest 'gcc-core-3.3.6.tar.bz2', '18c52e6fb8966b7700665dca289d077f';
+check_digest 'gcc-core-3.4.6.tar.bz2', '5324ace5145b12afd9ca867af7ec084d';
+check_digest 'gcc-core-4.0.4.tar.bz2', '193e0a7a471cca70e374974bc5a60137';
+check_digest 'gcc-core-4.1.1.tar.bz2', 'a1b189c98aa7d7f164036bbe89b9b2a2';
+check_digest 'gcc-core-4.1.2.tar.bz2', '2af3fb599635219171c6ae1f3034888a';
+check_digest 'gcc-core-4.2.4.tar.bz2', 'b7a4c167f6a05301591b139b356e36d0';
+check_digest 'gcc-core-4.3.4.tar.bz2', '575b3220bb8e7060939c429fc8608d22';
+check_digest 'gcc-core-4.3.5.tar.bz2', '321ca2fcca31aed0ad5d9d339e2a7a41';
+check_digest 'gcc-core-4.4.1.tar.bz2', 'd19693308aa6b2052e14c071111df59f';
+check_digest 'gcc-core-4.4.4.tar.bz2', 'eb68755f64b9a4e37751992abb41c4fc';
+check_digest 'gdb-6.8.91.tar.bz2', '6a02c0d9af3507efb842d6e0f4e4e1ee';
+check_digest 'gdb-7.1.tar.bz2', '21dce610476c054687b52770d2ddc657';
+check_digest 'gettext-0.16.1.tar.gz', '3d9ad24301c6d6b17ec30704a13fe127';
+check_digest 'glibc-2.11.tar.bz2', '2c990f97e9ff9fb1c3c85fe826e991b9';
+check_digest 'glibc-2.2.5.tar.bz2', '7ecad5261e6ca9636a4312574c215ac4';
+check_digest 'glibc-2.2.5.tar.gz', 'e4c3eb8343b5df346ceaaec23459f1dc';
+check_digest 'glibc-2.3.2.tar.bz2', 'ede969aad568f48083e413384f20753c';
+check_digest 'glibc-2.3.6.tar.bz2', 'bfdce99f82d6dbcb64b7f11c05d6bc96';
+check_digest 'glibc-2.5.tar.bz2', '1fb29764a6a650a4d5b409dda227ac9f';
+check_digest 'glibc-linuxthreads-2.2.5.tar.bz2', '56be931455850e073a56df454ae99818';
+check_digest 'glibc-linuxthreads-2.2.5.tar.gz', 'c766a79a51668d7fa33f175a249655b4';
+check_digest 'glibc-linuxthreads-2.3.2.tar.bz2', '894b8969cfbdf787c73e139782167607';
+check_digest 'glibc-linuxthreads-2.3.6.tar.bz2', 'd4eeda37472666a15cc1f407e9c987a9';
+check_digest 'glibc-linuxthreads-2.5.tar.bz2', '870d76d46dcaba37c13d01dca47d1774';
+check_digest 'glibc-ports-2.11.tar.bz2', '4856ad0f54a83fc3c1a9b5d3c820a230';
+check_digest 'glibc-ports-2.5.tar.bz2', '183f6d46e8fa5e4b2aff240ab1586c2e';
+check_digest 'gmp-4.3.1.tar.bz2', '26cec15a90885042dd4a15c4003b08ae';
+check_digest 'gmp-4.3.2.tar.bz2', 'dd60683d7057917e34630b4a787932e8';
+check_digest 'kbd-1.12.tar.gz', '7892c7010512a9bc6697a295c921da25';
+check_digest 'linux-2.2.26.tar.bz2', '4fa42c5112ddd2cc20dedfbd61d588a1';
+check_digest 'linux-2.4.36.tar.bz2', '230caed7f3caf23a96ded604ba0ad6ae';
+check_digest 'linux-2.6.18.tar.bz2', '296a6d150d260144639c3664d127d174';
+check_digest 'linux-2.6.20.tar.bz2', '34b0f354819217e6a345f48ebbd8f13e';
+check_digest 'linux-2.6.22.tar.bz2', '2e230d005c002fb3d38a3ca07c0200d0';
+check_digest 'linux-2.6.27.tar.bz2', 'b3e78977aa79d3754cb7f8143d7ddabd';
+check_digest 'linux-2.6.31.tar.bz2', '84c077a37684e4cbfa67b18154390d8a';
+check_digest 'linux-2.6.34.tar.bz2', '10eebcb0178fb4540e2165bfd7efc7ad';
+check_digest 'm4-1.4.13.tar.bz2', '28f9ccd3ac4da45409251008b911d677';
+check_digest 'make-3.81.tar.bz2', '354853e0b2da90c527e35aabb8d6f1e6';
+check_digest 'mpfr-2.4.1.tar.bz2', 'c5ee0a8ce82ad55fe29ac57edd35d09e';
+check_digest 'mpfr-2.4.2.tar.bz2', '89e59fe665e2b3ad44a6789f40b059a0';
+check_digest 'ppl-0.10.2.tar.bz2', '5667111f53150618b0fa522ffc53fc3e';
+check_digest 'sed-4.1.4.tar.gz', '2a62ceadcb571d2dac006f81df5ddb48';
+check_digest 'sed-4.1.5.tar.gz', '7a1cbbbb3341287308e140bd4834c3ba';
+check_digest 'sed-4.2.1.tar.bz2', '7d310fbd76e01a01115075c1fd3f455a';

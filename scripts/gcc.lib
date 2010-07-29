@@ -1,4 +1,5 @@
 ##############################################
+#
 # Functions relating to gcc
 
 function prep_gcc_core () {
@@ -15,29 +16,32 @@ function prep_gcc_core () {
     if [ ${TARGET_CPU} = m68k ] ; then
       case ${1} in
       ( gcc-2.95.3 )
-          decompress ${BTC_PATCHES}/gcc-core-2.95.4.ds15-27.diff | patch -p1
+          decompress ${BTC_PATCHES}/gcc-core-2.95_2.95.4.ds15-27-debian-m68k.diff | patch -p1
+          # Reverse unwanted Debian patches
+          patch -p1 -R < ${BTC_PATCHES}/gcc-core-295-install-names.patch
           ;;
       ( gcc-3.3.6 )
-          decompress ${BTC_PATCHES}/gcc-core-3.3.6ds1-15.diff | patch -p1
+          decompress ${BTC_PATCHES}/gcc-core-3.3_3.3.6ds1-15-debian-m68k.diff | patch -p1
+          # Reverse unwanted Debian patch
+          patch -p0 -R < ${BTC_PATCHES}/gcc-core-336-rename-info-files.dpatch
           ;;
-      ( gcc-4.1.1 )
-          decompress ${BTC_PATCHES}/gcc-core-4.1.1ds2-21.diff | patch -p1
+      ( gcc-4.1.2 )
+          decompress ${BTC_PATCHES}/gcc-core-4.1_4.1.2-27-debian-m68k.diff | patch -p1
+          # Build failure
+          patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
           ;;
-      ( gcc-4.2.4 )
-          decompress ${BTC_PATCHES}/gcc-core-4.2_4.2.4-6-debian.diff | patch -p1
-          ;;
-      ( gcc-4.4.1 )
-          decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.1-3-debian.diff | patch -p1
-          patch -p1 < ${BTC_PATCHES}/gcc-m68k-support-for-tls-backport.patch
+      ( gcc-4.3.5 )
+          decompress ${BTC_PATCHES}/gcc-core-4.3_4.3.5-1-debian-m68k.diff | patch -p1
+          # Reverse Debian inline-gnu99 hack
+          patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
           ;;
       ( gcc-4.4.4 )
-          decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.4-2-debian.diff | patch -p1
-          patch -p1 < ${BTC_PATCHES}/gcc-m68k-support-for-tls-backport.patch
+          decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.4-6-debian-m68k.diff | patch -p1
           ;;
       esac
     else
       case ${1} in
-      ( gcc-3.3[-.]* )
+      ( gcc-3.3[.-]* )
           # For binutils > 2.15
           patch -p0 < ${BTC_PATCHES}/gcc-3.3-mips-embedded-pic.patch
           ;;
@@ -54,13 +58,13 @@ function prep_gcc_core () {
         # makeinfo crash
         patch -p1 < ${BTC_PATCHES}/gcc-2.95.3-use-host-makeinfo.diff
         ;;
-    ( gcc-3.[01][-.]* )
+    ( gcc-3.[01][.-]* )
         ;;
     ( gcc-3.* )
         # We build gcc-core before libc is built
         patch -p0 < ${BTC_PATCHES}/gcc-3.2-btc-shlib-sans-libc.patch
         ;;
-    ( gcc-4.0[-.]* )
+    ( gcc-4.0[.-]* )
         # We build gcc-core before libc is built
         patch -p1 < ${BTC_PATCHES}/gcc-4-no-libc-yet.diff
         # Bug fix
@@ -77,7 +81,7 @@ function prep_gcc_core () {
     esac
 
     case ${1} in
-    ( gcc-[23].* | gcc-4.0[-.]* )
+    ( gcc-[23].* | gcc-4.0[.-]* )
         # build failure
         patch -p1 < ${BTC_PATCHES}/gcc-3-creat-needs-open3.patch
         ;;
@@ -94,29 +98,32 @@ function prep_gcc () {
     if [ ${TARGET_CPU} = m68k ] ; then
       case ${1} in
       ( gcc-2.95.3 )
-          decompress ${BTC_PATCHES}/gcc-2.95.4.ds15-27.diff | patch -p1
+          decompress ${BTC_PATCHES}/gcc-2.95_2.95.4.ds15-27-debian-m68k.diff | patch -p1
+          # Reverse unwanted Debian patches
+          patch -p1 -R < ${BTC_PATCHES}/gcc-295-install-names.patch
           ;;
       ( gcc-3.3.6 )
-          decompress ${BTC_PATCHES}/gcc-3.3.6ds1-15.diff | patch -p1
+          decompress ${BTC_PATCHES}/gcc-3.3_3.3.6ds1-15-debian-m68k.diff | patch -p1
+          # Reverse unwanted Debian patch
+          patch -p0 -R < ${BTC_PATCHES}/gcc-336-rename-info-files.dpatch
           ;;
-      ( gcc-4.1.1 )
-          decompress ${BTC_PATCHES}/gcc-4.1.1ds2-21.diff | patch -p1
+      ( gcc-4.1.2 )
+          decompress ${BTC_PATCHES}/gcc-4.1_4.1.2-27-debian-m68k.diff | patch -p1
+          # Build failure
+          patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
           ;;
-      ( gcc-4.2.4 )
-          decompress ${BTC_PATCHES}/gcc-4.2_4.2.4-6-debian.diff | patch -p1
-          ;;
-      ( gcc-4.4.1 )
-          decompress ${BTC_PATCHES}/gcc-4.4_4.4.1-3-debian.diff | patch -p1
-          patch -p1 < ${BTC_PATCHES}/gcc-m68k-support-for-tls-backport.patch
+      ( gcc-4.3.5 )
+          decompress ${BTC_PATCHES}/gcc-4.3_4.3.5-1-debian-m68k.diff | patch -p1
+          # Reverse Debian inline-gnu99 hack
+          patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
           ;;
       ( gcc-4.4.4 )
-          decompress ${BTC_PATCHES}/gcc-4.4_4.4.4-2-debian.diff | patch -p1
-          patch -p1 < ${BTC_PATCHES}/gcc-m68k-support-for-tls-backport.patch
+          decompress ${BTC_PATCHES}/gcc-4.4_4.4.4-6-debian-m68k.diff | patch -p1
           ;;
       esac
     else
       case ${1} in
-      ( gcc-3.3[-.]* )
+      ( gcc-3.3[.-]* )
           # For binutils > 2.15
           patch -p0 < ${BTC_PATCHES}/gcc-3.3-mips-embedded-pic.patch
           ;;
@@ -133,17 +140,17 @@ function prep_gcc () {
         # makeinfo crash
         patch -p1 < ${BTC_PATCHES}/gcc-2.95.3-use-host-makeinfo.diff
         ;;
-    ( gcc-3.3[-.]* )
+    ( gcc-3.3[.-]* )
         patch -p1 < ${BTC_PATCHES}/gcc-3.3.4-zecke-xgcc-cpp.patch
         ;;
-    ( gcc-3.4[-.]* )
+    ( gcc-3.4[.-]* )
         patch -p1 < ${BTC_PATCHES}/gcc-3.4.1-btc-use-target-cpp-for-lib-configure.patch
         #patch -p1 < ${BTC_PATCHES}/gcc-3.4.4-zecke-xgcc-cpp.patch
         ;;
-    ( gcc-4.0[-.]* )
+    ( gcc-4.0[.-]* )
         patch -p1 < ${BTC_PATCHES}/gcc-4.0.2-zecke-xgcc-cpp.patch
         ;;
-    ( gcc-4.[123][-.]* )
+    ( gcc-4.[123][.-]* )
         patch -p1 < ${BTC_PATCHES}/gcc-4.1.1-zecke-xgcc-cpp.patch
         ;;
     ( gcc-4.* )
@@ -152,7 +159,7 @@ function prep_gcc () {
     esac
 
     case ${1} in
-    ( gcc-[23].* | gcc-4.0[-.]* )
+    ( gcc-[23].* | gcc-4.0[.-]* )
         # build failure
         patch -p1 < ${BTC_PATCHES}/gcc-3-creat-needs-open3.patch
         ;;
@@ -179,11 +186,13 @@ function install_gcc_core_static () {
     --disable-multilib \
     --disable-nls \
     --enable-threads=posix \
-    --enable-symvers=gnu \
     --enable-languages=c \
     --disable-shared \
-    --disable-libunwind-exceptions \
-    --disable-libmudflap --disable-libssp --disable-decimal-float --disable-libgomp 
+    --disable-libmudflap \
+    --disable-libssp \
+    --disable-decimal-float \
+    --disable-libgomp 
+#    --disable-libunwind-exceptions
 
     make ${MAKE_OPTS} all-gcc
     make install-gcc 
@@ -219,10 +228,12 @@ function install_gcc_core_shared () {
     --disable-multilib \
     --disable-nls \
     --enable-threads=posix \
-    --enable-symvers=gnu \
     --enable-languages=c \
     --enable-shared \
-    --disable-libmudflap --disable-libssp --disable-decimal-float --disable-libgomp 
+    --disable-libmudflap \
+    --disable-libssp \
+    --disable-decimal-float \
+    --disable-libgomp 
 
     mkdir -p gcc
     cp ../glibc-${TARGET}-2/csu/crt[1in].o gcc
@@ -257,13 +268,16 @@ function install_gcc () {
     --prefix=${TC_PREFIX} --target=${TARGET} \
     ${GCC_CONFIG_OPTS} \
     --enable-threads=posix \
+    --enable-languages=c,c++ \
     --enable-symvers=gnu \
     --enable-__cxa_atexit \
-    --enable-languages=c,c++ \
-    --enable-shared
+    --enable-shared \
+    --enable-clocale=gnu
 
     make all
     make install
+
+    rm -f ${TC_PREFIX}/lib/libiberty.a
 
     manifest install_gcc
 }

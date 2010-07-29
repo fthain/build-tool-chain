@@ -1,0 +1,4 @@
+. ${BTC_PROFILES}/D
+. ${BTC_PROFILES}/4.4
+TARGET=m68k-linux-gnu
+TARGET_CPU=m68k

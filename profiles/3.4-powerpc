@@ -1,0 +1,6 @@
+. ${BTC_PROFILES}/C
+. ${BTC_PROFILES}/3.4
+TARGET=powerpc-linux-gnu
+TARGET_CPU=powerpc
+
+LINUX_DIST=linux-2.6.27
