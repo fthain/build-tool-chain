@@ -1,0 +1,9 @@
+# Method E base profile
+# Same as method C, but uses NPTL on all architectures
+# Approximates Debian 6 (squeeze)
+METHOD=E
+LINUX_DIST=linux-2.6.32
+GLIBC_DIST=glibc-2.11
+GLIBC_ADD_ONS=ports
+BINUTILS_DIST=binutils-2.20.1
+#BINUTILS_DIST=binutils-2.19.51

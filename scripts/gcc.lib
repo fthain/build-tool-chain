@@ -8,45 +8,97 @@ function prep_gcc_core () {
     c=${1/gcc/gcc-core}
     test -e $c && echo $c already exists && return
     test -e $1 && echo not overwriting $1 && return 1
-    untar $c ftp://sourceware.org/pub/gcc/releases/$1 ftp://ftp.gnu.org/gnu/gcc/$1
+    untar $c ftp://ftp.gnu.org/gnu/gcc/$1 ftp://sourceware.org/pub/gcc/releases/$1
     mv $1 $c
     cd $c
 
-    # Debian m68k sources, etc
-    if [ ${TARGET_CPU} = m68k ] ; then
-      case ${1} in
-      ( gcc-2.95.3 )
-          decompress ${BTC_PATCHES}/gcc-core-2.95_2.95.4.ds15-27-debian-m68k.diff | patch -p1
-          # Reverse unwanted Debian patches
-          patch -p1 -R < ${BTC_PATCHES}/gcc-core-295-install-names.patch
-          ;;
-      ( gcc-3.3.6 )
-          decompress ${BTC_PATCHES}/gcc-core-3.3_3.3.6ds1-15-debian-m68k.diff | patch -p1
-          # Reverse unwanted Debian patch
-          patch -p0 -R < ${BTC_PATCHES}/gcc-core-336-rename-info-files.dpatch
-          ;;
-      ( gcc-4.1.2 )
-          decompress ${BTC_PATCHES}/gcc-core-4.1_4.1.2-27-debian-m68k.diff | patch -p1
-          # Build failure
-          patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
-          ;;
-      ( gcc-4.3.5 )
-          decompress ${BTC_PATCHES}/gcc-core-4.3_4.3.5-1-debian-m68k.diff | patch -p1
-          # Reverse Debian inline-gnu99 hack
-          patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
-          ;;
-      ( gcc-4.4.4 )
-          decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.4-6-debian-m68k.diff | patch -p1
-          ;;
-      esac
-    else
-      case ${1} in
-      ( gcc-3.3[.-]* )
-          # For binutils > 2.15
-          patch -p0 < ${BTC_PATCHES}/gcc-3.3-mips-embedded-pic.patch
-          ;;
-      esac
-    fi
+    # Debian sources, etc
+    case ${TARGET} in
+    ( m68k-* )
+        case ${1} in
+        ( gcc-2.95.3 )
+            decompress ${BTC_PATCHES}/gcc-core-2.95_2.95.4.ds15-27-debian-m68k.diff | patch -p1
+            # Reverse unwanted Debian patch
+            patch -p1 -R < ${BTC_PATCHES}/gcc-core-295-install-names.patch
+            ;;
+        ( gcc-3.3.6 )
+            decompress ${BTC_PATCHES}/gcc-core-3.3_3.3.6ds1-15-debian-m68k.diff | patch -p1
+            # Reverse unwanted Debian patch
+            patch -p0 -R < ${BTC_PATCHES}/gcc-core-336-rename-info-files.dpatch
+            ;;
+        ( gcc-4.1.2 )
+            decompress ${BTC_PATCHES}/gcc-core-4.1_4.1.2-25-debian-m68k.diff | patch -p1
+            # Build failure
+            patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
+            # Etch binutils doesn't do GNU hash
+            patch -p0 -R < ${BTC_PATCHES}/gcc-hash-style-both.dpatch
+            ;;
+        ( gcc-4.3.2 )
+            decompress ${BTC_PATCHES}/gcc-core-4.3_4.3.2-1.1-debian-m68k.diff | patch -p1
+            # Reverse Debian inline-gnu99 hack
+            patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
+            # Build failure
+            patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
+            ;;
+        ( gcc-4.3.5 )
+            decompress ${BTC_PATCHES}/gcc-core-4.3_4.3.5-2-debian-m68k.diff | patch -p1
+            # Reverse Debian inline-gnu99 hack
+            patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
+            ;;
+        ( gcc-4.4.4 )
+            decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.4-8-debian-m68k.diff | patch -p1
+            # Reverse Debian libgomp info rename
+            patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
+            ;;
+        esac
+        ;;
+    ( powerpc-* )
+        case ${1} in
+        ( gcc-2.95.3 )
+            decompress ${BTC_PATCHES}/gcc-core-2.95_2.95.4.ds15-27-debian-powerpc.diff | patch -p1
+            # Reverse unwanted Debian patch
+            patch -p1 -R < ${BTC_PATCHES}/gcc-core-295-install-names.patch
+            ;;
+        ( gcc-3.3.6 )
+            decompress ${BTC_PATCHES}/gcc-core-3.3_3.3.6ds1-15-debian-powerpc.diff | patch -p1
+            # Reverse unwanted Debian patch
+            patch -p0 -R < ${BTC_PATCHES}/gcc-core-336-rename-info-files.dpatch
+            ;;
+        ( gcc-4.1.2 )
+            decompress ${BTC_PATCHES}/gcc-core-4.1_4.1.2-25-debian-powerpc.diff | patch -p1
+            # Build failure
+            patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
+            # Etch binutils doesn't do GNU hash
+            patch -p0 -R < ${BTC_PATCHES}/gcc-hash-style-both.dpatch
+            ;;
+        ( gcc-4.3.2 )
+            decompress ${BTC_PATCHES}/gcc-core-4.3_4.3.2-1.1-debian-powerpc.diff | patch -p1
+            # Reverse Debian inline-gnu99 hack
+            patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
+            # Build failure
+            patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
+            ;;
+        ( gcc-4.3.5 )
+            decompress ${BTC_PATCHES}/gcc-core-4.3_4.3.5-2-debian-powerpc.diff | patch -p1
+            # Reverse Debian inline-gnu99 hack
+            patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
+            ;;
+        ( gcc-4.4.4 )
+            decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.4-8-debian-powerpc.diff | patch -p1
+            # Reverse Debian libgomp info rename
+            patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
+            ;;
+        esac
+        ;;
+    ( * )
+        case ${1} in
+        ( gcc-3.3[.-]* )
+            # For binutils > 2.15
+            patch -p0 < ${BTC_PATCHES}/gcc-3.3-mips-embedded-pic.patch
+            ;;
+        esac
+        ;;
+    esac
 
     case ${1} in
     ( gcc-2.95.* )
@@ -57,6 +109,10 @@ function prep_gcc_core () {
         patch -p1 < ${BTC_PATCHES}/gcc-2.95.2-host-darwin.diff
         # makeinfo crash
         patch -p1 < ${BTC_PATCHES}/gcc-2.95.3-use-host-makeinfo.diff
+        # Fix names of cross gcov and cpp
+        patch -p1 < ${BTC_PATCHES}/gcc-2.95-AR_FOR_TARGET-RANLIB_FOR_TARGET-fix-target-name.patch
+        patch -p1 < ${BTC_PATCHES}/gcc-2.95-CPP_CROSS_NAME.patch
+        patch -p1 < ${BTC_PATCHES}/gcc-2.95-btc-GCOV_CROSS_NAME.diff
         ;;
     ( gcc-3.[01][.-]* )
         ;;
@@ -94,41 +150,93 @@ function prep_gcc () {
     untar $1 ftp://sourceware.org/pub/gcc/releases/$1 ftp://ftp.gnu.org/gnu/gcc/$1
     cd $1
 
-    # Debian m68k sources, etc
-    if [ ${TARGET_CPU} = m68k ] ; then
-      case ${1} in
-      ( gcc-2.95.3 )
-          decompress ${BTC_PATCHES}/gcc-2.95_2.95.4.ds15-27-debian-m68k.diff | patch -p1
-          # Reverse unwanted Debian patches
-          patch -p1 -R < ${BTC_PATCHES}/gcc-295-install-names.patch
-          ;;
-      ( gcc-3.3.6 )
-          decompress ${BTC_PATCHES}/gcc-3.3_3.3.6ds1-15-debian-m68k.diff | patch -p1
-          # Reverse unwanted Debian patch
-          patch -p0 -R < ${BTC_PATCHES}/gcc-336-rename-info-files.dpatch
-          ;;
-      ( gcc-4.1.2 )
-          decompress ${BTC_PATCHES}/gcc-4.1_4.1.2-27-debian-m68k.diff | patch -p1
-          # Build failure
-          patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
-          ;;
-      ( gcc-4.3.5 )
-          decompress ${BTC_PATCHES}/gcc-4.3_4.3.5-1-debian-m68k.diff | patch -p1
-          # Reverse Debian inline-gnu99 hack
-          patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
-          ;;
-      ( gcc-4.4.4 )
-          decompress ${BTC_PATCHES}/gcc-4.4_4.4.4-6-debian-m68k.diff | patch -p1
-          ;;
-      esac
-    else
-      case ${1} in
-      ( gcc-3.3[.-]* )
-          # For binutils > 2.15
-          patch -p0 < ${BTC_PATCHES}/gcc-3.3-mips-embedded-pic.patch
-          ;;
-      esac
-    fi
+    # Debian sources, etc
+    case ${TARGET} in
+    ( m68k-* )
+        case ${1} in
+        ( gcc-2.95.3 )
+            decompress ${BTC_PATCHES}/gcc-2.95_2.95.4.ds15-27-debian-m68k.diff | patch -p1
+            # Reverse unwanted Debian patch
+            patch -p1 -R < ${BTC_PATCHES}/gcc-295-install-names.patch
+            ;;
+        ( gcc-3.3.6 )
+            decompress ${BTC_PATCHES}/gcc-3.3_3.3.6ds1-15-debian-m68k.diff | patch -p1
+            # Reverse unwanted Debian patch
+            patch -p0 -R < ${BTC_PATCHES}/gcc-336-rename-info-files.dpatch
+            ;;
+        ( gcc-4.1.2 )
+            decompress ${BTC_PATCHES}/gcc-4.1_4.1.2-25-debian-m68k.diff | patch -p1
+            # Build failure
+            patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
+            # Etch binutils doesn't do GNU hash
+            patch -p0 -R < ${BTC_PATCHES}/gcc-hash-style-both.dpatch
+            ;;
+        ( gcc-4.3.2 )
+            decompress ${BTC_PATCHES}/gcc-4.3_4.3.2-1.1-debian-m68k.diff | patch -p1
+            # Reverse Debian inline-gnu99 hack
+            patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
+            # Build failure
+            patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
+            ;;
+        ( gcc-4.3.5 )
+            decompress ${BTC_PATCHES}/gcc-4.3_4.3.5-2-debian-m68k.diff | patch -p1
+            # Reverse Debian inline-gnu99 hack
+            patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
+            ;;
+        ( gcc-4.4.4 )
+            decompress ${BTC_PATCHES}/gcc-4.4_4.4.4-8-debian-m68k.diff | patch -p1
+            # Reverse Debian libgomp info rename
+            patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
+            ;;
+        esac
+        ;;
+    ( powerpc-* )
+        case ${1} in
+        ( gcc-2.95.3 )
+            decompress ${BTC_PATCHES}/gcc-2.95_2.95.4.ds15-27-debian-powerpc.diff | patch -p1
+            # Reverse unwanted Debian patch
+            patch -p1 -R < ${BTC_PATCHES}/gcc-295-install-names.patch
+            ;;
+        ( gcc-3.3.6 )
+            decompress ${BTC_PATCHES}/gcc-3.3_3.3.6ds1-15-debian-powerpc.diff | patch -p1
+            # Reverse unwanted Debian patch
+            patch -p0 -R < ${BTC_PATCHES}/gcc-336-rename-info-files.dpatch
+            ;;
+        ( gcc-4.1.2 )
+            decompress ${BTC_PATCHES}/gcc-4.1_4.1.2-25-debian-powerpc.diff | patch -p1
+            # Build failure
+            patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
+            # Etch binutils doesn't do GNU hash
+            patch -p0 -R < ${BTC_PATCHES}/gcc-hash-style-both.dpatch
+            ;;
+        ( gcc-4.3.2 )
+            decompress ${BTC_PATCHES}/gcc-4.3_4.3.2-1.1-debian-powerpc.diff | patch -p1
+            # Reverse Debian inline-gnu99 hack
+            patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
+            # Build failure
+            patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
+            ;;
+        ( gcc-4.3.5 )
+            decompress ${BTC_PATCHES}/gcc-4.3_4.3.5-2-debian-powerpc.diff | patch -p1
+            # Reverse Debian inline-gnu99 hack
+            patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
+            ;;
+        ( gcc-4.4.4 )
+            decompress ${BTC_PATCHES}/gcc-4.4_4.4.4-8-debian-powerpc.diff | patch -p1
+            # Reverse Debian libgomp info rename
+            patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
+            ;;
+        esac
+        ;;
+    ( * )
+        case ${1} in
+        ( gcc-3.3[.-]* )
+            # For binutils > 2.15
+            patch -p0 < ${BTC_PATCHES}/gcc-3.3-mips-embedded-pic.patch
+            ;;
+        esac
+        ;;
+    esac
 
     case ${1} in
     ( gcc-2.95.* )
@@ -139,6 +247,10 @@ function prep_gcc () {
         patch -p1 < ${BTC_PATCHES}/gcc-2.95.2-host-darwin.diff
         # makeinfo crash
         patch -p1 < ${BTC_PATCHES}/gcc-2.95.3-use-host-makeinfo.diff
+        # Fix names of cross gcov and cpp
+        patch -p1 < ${BTC_PATCHES}/gcc-2.95-AR_FOR_TARGET-RANLIB_FOR_TARGET-fix-target-name.patch
+        patch -p1 < ${BTC_PATCHES}/gcc-2.95-CPP_CROSS_NAME.patch
+        patch -p1 < ${BTC_PATCHES}/gcc-2.95-btc-GCOV_CROSS_NAME.diff
         ;;
     ( gcc-3.3[.-]* )
         patch -p1 < ${BTC_PATCHES}/gcc-3.3.4-zecke-xgcc-cpp.patch
@@ -280,4 +392,5 @@ function install_gcc () {
     rm -f ${TC_PREFIX}/lib/libiberty.a
 
     manifest install_gcc
+    copy_license ${GCC_DIST}
 }

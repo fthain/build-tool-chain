@@ -1,4 +1,5 @@
-. ${BTC_PROFILES}/A
-. ${BTC_PROFILES}/2.95
+GCC_DIST=gcc-2.95.3
 TARGET=powerpc-linux-gnu
-TARGET_CPU=ppc
+TARGET_ARCH=ppc
+
+. ${BTC_PROFILES}/A

@@ -1,6 +1,0 @@
-# Sub-profile for gcc-2.95
-PROFILE_NAME=gcc-2.95
-
-
-
-GCC_DIST=gcc-2.95.3

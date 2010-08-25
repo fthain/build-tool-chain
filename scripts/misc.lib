@@ -107,3 +107,8 @@ function log () {
     "$@" >> ${BTC_LOGS}/${1}.log 2>&1
     return
 }
+
+function copy_license () {
+    mkdir -p ${TC_PREFIX}/share/doc
+    cat ${BTC_BUILD}/${1}/COPYING > ${TC_PREFIX}/share/doc/${1%%-[0-9]*}-license
+}

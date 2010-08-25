@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Cross-tool-chain build script, for hosting on Mac OS X or Linux, targeting Linux.
-# Copyright (c) 2004-2010 Finn Thain <fthain@telegraphics.com.au>
+# Copyright (c) 2004-2010 Finn Thain
+# fthain@telegraphics.com.au
 
 set -o pipefail 2>/dev/null
 set -e -u
@@ -52,6 +53,7 @@ BTC_PROFILES=${BTC_DIST}/profiles
 # Source the profile
 if [ "${1:-}" == "-p" -a "${2:-}" != "" ]; then
     . ${BTC_PROFILES}/${2}
+    shift 2
 else
     echo usage: $0 '-p <profile> [ -c command ]'
     exit 1
@@ -59,12 +61,12 @@ fi
 
 # Profile must set these
 echo TARGET: $TARGET
-echo TARGET_CPU: $TARGET_CPU
+echo TARGET_ARCH: $TARGET_ARCH
 echo METHOD: $METHOD
 echo GLIBC_ADD_ONS: $GLIBC_ADD_ONS
 
 # Tool chain prefix
-TC_PREFIX=${BTC_PRODUCE}/${PROFILE_NAME}
+TC_PREFIX=${BTC_PRODUCE}/${GCC_DIST%.*}
 
 mkdir -p ${TC_PREFIX}/${TARGET} ${BTC_BUILD} ${HOST_TOOLS_PREFIX}/bin
 
@@ -179,20 +181,29 @@ export CC=gcc
 
 ##############################################
 #
-# Stop here and start an interactive shell?
+# Execute shell command
 
-if [ "${3:-}" == "-c" ] ; then
+case "${1:-}" in
+( -c )
     export -f fetch untar decompress prep_linux build_linux package_linux
     export BTC_PRODUCE HOST_TOOLS_PREFIX BTC_LOGS
     export BTC_BUILD BTC_SOURCES BTC_PATCHES BTC_CONFIGS BTC_MIRRORS
-    export BUILD TARGET TARGET_CPU
+    export BUILD TARGET TARGET_ARCH
     cd $BTC_BUILD
-    exec bash -c "$4"
-fi
+    exec bash -c "$2"
+    exit 1
+    ;;
+( '' )
+    ;;
+( * )
+    echo usage: $0 '-p <profile> [ -c command... ]'
+    exit 1
+    ;;
+esac
 
 ##############################################
 #
-# install host tools
+# Install host tools
 
 if [ ${BUILD} != ${BUILD%-apple-darwin*} ] ; then
     log install_sed       sed-4.2.1
@@ -228,7 +239,13 @@ log install_depmod depmod.pl-1_15_stable
 
 ##############################################
 #
-# build and install binutils
+# Make sure nothing uses the host cpp when cross-compiling
+
+# ln -nsf /bin/false ${HOST_TOOLS_PREFIX}/bin/cpp
+
+##############################################
+#
+# Build and install binutils
 
 log prep_binutils ${BINUTILS_DIST}
 log build_binutils binutils-${TARGET}
@@ -242,7 +259,7 @@ log install_binutils binutils-${TARGET}
 
 ##############################################
 #
-# install kernel headers
+# Install kernel headers
 
 log prep_linux ${LINUX_DIST}
 log install_linux_headers ${LINUX_DIST}
@@ -298,7 +315,7 @@ fi
 
 ##############################################
 #
-# test the compiler
+# Test the compiler
 
 log build_linux ${LINUX_DIST}
 

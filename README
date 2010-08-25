@@ -69,7 +69,7 @@ INSTRUCTIONS (not a good substitute for reading the scripts)
     of the provided ones. The profile is sourced by build-tool-chain in order
     to define the variables specifying what to build and how to do so.
 
-    In particular, the profile will define TARGET, TARGET_CPU, the build
+    In particular, the profile will define TARGET, TARGET_ARCH, the build
     METHOD as well as package versions given in the variables BINUTILS_DIST,
     GCC_DIST, GLIBC_DIST, GLIBC_ADD_ONS and LINUX_DIST.
 
@@ -94,7 +94,7 @@ INSTRUCTIONS (not a good substitute for reading the scripts)
   linux-2.4.27-powerpc-dot-config
 
 - Run build-tool-chain, as an unprivileged user, as follows. Substitute
-  your choice of tool-chain, e.g. profiles/444-m68k.
+  your choice of tool-chain, e.g. profiles/4.4-m68k.
 
 scripts/build-tool-chain -p PROFILE
 

@@ -4,7 +4,7 @@ set -e -u
 
 pushd ~/btc
 
-t=`mktemp -d /tmp/test.XXXXXX`
+t=`mktemp -d /tmp/btc.XXXXXX`
 mkdir ${t}/{ok,fail}
 
 export BTC_LOGS=${t}/logs

@@ -1,0 +1,43 @@
+$ uname -rsv 
+Darwin 9.8.0 Darwin Kernel Version 9.8.0: Wed Jul 15 16:55:01 PDT 2009; root:xnu-1228.15.4~1/RELEASE_I386
+
+$ /Volumes/btc-0.12/gcc-4.3/bin/powerpc-linux-gnu-ld
+dyld: Symbol not found: __hex_value
+  Referenced from: /Volumes/btc-0.12/gcc-4.3/i386-apple-darwin9.8.0/powerpc-linux-gnu/lib/libbfd-2.18.0.20080103.dylib
+  Expected in: dynamic lookup
+
+Trace/BPT trap
+
+Also,
+
+collect2: ld terminated with signal 5 [Trace/BPT trap]
+dyld: lazy symbol binding failed: Symbol not found: _libintl_dgettext
+  Referenced from: /Volumes/btc-0.12/gcc-4.3/i386-apple-darwin9.8.0/powerpc-linux-gnu/lib/libb
+fd-2.18.0.20080103.dylib
+  Expected in: dynamic lookup
+
+
+diff -ru binutils-2.18.orig/bfd/Makefile.am binutils-2.18/bfd/Makefile.am
+--- binutils-2.18.orig/bfd/Makefile.am	2007-08-29 06:20:14.000000000 +1000
++++ binutils-2.18/bfd/Makefile.am	2010-08-17 15:03:16.000000000 +1000
+@@ -751,7 +751,7 @@
+ # libbfd_la_SOURCES, we put BFD64_LIBS in OFILES instead.
+ libbfd_la_SOURCES = $(BFD32_LIBS_CFILES)
+ libbfd_la_DEPENDENCIES = $(OFILES) ofiles
+-libbfd_la_LIBADD = `cat ofiles` @WIN32LIBADD@
++libbfd_la_LIBADD = `cat ofiles` @WIN32LIBADD@ ../libiberty/pic/libiberty.a `ls ../intl/libintl.a`
+ libbfd_la_LDFLAGS = -release `cat libtool-soversion` @WIN32LDFLAGS@
+ 
+ # libtool will build .libs/libbfd.a.  We create libbfd.a in the build
+diff -ru binutils-2.18.orig/bfd/Makefile.in binutils-2.18/bfd/Makefile.in
+--- binutils-2.18.orig/bfd/Makefile.in	2007-08-29 06:20:12.000000000 +1000
++++ binutils-2.18/bfd/Makefile.in	2010-08-17 15:03:13.000000000 +1000
+@@ -943,7 +943,7 @@
+ # libbfd_la_SOURCES, we put BFD64_LIBS in OFILES instead.
+ libbfd_la_SOURCES = $(BFD32_LIBS_CFILES)
+ libbfd_la_DEPENDENCIES = $(OFILES) ofiles
+-libbfd_la_LIBADD = `cat ofiles` @WIN32LIBADD@
++libbfd_la_LIBADD = `cat ofiles` @WIN32LIBADD@ ../libiberty/pic/libiberty.a `ls ../intl/libintl.a`
+ libbfd_la_LDFLAGS = -release `cat libtool-soversion` @WIN32LDFLAGS@
+ 
+ # libtool will build .libs/libbfd.a.  We create libbfd.a in the build

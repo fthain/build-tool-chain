@@ -1,0 +1,33 @@
+--- gcc-2.95.3/gcc/Makefile.in.orig	2010-08-22 14:33:32.000000000 +1000
++++ gcc-2.95.3/gcc/Makefile.in	2010-08-22 15:03:10.259803042 +1000
+@@ -485,5 +485,6 @@
+ PROTOIZE_CROSS_NAME = `t='$(program_transform_cross_name)'; echo protoize | sed -e $$t`
+ UNPROTOIZE_CROSS_NAME = `t='$(program_transform_cross_name)'; echo unprotoize | sed -e $$t`
++GCOV_CROSS_NAME = `t='$(program_transform_cross_name)'; echo gcov | sed -e $$t`
+ 
+ # Choose the real default target.
+ ALL=all.internal
+@@ -2550,8 +2551,13 @@
+ # Install gcov if it was compiled.
+ 	-if [ -f gcov$(exeext) ]; \
+ 	then \
+-	    rm -f $(bindir)/gcov$(exeext); \
+-	    $(INSTALL_PROGRAM) gcov$(exeext) $(bindir)/$(GCOV_INSTALL_NAME)$(exeext); \
++	    if [ -f gcc-cross$(exeext) ] ; then \
++		rm -f $(bindir)/$(GCOV_CROSS_NAME)$(exeext); \
++		$(INSTALL_PROGRAM) gcov$(exeext) $(bindir)/$(GCOV_CROSS_NAME)$(exeext); \
++	    else \
++		rm -f $(bindir)/$(GCOV_INSTALL_NAME)$(exeext); \
++		$(INSTALL_PROGRAM) gcov$(exeext) $(bindir)/$(GCOV_INSTALL_NAME)$(exeext); \
++	    fi ; \
+ 	fi
+ 
+ # Install the driver program as $(target_alias)-gcc
+@@ -2709,6 +2715,7 @@
+ 	-rm -rf $(bindir)/$(UNPROTOIZE_INSTALL_NAME)$(exeext)
+ 	-rm -rf $(bindir)/$(UNPROTOIZE_CROSS_NAME)$(exeext)
+ 	-rm -rf $(bindir)/$(GCOV_INSTALL_NAME)$(exeext)
++	-rm -rf $(bindir)/$(GCOV_CROSS_NAME)$(exeext)
+ 	-rm -rf $(man1dir)/$(GCC_INSTALL_NAME)$(manext)
+ 	-rm -rf $(man1dir)/$(GCC_CROSS_NAME)$(manext)
+ 	-rm -rf $(man1dir)/cccp$(manext)

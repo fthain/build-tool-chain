@@ -1,4 +1,5 @@
-. ${BTC_PROFILES}/B
-. ${BTC_PROFILES}/3.3
+GCC_DIST=gcc-3.3.6
 TARGET=mipsel-linux-gnu
-TARGET_CPU=mips
+TARGET_ARCH=mips
+
+. ${BTC_PROFILES}/B

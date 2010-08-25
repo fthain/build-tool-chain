@@ -1,6 +1,5 @@
-. ${BTC_PROFILES}/C
-. ${BTC_PROFILES}/4.0
+GCC_DIST=gcc-4.0.4
 TARGET=powerpc-linux-gnu
-TARGET_CPU=powerpc
+TARGET_ARCH=powerpc
 
-LINUX_DIST=linux-2.6.27
+. ${BTC_PROFILES}/C

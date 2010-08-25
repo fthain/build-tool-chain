@@ -1,8 +1,8 @@
 # Method B base profile
 # Suitable for gcc 3.2 and newer, glibc <= 2.3.3 and linuxthreads
+# Approximates Debian 3 (sarge)
 METHOD=B
-BINUTILS_DIST=binutils-2.17
 LINUX_DIST=linux-2.4.36
-
 GLIBC_DIST=glibc-2.3.2
 GLIBC_ADD_ONS=linuxthreads
+BINUTILS_DIST=binutils-2.17

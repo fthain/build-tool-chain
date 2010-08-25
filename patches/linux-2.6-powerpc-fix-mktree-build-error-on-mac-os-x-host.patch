@@ -1,0 +1,59 @@
+From: Timur Tabi <timur@freescale.com>
+Date: Thu, 30 Apr 2009 18:16:44 +0000 (+0000)
+Subject: powerpc: Fix mktree build error on Mac OS X host
+X-Git-Tag: v2.6.30-rc6~10^2~8
+X-Git-Url: http://git.kernel.org/?p=linux%2Fkernel%2Fgit%2Ftorvalds%2Flinux-2.6.git;a=commitdiff_plain;h=93f1cc609c702a83e44da51cabdd353b20c24f79
+
+powerpc: Fix mktree build error on Mac OS X host
+
+The mktree utility defines some variables as "uint", although this is not a
+standard C type, and so cross-compiling on Mac OS X fails.  Change this to
+"unsigned int".
+
+Signed-off-by: Timur Tabi <timur@freescale.com>
+Acked-by: Josh Boyer <jwboyer@linux.vnet.ibm.com>
+Signed-off-by: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+---
+
+diff --git a/arch/powerpc/boot/mktree.c b/arch/powerpc/boot/mktree.c
+index 45d06a8..c2baae0 100644
+--- a/arch/powerpc/boot/mktree.c
++++ b/arch/powerpc/boot/mktree.c
+@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
+ {
+ 	int	in_fd, out_fd;
+ 	int	nblks, i;
+-	uint	cksum, *cp;
++	unsigned int	cksum, *cp;
+ 	struct	stat	st;
+ 	boot_block_t	bt;
+ 
+@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
+ 
+ 	cksum = 0;
+ 	cp = (void *)&bt;
+-	for (i=0; i<sizeof(bt)/sizeof(uint); i++)
++	for (i = 0; i < sizeof(bt) / sizeof(unsigned int); i++)
+ 		cksum += *cp++;
+ 
+ 	/* Assume zImage is an ELF file, and skip the 64K header.
+@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
+ 		exit(4);
+ 	}
+ 
+-	if ((*(uint *)tmpbuf) != htonl(0x7f454c46)) {
++	if ((*(unsigned int *)tmpbuf) != htonl(0x7f454c46)) {
+ 		fprintf(stderr, "%s is not an ELF image\n", argv[1]);
+ 		exit(4);
+ 	}
+@@ -125,8 +125,8 @@ int main(int argc, char *argv[])
+ 			perror("zImage read");
+ 			exit(5);
+ 		}
+-		cp = (uint *)tmpbuf;
+-		for (i=0; i<sizeof(tmpbuf)/sizeof(uint); i++)
++		cp = (unsigned int *)tmpbuf;
++		for (i = 0; i < sizeof(tmpbuf) / sizeof(unsigned int); i++)
+ 			cksum += *cp++;
+ 		if (write(out_fd, tmpbuf, sizeof(tmpbuf)) != sizeof(tmpbuf)) {
+ 			perror("boot-image write");

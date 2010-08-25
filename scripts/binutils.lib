@@ -26,7 +26,6 @@ function prep_binutils () {
         decompress ${BTC_PATCHES}/binutils_2.15-6-debian-all.diff | patch -p1
         # Fix to support April '04 glibc asm (m68k/arm/cris)
         patch -p1 < ${BTC_PATCHES}/binutils-2.15-NO_APP-mode-line-comment.patch
-        patch -p1 < ${BTC_PATCHES}/702-binutils-skip-comments.patch
         ;;
     ( binutils-2.16 | binutils-2.16.* )
         # Fix to support April '04 glibc asm (m68k/arm/cris)
@@ -56,30 +55,23 @@ function prep_binutils () {
         decompress ${BTC_PATCHES}/binutils_2.18.1~cvs20080103-7-debian-all.diff | patch -p1
         # Avoid fatal compiler warnings
         patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
-        # Darwin build failure
-        patch -p1 < ${BTC_PATCHES}/binutils-2.18.50.0.4-opcodes-bfd-dylib.diff
-        ;;
-    ( binutils-2.18.50.0.9 )
-        # Avoid fatal compiler warnings
-        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
-        # Darwin build failure, fixes i386-darwin too
-        patch -p1 < ${BTC_PATCHES}/binutils-2.18-link-bfd-with-libiberty.patch
+        # Darwin link problems
+        patch -p1 < ${BTC_PATCHES}/binutils-2.18-darwin-libbfd-link.diff
+        patch -p1 < ${BTC_PATCHES}/binutils-2.18-darwin-libopcodes-link.diff
         ;;
     ( binutils-2.19.51 )
         # Avoid fatal compiler warnings
         patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
-        # Darwin build failure
-        patch -p1 < ${BTC_PATCHES}/binutils-2.18.50.0.4-opcodes-bfd-dylib.diff
         # Move ldscripts directory
         patch -p1 < ${BTC_PATCHES}/binutils-2.19.51-scriptdir.diff
         ;;
     ( binutils-2.20.1 )
         # Debian source package
-        decompress ${BTC_PATCHES}/binutils_2.20.1-11-debian-all.diff | patch -p1
+        decompress ${BTC_PATCHES}/binutils_2.20.1-12-debian-all.diff | patch -p1
         # Avoid fatal compiler warnings
         patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
-        # Darwin build failure
-        patch -p1 < ${BTC_PATCHES}/binutils-2.18.50.0.4-opcodes-bfd-dylib.diff
+        # Darwin link problem
+        patch -p1 < ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
         ;;
     esac
 ## Apply HJL patches according to patches/README, e.g.
@@ -132,4 +124,5 @@ function install_binutils () {
     ln -nsf share/man ${TC_PREFIX}/man
 
     manifest install_binutils
+    copy_license ${BINUTILS_DIST}
 }

@@ -2,12 +2,18 @@
 #
 # Functions relating to host-native tools
 
-function install_host_tool () {
+function host_tool_license () {
+    mkdir -p ${HOST_TOOLS_PREFIX}/share/doc
+    cat ${1}/COPYING > ${HOST_TOOLS_PREFIX}/share/doc/${1%%-[0-9]*}-license ||
+      cat ${1}/LICENSE > ${HOST_TOOLS_PREFIX}/share/doc/${1%%-[0-9]*}-license
+}
+
+function host_tool_install () {
     echo unpacking $1
     cd $BTC_BUILD
     untar "$@"
 
-    cd $1
+    pushd $1 >/dev/null
     echo building $1
 
     CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
@@ -19,9 +25,10 @@ function install_host_tool () {
 
     rm -rf ${BTC_BUILD}/image
     make DESTDIR=${BTC_BUILD}/image install
+    popd >/dev/null
 }
 
-function merge_host_tool () {
+function host_tool_merge () {
     pushd ${BTC_BUILD}/image/${HOST_TOOLS_PREFIX} >/dev/null
 
     test -d share/man && ln -nsf share/man ${BTC_BUILD}/image/man
@@ -42,24 +49,27 @@ function merge_host_tool () {
 function install_sed () {
     test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
 
-    install_host_tool $1 ftp://ftp.gnu.org/gnu/sed
+    host_tool_install $1 ftp://ftp.gnu.org/gnu/sed
     ln -nsf sed ${BTC_BUILD}/image/${HOST_TOOLS_PREFIX}/bin/gsed
-    merge_host_tool bin share/{info,man}
+    host_tool_merge bin share/{info,man}
+    host_tool_license $1
 }
 
 function install_make () {
     test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
 
-    install_host_tool $1 ftp://ftp.gnu.org/gnu/make
+    host_tool_install $1 ftp://ftp.gnu.org/gnu/make
     ln -nsf make ${BTC_BUILD}/image/${HOST_TOOLS_PREFIX}/bin/gnumake
-    merge_host_tool bin share/{info,man}
+    host_tool_merge bin share/{info,man}
+    host_tool_license $1
 }
 
 function install_gettext () {
     test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
 
-    install_host_tool $1 ftp://ftp.gnu.org/gnu/gettext
-    merge_host_tool bin lib include share/{info,man}
+    host_tool_install $1 ftp://ftp.gnu.org/gnu/gettext
+    host_tool_merge bin lib include share/{info,man}
+    host_tool_license $1
 }
 
 function install_coreutils () {
@@ -69,7 +79,7 @@ function install_coreutils () {
     cd $BTC_BUILD
     untar $1 ftp://ftp.gnu.org/gnu/coreutils
 
-    cd $1
+    pushd $1 >/dev/null
     echo building $1
 
     CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX}
@@ -79,8 +89,10 @@ function install_coreutils () {
 
     rm -rf ${BTC_BUILD}/image
     make DESTDIR=${BTC_BUILD}/image install
+    popd >/dev/null
 
-    merge_host_tool bin/{readlink,expr,install}
+    host_tool_merge bin/{readlink,expr,install}
+    host_tool_license $1
 }
 
 function install_loadkeys () {
@@ -90,7 +102,7 @@ function install_loadkeys () {
     cd $BTC_BUILD
     untar $1 ftp://ftp.kernel.org/pub/linux/utils/kbd
 
-    cd $1
+    pushd $1 >/dev/null
     patch -p1 < ${BTC_PATCHES}/kbd-1.12-gentoo.diff
     patch -p1 < ${BTC_PATCHES}/kbd-1.12-btc-darwin.diff
 
@@ -101,6 +113,8 @@ function install_loadkeys () {
     make analyze.c loadkeys
 
     cp -p loadkeys ${HOST_TOOLS_PREFIX}/bin
+    popd >/dev/null
+    host_tool_license $1
 }
 
 function install_find_pl () {
@@ -122,16 +136,18 @@ function install_find_pl () {
 function install_gawk () {
     test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
 
-    install_host_tool $1 ftp://ftp.gnu.org/gnu/gawk
+    host_tool_install $1 ftp://ftp.gnu.org/gnu/gawk
     ln -nsf gawk ${BTC_BUILD}/image/${HOST_TOOLS_PREFIX}/bin/awk
-    merge_host_tool bin/{gawk,awk} share/info/gawk.info share/man/man1/gawk.1
+    host_tool_merge bin/{gawk,awk} share/info/gawk.info share/man/man1/gawk.1
+    host_tool_license $1
 }
 
 function install_bison () {
     test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
 
-    install_host_tool $1 ftp://ftp.gnu.org/gnu/bison
-    merge_host_tool bin share
+    host_tool_install $1 ftp://ftp.gnu.org/gnu/bison
+    host_tool_merge bin share
+    host_tool_license $1
 }
 
 function install_flex () {
@@ -140,7 +156,8 @@ function install_flex () {
     echo unpacking $1
     cd $BTC_BUILD
     untar $1 http://prdownloads.sourceforge.net/flex
-    cd ${1%a}
+
+    pushd ${1%a} >/dev/null
     patch -p1 < ${BTC_PATCHES}/flex-2.5.4a-r6.diff
 
     echo building $1
@@ -152,8 +169,10 @@ function install_flex () {
 
     rm -rf ${BTC_BUILD}/image
     make DESTDIR=${BTC_BUILD}/image install
+    popd >/dev/null
 
-    merge_host_tool bin include share/man
+    host_tool_merge bin include share/man
+    host_tool_license ${1%a}
 }
 
 function install_gmp () {
@@ -163,7 +182,7 @@ function install_gmp () {
     cd $BTC_BUILD
     untar $1 ftp://ftp.gnu.org/gnu/gmp
 
-    cd $1
+    pushd $1 >/dev/null
     echo building $1
 
     (
@@ -188,8 +207,10 @@ function install_gmp () {
 
     rm -rf ${BTC_BUILD}/image
     make DESTDIR=${BTC_BUILD}/image install
+    popd >/dev/null
 
-    merge_host_tool include lib share/info
+    host_tool_merge include lib share/info
+    host_tool_license $1
 }
 
 function install_mpfr () {
@@ -199,7 +220,7 @@ function install_mpfr () {
     cd $BTC_BUILD
     untar $1 http://www.mpfr.org/$1
 
-    cd $1
+    pushd $1 >/dev/null
     patch -p1 < ${BTC_PATCHES}/mpfr-2.4.2-gentoo.patch
 
     echo building $1
@@ -219,15 +240,18 @@ function install_mpfr () {
 
     rm -rf ${BTC_BUILD}/image
     make DESTDIR=${BTC_BUILD}/image install
+    popd >/dev/null
 
-    merge_host_tool include lib share/info
+    host_tool_merge include lib share/info
+    host_tool_license $1
 }
 
 function install_m4 () {
     test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
 
-    install_host_tool $1 ftp://ftp.gnu.org/gnu/m4
-    merge_host_tool bin share
+    host_tool_install $1 ftp://ftp.gnu.org/gnu/m4
+    host_tool_merge bin share
+    host_tool_license $1
 }
 
 function install_ppl () {
@@ -237,7 +261,7 @@ function install_ppl () {
     cd $BTC_BUILD
     untar $1 ftp://ftp.cs.unipr.it/pub/ppl/releases/${1#*-}
 
-    cd $1
+    pushd $1 >/dev/null
     echo building $1
 
     CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
@@ -249,8 +273,10 @@ function install_ppl () {
 
     rm -rf ${BTC_BUILD}/image
     make DESTDIR=${BTC_BUILD}/image install
+    popd >/dev/null
 
-    merge_host_tool include lib share/man/man3
+    host_tool_merge include lib share/man/man3
+    host_tool_license $1
 }
 
 function install_cloog_ppl () {
@@ -260,7 +286,7 @@ function install_cloog_ppl () {
     cd $BTC_BUILD
     untar $1 ftp://gcc.gnu.org/pub/gcc/infrastructure
 
-    cd $1
+    pushd $1 >/dev/null
     echo building $1
 
     CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
@@ -272,8 +298,10 @@ function install_cloog_ppl () {
 
     rm -rf ${BTC_BUILD}/image
     make DESTDIR=${BTC_BUILD}/image install
+    popd >/dev/null
 
-    merge_host_tool include lib
+    host_tool_merge include lib
+    host_tool_license $1
 }
 
 function install_depmod () {

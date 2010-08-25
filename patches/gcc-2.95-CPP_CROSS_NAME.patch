@@ -1,0 +1,47 @@
+--- trunk/gcc/Makefile.in	1999/10/24 20:20:00	30147
++++ trunk/gcc/Makefile.in	1999/10/26 05:12:14	30177
+@@ -469,6 +469,7 @@
+ 
+ # Actual name to use when installing a cross-compiler.
+ GCC_CROSS_NAME = `t='$(program_transform_cross_name)'; echo gcc | sed -e $$t`
++CPP_CROSS_NAME = `t='$(program_transform_cross_name)'; echo cpp | sed -e $$t`
+ PROTOIZE_CROSS_NAME = `t='$(program_transform_cross_name)'; echo protoize | sed -e $$t`
+ UNPROTOIZE_CROSS_NAME = `t='$(program_transform_cross_name)'; echo unprotoize | sed -e $$t`
+ 
+@@ -2448,17 +2449,28 @@
+ 
+ # Handle cpp installation.
+ install-cpp: cpp$(exeext)
+-	-rm -f $(bindir)/$(CPP_INSTALL_NAME)$(exeext)
+-	$(INSTALL_PROGRAM) -m 755 cpp$(exeext) $(bindir)/$(CPP_INSTALL_NAME)$(exeext)
+-	if [ x$(cpp_install_dir) != x ]; then \
+-	  rm -f $(prefix)/$(cpp_install_dir)/$(CPP_INSTALL_NAME)$(exeext); \
+-	  $(INSTALL_PROGRAM) -m 755 cpp$(exeext) $(prefix)/$(cpp_install_dir)/$(CPP_INSTALL_NAME)$(exeext); \
+-	else true; fi
++	-if [ -f gcc-cross$(exeext) ] ; then \
++	  rm -f $(bindir)/$(CPP_CROSS_NAME)$(exeext); \
++	  $(INSTALL_PROGRAM) -m 755 cpp$(exeext) $(bindir)/$(CPP_CROSS_NAME)$(exeext); \
++	  if [ x$(cpp_install_dir) != x ]; then \
++	    rm -f $(prefix)/$(cpp_install_dir)/$(CPP_CROSS_NAME)$(exeext); \
++	    $(INSTALL_PROGRAM) -m 755 cpp$(exeext) $(prefix)/$(cpp_install_dir)/$(CPP_CROSS_NAME)$(exeext); \
++	  else true; fi; \
++	else \
++	  rm -f $(bindir)/$(CPP_INSTALL_NAME)$(exeext); \
++	  $(INSTALL_PROGRAM) -m 755 cpp$(exeext) $(bindir)/$(CPP_INSTALL_NAME)$(exeext); \
++	  if [ x$(cpp_install_dir) != x ]; then \
++	    rm -f $(prefix)/$(cpp_install_dir)/$(CPP_INSTALL_NAME)$(exeext); \
++	    $(INSTALL_PROGRAM) -m 755 cpp$(exeext) $(prefix)/$(cpp_install_dir)/$(CPP_INSTALL_NAME)$(exeext); \
++	  else true; fi; \
++	fi
+ 
+ uninstall-cpp:
+-	-rm -f $(bindir)/cpp
++	-rm -f $(bindir)/$(CPP_INSTALL_NAME)$(exeext)
++	-rm -f $(bindir)/$(CPP_CROSS_NAME)$(exeext)
+ 	-if [ x$(cpp_install_dir) != x ]; then \
+-	  rm -f $(prefix)/$(cpp_install_dir)/cpp; \
++	  rm -f $(prefix)/$(cpp_install_dir)/$(CPP_INSTALL_NAME)$(exeext); \
++	  rm -f $(prefix)/$(cpp_install_dir)/$(CPP_CROSS_NAME)$(exeext); \
+ 	else true; fi
+ 
+ # Install float.h for cross compiler.

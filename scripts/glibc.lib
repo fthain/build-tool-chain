@@ -24,7 +24,7 @@ function prep_glibc () {
     case ${1} in
     ( glibc-2.2.5 )
         # Debian sources
-        decompress ${BTC_PATCHES}/glibc_2.2.5-11.8-debian-m68k.diff | patch -p1
+        decompress ${BTC_PATCHES}/glibc_2.2.5-11.8-debian.diff | patch -p1
         # Create the 2.2.5-11.8 symlink that patch can't
         ln -s . db/db1
         # Fix for glibc-2.2 with recent kernel headers (m68k)
@@ -39,7 +39,7 @@ function prep_glibc () {
         #patch -p1 < ${BTC_PATCHES}/glibc-2.3.2-lfs-sscanf-1.patch
 
         # Debian sources
-        decompress ${BTC_PATCHES}/glibc_2.3.2.ds1-22sarge6-debian-m68k.diff | patch -p1
+        decompress ${BTC_PATCHES}/glibc_2.3.2.ds1-22sarge6-debian.diff | patch -p1
         # Permit install headers with gcc 4
         patch -p1 < ${BTC_PATCHES}/glibc-2.3.3-btc-gcc4.diff
         # Fix for systems on which sh is not bash
@@ -75,7 +75,7 @@ function prep_glibc () {
         #patch -p1 < ${BTC_PATCHES}/glibc-2.3.6-allow-gcc-4.1-powerpc32-initfini.s.patch
 
         # Debian sources
-        decompress ${BTC_PATCHES}/glibc_2.3.6.ds1-13etch10-debian-m68k.diff | patch -p1
+        decompress ${BTC_PATCHES}/glibc_2.3.6.ds1-13etch10-debian.diff | patch -p1
         # Make install headers work without a mips compiler
         patch -p1 < ${BTC_PATCHES}/glibc-2.3.2-btc-allow-wrong-cc.diff
         # alpha build failures
@@ -90,7 +90,7 @@ function prep_glibc () {
         ;;
     ( glibc-2.5 )
         # Debian sources
-        decompress ${BTC_PATCHES}/glibc_2.5-11-debian-m68k.diff | patch -p1
+        decompress ${BTC_PATCHES}/glibc_2.5-11-debian.diff | patch -p1
         # Reverse problematic Debian patch
         patch -p1 -R < ${BTC_PATCHES}/local-linuxthreads-semaphore_h.diff
         # Remove linuxthreads insanity check
@@ -107,6 +107,12 @@ function prep_glibc () {
         patch -p1 < ${BTC_PATCHES}/glibc-2.5-linuxthreads-punt-semaphore-header.diff
         # Build failure
         patch -p1 < ${BTC_PATCHES}/glibc-2.5-update-m68k-sysdeps-files.patch
+        ;;
+    ( glibc-2.7 )
+        # Debian sources
+        decompress ${BTC_PATCHES}/glibc_2.7-18lenny4-debian.diff | patch -p1
+        # build failure
+        patch -p1 < ${BTC_PATCHES}/glibc-2.7-powerpc-private-futex.patch
         ;;
     ( glibc-2.10.1 )
         # Debian sources
@@ -187,8 +193,8 @@ function install_glibc_headers () {
     ( glibc-2.5 )
         cp ${BTC_CONFIGS}/glibc-2.5-config.cache config.cache
         ;;
-    ( glibc-2.1[01] | glibc-2.1[01].* )
-        cp ${BTC_CONFIGS}/glibc-2.10-config.cache config.cache
+    ( * )
+        cp ${BTC_CONFIGS}/glibc-2.7-config.cache config.cache
         ;;
     esac
 
@@ -199,14 +205,14 @@ function install_glibc_headers () {
         touch stddef.h
     fi
 
-    case ${TARGET_CPU} in
-    ( alpha )
+    case ${TARGET} in
+    ( alpha-* )
         arch_defines="-D__WORDSIZE=64"
         ;;
-    ( arm )
+    ( arm-* )
         arch_defines="-D__ARM_EABI__"
         ;;
-    ( mips )
+    ( mipse[bl]-* )
         arch_defines="-DABIO32=1 -D_MIPS_SIM=_ABIO32 -D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32 -D__WORDSIZE=32 -D_MIPS_FPSET=16 -D_MIPS_SZINT=32 -D_MIPS_ISA=2 -D__mips=2"
         ;;
     ( * )
@@ -295,4 +301,5 @@ function install_glibc () {
     make install_root=${GLIBC_INSTALL_ROOT} install
 
     manifest install_glibc
+    copy_license ${GLIBC_DIST}
 }

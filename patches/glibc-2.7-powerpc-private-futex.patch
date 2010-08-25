@@ -1,0 +1,66 @@
+Fix for build failure --
+
+gawk -f ../scripts/gen-as-const.awk ../nptl/sysdeps/powerpc/tcb-offsets.sym \
+        | powerpc-linux-gnu-gcc -S -o /Volumes/btc-0.12/build/glibc-powerpc-linux-gnu-2/tcb-offsets.hT3 -std=gnu99 -fgnu89-inline -O2 -Wall -Winline -Wwrite-strings -fmerge-all-constants -mnew-mnemonics -Wstrict-prototypes -mlong-double-128     -I../include -I/Volumes/btc-0.12/build/glibc-powerpc-linux-gnu-2/csu -I/Volumes/btc-0.12/build/glibc-powerpc-linux-gnu-2 -I../sysdeps/powerpc/powerpc32/elf -I../sysdeps/powerpc/elf -I../sysdeps/unix/sysv/linux/powerpc/powerpc32/fpu -I../sysdeps/powerpc/powerpc32/fpu -I../ports/sysdeps/unix/sysv/linux/powerpc/powerpc32 -I../nptl/sysdeps/unix/sysv/linux/powerpc/powerpc32 -I../sysdeps/unix/sysv/linux/powerpc/powerpc32 -I../ports/sysdeps/unix/sysv/linux/powerpc -I../nptl/sysdeps/unix/sysv/linux/powerpc -I../sysdeps/unix/sysv/linux/powerpc -I../sysdeps/ieee754/ldbl-128ibm -I../sysdeps/ieee754/ldbl-opt -I../ports/sysdeps/unix/sysv/linux -I../nptl/sysdeps/unix/sysv/linux -I../nptl/sysdeps/pthread -I../sysdeps/pthread -I../sysdeps/unix/sysv/linux -I../sysdeps/gnu -I../sysdeps/unix/common -I../sysdeps/unix/mman -I../sysdeps/unix/inet -I../ports/sysdeps/unix/sysv -I../nptl/sysdeps/unix/sysv -I../sysdeps/unix/sysv -I../sysdeps/unix/powerpc -I../ports/sysdeps/unix -I../nptl/sysdeps/unix -I../sysdeps/unix -I../sysdeps/posix -I../sysdeps/powerpc/powerpc32 -I../sysdeps/wordsize-32 -I../sysdeps/powerpc/fpu -I../ports/sysdeps/powerpc -I../nptl/sysdeps/powerpc -I../sysdeps/powerpc -I../sysdeps/ieee754/dbl-64 -I../sysdeps/ieee754/flt-32 -I../sysdeps/ieee754 -I../sysdeps/generic/elf -I../sysdeps/generic -I../ports -I../nptl  -I.. -I../libio -I. -nostdinc -isystem /Volumes/btc-0.12/gcc-4.2/lib/gcc/powerpc-linux-gnu/4.2.4/include -isystem /Volumes/btc-0.12/gcc-4.2/powerpc-linux-gnu/sysroot/usr/include -D_LIBC_REENTRANT -include ../include/libc-symbols.h       -DHAVE_INITFINI -x c - \
+                -MD -MP -MF /Volumes/btc-0.12/build/glibc-powerpc-linux-gnu-2/tcb-offsets.h.dT -MT '/Volumes/btc-0.12/build/glibc-powerpc-linux-gnu-2/tcb-offsets.h.d /Volumes/btc-0.12/build/glibc-powerpc-linux-gnu-2/tcb-offsets.h'
+<stdin>: In function 'dummy':
+<stdin>:13: error: 'struct <anonymous>' has no member named 'private_futex'
+make[2]: *** [/Volumes/btc-0.12/build/glibc-powerpc-linux-gnu-2/tcb-offsets.h] Error 1
+make[2]: Leaving directory `/Volumes/btc-0.12/build/glibc-2.7/csu'
+make[1]: *** [csu/subdir_lib] Error 2
+make[1]: Leaving directory `/Volumes/btc-0.12/build/glibc-2.7'
+make: *** [csu/subdir_lib] Error 2
+
+
+Subject: [PATCH][BZ 6740] Correct build failiure on PowerPC when using --enable-kernel=2 dot 6 dot 22 or higher
+From: "Ryan S dot  Arnold" <rsa at us dot ibm dot com>
+Reply-To: rsa at us dot ibm dot com
+To: libc-alpha at sourceware dot org, Ulrich Drepper <drepper at redhat dot com>
+Content-Type: text/plain
+Date: Fri, 11 Jul 2008 16:48:23 -0500
+Message-Id: <1215812903.20096.27.camel@localhost>
+Mime-Version: 1.0
+X-Mailer: Evolution 2.22.2 
+Content-Transfer-Encoding: 7bit
+Mailing-List: contact libc-alpha-help at sourceware dot org; run by ezmlm
+Precedence: bulk
+List-Id: <libc-alpha.sourceware.org>
+List-Subscribe: <mailto:libc-alpha-subscribe at sourceware dot org>
+List-Archive: <http://sourceware.org/ml/libc-alpha/>
+List-Post: <mailto:libc-alpha at sourceware dot org>
+List-Help: <mailto:libc-alpha-help at sourceware dot org>, <http://sourceware dot org/ml/#faqs>
+Sender: libc-alpha-owner at sourceware dot org
+Delivered-To: mailing list libc-alpha at sourceware dot org
+
+Per bugzilla http://sourceware.org/bugzilla/show_bug.cgi?id=6740 a build
+failure has been identified on PowerPC using --enable-kernel=2.6.22
+
+Hiroki Kaminaga submitted a patch to libc-help which prevents the
+definition of PRIVATE_FUTEX_OFFSET when the kernel supports private
+futexes.
+
+We've vetted the patch and extracted the necessary portion and
+successfully run it through build tests.
+
+Regards,
+
+Ryan S. Arnold
+IBM Linux Technology Center
+Linux Toolchain Development
+
+2008-04-28  Hiroki Kaminaga  <kaminaga@sm.sony.co.jp>
+
+	[BZ 6740]
+	nptl/sysdeps/powerpc/tcb-offsets.sym (PRIVATE_FUTEX_OFFSET):
+	Guard sym definition with #ifndef __ASSUME_PRIVATE_FUTEX.
+
+--- a/nptl/sysdeps/powerpc/tcb-offsets.sym
++++ b/nptl/sysdeps/powerpc/tcb-offsets.sym
+@@ -15,4 +15,6 @@ MULTIPLE_THREADS_OFFSET               thread_offsetof
+ PID				thread_offsetof (pid)
+ TID				thread_offsetof (tid)
+ POINTER_GUARD			(offsetof (tcbhead_t, pointer_guard) - TLS_TCB_OFFSET - sizeof (tcbhead_t))
++#ifndef __ASSUME_PRIVATE_FUTEX
+ PRIVATE_FUTEX_OFFSET		thread_offsetof (header.private_futex)
++#endif
+

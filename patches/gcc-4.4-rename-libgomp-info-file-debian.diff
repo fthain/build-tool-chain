@@ -1,0 +1,72 @@
+--- a/src/libgomp/Makefile.am
++++ b/src/libgomp/Makefile.am
+@@ -93,16 +93,19 @@ endif
+ 
+ all-local: $(STAMP_GENINSRC)
+ 
+-stamp-geninsrc: libgomp.info
+-	cp -p $(top_builddir)/libgomp.info $(srcdir)/libgomp.info
++INFO_LIBGOMP_NAME = $(shell echo libgomp|sed '$(program_transform_name)')
++stamp-geninsrc: $(INFO_LIBGOMP_NAME).info
++	cp -p $(top_builddir)/$(INFO_LIBGOMP_NAME).info $(srcdir)/libgomp.info
+ 	@touch $@
+ 
+-libgomp.info: $(STAMP_BUILD_INFO)
++libgomp.info: $(INFO_LIBGOMP_NAME).info
++	cp $(INFO_LIBGOMP_NAME).info libgomp.info
++$(INFO_LIBGOMP_NAME).info: $(STAMP_BUILD_INFO)
+ 
+ stamp-build-info: libgomp.texi
+-	$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) -o libgomp.info $(srcdir)/libgomp.texi
++	$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -D 'fnlibgomp $(INFO_LIBGOMP_NAME)' -I $(srcdir) -o $(INFO_LIBGOMP_NAME).info $(srcdir)/libgomp.texi
+ 	@touch $@
+ 
+ 
+-CLEANFILES = $(STAMP_GENINSRC) $(STAMP_BUILD_INFO) libgomp.info
++CLEANFILES = $(STAMP_GENINSRC) $(STAMP_BUILD_INFO) $(INFO_LIBGOMP_NAME).info
+ MAINTAINERCLEANFILES = $(srcdir)/libgomp.info
+--- a/src/libgomp/Makefile.in
++++ b/src/libgomp/Makefile.in
+@@ -336,7 +336,8 @@ info_TEXINFOS = libgomp.texi
+ 
+ # AM_CONDITIONAL on configure check ACX_CHECK_PROG_VER([MAKEINFO])
+ @BUILD_INFO_TRUE@STAMP_BUILD_INFO = stamp-build-info
+-CLEANFILES = $(STAMP_GENINSRC) $(STAMP_BUILD_INFO) libgomp.info
++INFO_LIBGOMP_NAME = $(shell echo libgomp|sed '$(program_transform_name)')
++CLEANFILES = $(STAMP_GENINSRC) $(STAMP_BUILD_INFO) $(INFO_LIBGOMP_NAME).info
+ MAINTAINERCLEANFILES = $(srcdir)/libgomp.info
+ all: config.h
+ 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
+@@ -1100,15 +1101,16 @@ install-pdf: $(PDFS)
+ 	done
+ 
+ all-local: $(STAMP_GENINSRC)
+-
+-stamp-geninsrc: libgomp.info
+-	cp -p $(top_builddir)/libgomp.info $(srcdir)/libgomp.info
++stamp-geninsrc: $(INFO_LIBGOMP_NAME).info
++	cp -p $(top_builddir)/$(INFO_LIBGOMP_NAME).info $(srcdir)/libgomp.info
+ 	@touch $@
+ 
+-libgomp.info: $(STAMP_BUILD_INFO)
++libgomp.info: $(INFO_LIBGOMP_NAME).info
++	[ "$(INFO_LIBGOMP_NAME).info" = libgomp.info ] || cp $(INFO_LIBGOMP_NAME).info libgomp.info
++$(INFO_LIBGOMP_NAME).info: $(STAMP_BUILD_INFO)
+ 
+ stamp-build-info: libgomp.texi
+-	$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) -o libgomp.info $(srcdir)/libgomp.texi
++	$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -D 'fnlibgomp $(INFO_LIBGOMP_NAME)' -I $(srcdir) -o $(INFO_LIBGOMP_NAME).info $(srcdir)/libgomp.texi
+ 	@touch $@
+ # Tell versions [3.59,3.63) of GNU make to not export all variables.
+ # Otherwise a system limit (for SysV at least) may be exceeded.
+--- a/src/libgomp/libgomp.texi
++++ b/src/libgomp/libgomp.texi
+@@ -31,7 +31,7 @@ texts being (a) (see below), and with the Back-Cover Texts being (b)
+ @ifinfo
+ @dircategory GNU Libraries
+ @direntry
+-* libgomp: (libgomp).                    GNU OpenMP runtime library
++* @value{fnlibgomp}: (@value{fnlibgomp}).                    GNU OpenMP runtime library
+ @end direntry
+ 
+ This manual documents the GNU implementation of the OpenMP API for 

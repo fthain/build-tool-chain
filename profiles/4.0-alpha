@@ -1,5 +1,6 @@
-. ${BTC_PROFILES}/C
-. ${BTC_PROFILES}/4.0
+GCC_DIST=gcc-4.0.4
 TARGET=alpha-linux-gnu
-TARGET_CPU=alpha
+TARGET_ARCH=alpha
+
+. ${BTC_PROFILES}/C
 BINUTILS_DIST=binutils-2.19.51

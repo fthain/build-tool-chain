@@ -1,8 +1,8 @@
 # Method A base profile
 # This mode is suitable for gcc 3.1 and earlier
+# Approximates Debian 2 (woody)
 METHOD=A
-BINUTILS_DIST=binutils-2.12.90.0.1
 LINUX_DIST=linux-2.2.26
-
 GLIBC_DIST=glibc-2.2.5
 GLIBC_ADD_ONS=linuxthreads
+BINUTILS_DIST=binutils-2.12.90.0.1

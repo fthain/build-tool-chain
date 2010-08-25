@@ -40,6 +40,4 @@ function install_gdb () {
 
     make ${MAKE_OPTS}
     make install
-
-    manifest install_gdb
 }

@@ -1,4 +1,8 @@
-. ${BTC_PROFILES}/C
-. ${BTC_PROFILES}/4.3
+GCC_DIST=gcc-4.3.5
 TARGET=m68k-linux-gnu
-TARGET_CPU=m68k
+TARGET_ARCH=m68k
+
+. ${BTC_PROFILES}/D
+METHOD=C
+GLIBC_DIST=glibc-2.5
+GLIBC_ADD_ONS="linuxthreads ports"
