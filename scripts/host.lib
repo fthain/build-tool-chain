@@ -187,15 +187,17 @@ function install_gmp () {
 
     (
         local opts
-        if [ ${BUILD} != "${BUILD#powerpc-apple-darwin}" ] ; then
+        opts=
+        case ${BUILD} in
+        ( powerpc-apple-darwin* )
             export CFLAGS="-Wa,-force_cpusubtype_ALL -std=gnu89"
             opts="--with-pic"
-        elif [ ${BUILD} != "${BUILD#i386-apple-darwin9}" ] ; then
+            ;;
+        ( i386-apple-darwin* )
             export CFLAGS="-std=gnu89"
             opts="--build=none-apple-darwin"
-        else
-            opts=
-        fi
+            ;;
+        esac
         ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
                     --infodir=${HOST_TOOLS_PREFIX}/share/info \
                     --enable-cxx --with-gmp=${HOST_TOOLS_PREFIX} \
@@ -226,13 +228,14 @@ function install_mpfr () {
     echo building $1
 
     local opts
-    if [ ${BUILD} != "${BUILD#i386-apple-darwin9}" ] ; then
+    opts=
+    case ${BUILD} in
+    ( i386-apple-darwin* )
         opts="--build=none-apple-darwin"
-    else
-        opts=
-    fi
+        ;;
+    esac
 
-    ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
+    ./configure --prefix=${HOST_TOOLS_PREFIX} \
                 --with-gmp=${HOST_TOOLS_PREFIX} $opts
     make ${MAKE_OPTS}
 

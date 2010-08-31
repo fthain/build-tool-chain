@@ -115,6 +115,7 @@ check_digest 'linux-2.6.22.tar.bz2', '2e230d005c002fb3d38a3ca07c0200d0';
 check_digest 'linux-2.6.26.tar.bz2', '5169d01c405bc3f866c59338e217968c';
 check_digest 'linux-2.6.27.tar.bz2', 'b3e78977aa79d3754cb7f8143d7ddabd';
 check_digest 'linux-2.6.31.tar.bz2', '84c077a37684e4cbfa67b18154390d8a';
+check_digest 'linux-2.6.32.tar.bz2', '260551284ac224c3a43c4adac7df4879';
 check_digest 'linux-2.6.34.tar.bz2', '10eebcb0178fb4540e2165bfd7efc7ad';
 check_digest 'm4-1.4.13.tar.bz2', '28f9ccd3ac4da45409251008b911d677';
 check_digest 'make-3.81.tar.bz2', '354853e0b2da90c527e35aabb8d6f1e6';
