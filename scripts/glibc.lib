@@ -141,14 +141,9 @@ function prep_glibc () {
         ;;
     ( glibc-2.11 )
         # Debian sources
-        decompress ${BTC_PATCHES}/eglibc-source_2.11.2-2_all-debian.diff | patch -p1
-
-        # m68k TLS/NPTL
-        patch -p1          < ${BTC_PATCHES}/glibc-0079dd2382eba185d22410a1d3088dc7146bc00a.patch
-        patch -p1          < ${BTC_PATCHES}/glibc-bbabf1f73f611b9101b42c3390a9ddd53e6dd7d4.patch
-
-        patch -p1 -d ports < ${BTC_PATCHES}/glibc-ports-m68k-bundle.patch
-
+        decompress ${BTC_PATCHES}/eglibc-source_2.11.2-3_all-debian.diff | patch -p1
+        # Add the commit that went wrong in Debian's 2.11.2-3 source package
+        patch -p1 -d ports < ${BTC_PATCHES}/glibc-ports-0a124d8bc7a3d99f461af942aebdd3a8848672e9.patch
         # build failure
         patch -p1 < ${BTC_PATCHES}/glibc-2.5-m68k-fchownat.patch
         # darwin portability

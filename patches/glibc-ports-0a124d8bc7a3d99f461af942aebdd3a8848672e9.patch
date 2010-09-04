@@ -1,0 +1,111 @@
+From: Andreas Schwab <schwab@linux-m68k.org>
+Date: Sat, 22 May 2010 19:04:42 +0000 (+0200)
+Subject: m68k: add c++-types and localplt data for m68k-linux-gnu
+X-Git-Url: http://sourceware.org/git/?p=glibc-ports.git;a=commitdiff_plain;h=0a124d8bc7a3d99f461af942aebdd3a8848672e9
+
+m68k: add c++-types and localplt data for m68k-linux-gnu
+---
+
+diff --git a/ChangeLog.m68k b/ChangeLog.m68k
+index c7d068e..cdc0ab5 100644
+--- a/ChangeLog.m68k
++++ b/ChangeLog.m68k
+@@ -16,6 +1,11 @@
+ 	* sysdeps/unix/sysv/linux/m68k/nptl/bits/pthreadtypes.h: Force
+ 	alignment of futex variables.
+ 
++2010-05-22  Andreas Schwab  <schwab@linux-m68k.org>
++
++	* data/c++-types-m68k-linux-gnu.data: New file.
++	* data/localplt-m68k-linux-gnu.data: New file.
++
+ 2010-03-13  Andreas Schwab  <schwab@linux-m68k.org>
+ 
+ 	* sysdeps/m68k/m680x0/fpu/s_ccosh.c: Use signbit macro.
+diff --git a/data/c++-types-m68k-linux-gnu.data b/data/c++-types-m68k-linux-gnu.data
+new file mode 100644
+index 0000000..fde53bf
+--- /dev/null
++++ b/data/c++-types-m68k-linux-gnu.data
+@@ -0,0 +1,67 @@
++blkcnt64_t:x
++blkcnt_t:l
++blksize_t:l
++caddr_t:Pc
++clockid_t:i
++clock_t:l
++daddr_t:i
++dev_t:y
++fd_mask:l
++fsblkcnt64_t:y
++fsblkcnt_t:m
++fsfilcnt64_t:y
++fsfilcnt_t:m
++fsid_t:8__fsid_t
++gid_t:j
++id_t:j
++ino64_t:y
++ino_t:m
++int16_t:s
++int32_t:i
++int64_t:x
++int8_t:a
++intptr_t:i
++key_t:i
++loff_t:x
++mode_t:j
++nlink_t:j
++off64_t:x
++off_t:l
++pid_t:i
++pthread_attr_t:14pthread_attr_t
++pthread_barrier_t:17pthread_barrier_t
++pthread_barrierattr_t:21pthread_barrierattr_t
++pthread_cond_t:14pthread_cond_t
++pthread_condattr_t:18pthread_condattr_t
++pthread_key_t:j
++pthread_mutex_t:15pthread_mutex_t
++pthread_mutexattr_t:19pthread_mutexattr_t
++pthread_once_t:i
++pthread_rwlock_t:16pthread_rwlock_t
++pthread_rwlockattr_t:20pthread_rwlockattr_t
++pthread_spinlock_t:i
++pthread_t:m
++quad_t:x
++register_t:i
++rlim64_t:y
++rlim_t:m
++sigset_t:10__sigset_t
++size_t:j
++socklen_t:j
++ssize_t:i
++suseconds_t:l
++time_t:l
++u_char:h
++uid_t:j
++uint:j
++u_int:j
++u_int16_t:t
++u_int32_t:j
++u_int64_t:y
++u_int8_t:h
++ulong:m
++u_long:m
++u_quad_t:y
++useconds_t:j
++ushort:t
++u_short:t
+diff --git a/data/localplt-m68k-linux-gnu.data b/data/localplt-m68k-linux-gnu.data
+new file mode 100644
+index 0000000..d266b8f
+--- /dev/null
++++ b/data/localplt-m68k-linux-gnu.data
+@@ -0,0 +1,8 @@
++libc.so: _Unwind_Find_FDE
++libc.so: __m68k_read_tp
++libc.so: calloc
++libc.so: free
++libc.so: malloc
++libc.so: memalign
++libc.so: realloc
++libm.so: matherr
