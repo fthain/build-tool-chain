@@ -5,8 +5,8 @@
 function prep_gdb () {
     cd ${BTC_BUILD}
     test -e $1 && echo $1 already exists && return
-    untar $1 ftp://ftp.gnu.org/gnu/gdb \
-             ftp://sourceware.org/pub/gdb/snapshots/branch
+    untar $1 ftp://ftp.gnu.org/gnu/gdb/ \
+             ftp://sourceware.org/pub/gdb/snapshots/branch/
     cd $1
 
     case $1 in

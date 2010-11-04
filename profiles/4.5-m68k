@@ -1,0 +1,5 @@
+GCC_DIST=gcc-4.5-20101021
+TARGET=m68k-linux-gnu
+TARGET_ARCH=m68k
+
+. ${BTC_PROFILES}/E

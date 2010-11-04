@@ -23,7 +23,7 @@
  .PHONY: _modinst_post
  _modinst_post: _modinst_post_pcmcia
 -	if [ -r System.map ]; then $(DEPMOD) -ae -F System.map $(depmod_opts) $(KERNELRELEASE); fi
-+	if [ -r System.map ]; then depmod.pl $(depmod_opts) -k vmlinux; fi
++	if [ -r System.map ]; then NM=$(CROSS_COMPILE)nm depmod.pl -a -F System.map $(depmod_opts) ; fi
  
  # Backwards compatibilty symlinks for people still using old versions
  # of pcmcia-cs with hard coded pathnames on insmod.  Remove

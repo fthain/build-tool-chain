@@ -4,8 +4,11 @@
 
 function host_tool_license () {
     mkdir -p ${HOST_TOOLS_PREFIX}/share/doc
-    cat ${1}/COPYING > ${HOST_TOOLS_PREFIX}/share/doc/${1%%-[0-9]*}-license ||
-      cat ${1}/LICENSE > ${HOST_TOOLS_PREFIX}/share/doc/${1%%-[0-9]*}-license
+    local pn
+    pn=${1%%-[0-9]*}
+    cat ${1}/COPYING > ${HOST_TOOLS_PREFIX}/share/doc/${pn}-license ||
+      cat ${1}/COPYING.LIB > ${HOST_TOOLS_PREFIX}/share/doc/${pn}-license ||
+        cat ${1}/LICENSE > ${HOST_TOOLS_PREFIX}/share/doc/${pn}-license
 }
 
 function host_tool_install () {
@@ -36,8 +39,7 @@ function host_tool_merge () {
     rm -f share/info/dir
 
     if test -d lib ; then
-        find lib -type f \( -name '*.la' -o -name '*.a' \) -print0 | xargs -0 rm -fv
-        rmdir lib || true
+        find lib -type f -name '*.la' -print0 | xargs -0 rm -fv
     fi
 
     tar -c "$@" | tar -C ${HOST_TOOLS_PREFIX} -xpv
@@ -77,7 +79,7 @@ function install_coreutils () {
 
     echo unpacking $1
     cd $BTC_BUILD
-    untar $1 ftp://ftp.gnu.org/gnu/coreutils
+    untar $1 ftp://ftp.gnu.org/gnu/coreutils/
 
     pushd $1 >/dev/null
     echo building $1
@@ -100,7 +102,7 @@ function install_loadkeys () {
     
     echo unpacking $1
     cd $BTC_BUILD
-    untar $1 ftp://ftp.kernel.org/pub/linux/utils/kbd
+    untar $1 ftp://ftp.kernel.org/pub/linux/utils/kbd/
 
     pushd $1 >/dev/null
     patch -p1 < ${BTC_PATCHES}/kbd-1.12-gentoo.diff
@@ -155,7 +157,7 @@ function install_flex () {
 
     echo unpacking $1
     cd $BTC_BUILD
-    untar $1 http://prdownloads.sourceforge.net/flex
+    untar $1 http://prdownloads.sourceforge.net/flex/
 
     pushd ${1%a} >/dev/null
     patch -p1 < ${BTC_PATCHES}/flex-2.5.4a-r6.diff
@@ -180,7 +182,7 @@ function install_gmp () {
 
     echo unpacking $1
     cd $BTC_BUILD
-    untar $1 ftp://ftp.gnu.org/gnu/gmp
+    untar $1 ftp://ftp.gnu.org/gnu/gmp/
 
     pushd $1 >/dev/null
     echo building $1
@@ -220,7 +222,7 @@ function install_mpfr () {
 
     echo unpacking $1
     cd $BTC_BUILD
-    untar $1 http://www.mpfr.org/$1
+    untar $1 http://www.mpfr.org/$1/
 
     pushd $1 >/dev/null
     patch -p1 < ${BTC_PATCHES}/mpfr-2.4.2-gentoo.patch
@@ -262,7 +264,7 @@ function install_ppl () {
 
     echo unpacking $1
     cd $BTC_BUILD
-    untar $1 ftp://ftp.cs.unipr.it/pub/ppl/releases/${1#*-}
+    untar $1 ftp://ftp.cs.unipr.it/pub/ppl/releases/${1#*-}/
 
     pushd $1 >/dev/null
     echo building $1
@@ -287,7 +289,7 @@ function install_cloog_ppl () {
 
     echo unpacking $1
     cd $BTC_BUILD
-    untar $1 ftp://gcc.gnu.org/pub/gcc/infrastructure
+    untar $1 ftp://gcc.gnu.org/pub/gcc/infrastructure/
 
     pushd $1 >/dev/null
     echo building $1
@@ -301,6 +303,58 @@ function install_cloog_ppl () {
 
     rm -rf ${BTC_BUILD}/image
     make DESTDIR=${BTC_BUILD}/image install
+    popd >/dev/null
+
+    host_tool_merge include lib
+    host_tool_license $1
+}
+
+function install_mpc () {
+    test -e ${HOST_TOOLS_PREFIX}/include/mpc.h && return
+
+    echo unpacking $1
+    cd $BTC_BUILD
+    untar $1 http://www.multiprecision.org/mpc/download/$1.tar.gz
+
+    pushd $1 >/dev/null
+    echo building $1
+
+    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
+                             --with-gmp=${HOST_TOOLS_PREFIX} \
+                             --with-mpfr=${HOST_TOOLS_PREFIX}
+    make ${MAKE_OPTS}
+
+    echo installing $1
+
+    rm -rf ${BTC_BUILD}/image
+    make DESTDIR=${BTC_BUILD}/image install
+    popd >/dev/null
+
+    host_tool_merge include lib share/info
+    host_tool_license $1
+}
+
+function install_libelf () {
+    test -e ${HOST_TOOLS_PREFIX}/include/libelf && return
+
+    echo unpacking $1
+    cd $BTC_BUILD
+    untar $1 http://www.mr511.de/software/$1.tar.gz
+
+    pushd $1 >/dev/null
+    echo building $1
+
+    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
+                             --enable-shared --enable-compat
+    make ${MAKE_OPTS}
+
+    echo installing $1
+
+    rm -rf ${BTC_BUILD}/image
+    make instroot=${BTC_BUILD}/image install
+    if test -e /usr/include/nlist.h && ! grep -q elfutils /usr/include/nlist.h ; then
+      rm ${BTC_BUILD}/image/${HOST_TOOLS_PREFIX}/include/nlist.h
+    fi
     popd >/dev/null
 
     host_tool_merge include lib

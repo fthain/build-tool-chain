@@ -5,7 +5,7 @@
 function prep_linux () {
     cd ${BTC_BUILD}
     test -e $1 && echo $1 already exists && return
-    untar $1 ftp://ftp.kernel.org/pub/linux/kernel/v2.{6,4,2}
+    untar $1 ftp://ftp.kernel.org/pub/linux/kernel/v2.{6,4,2}/
     cd $1
 
     case ${1} in
@@ -161,42 +161,43 @@ function prep_linux () {
             ;;
         ( mips )
             case ${1} in
-            ( linux-2.6.20 | linux-2.6.20-* )
+            ( linux-2.6.20 | linux-2.6.20[.-]* )
                 decompress ${BTC_PATCHES}/linux-2.6.20-mips-20070205.diff | patch -p1
                 ;;
             esac
             ;;
         ( m68k )
             case ${1} in
-            ( linux-2.6.18 | linux-2.6.18-* )
+            ( linux-2.6.18 | linux-2.6.18[.-]* )
                 decompress ${BTC_PATCHES}/linux-2.6.18-m68k-20061204.diff | patch -p1
                 ;;
-            ( linux-2.6.19 | linux-2.6.19-* )
+            ( linux-2.6.19 | linux-2.6.19[.-]* )
                 decompress ${BTC_PATCHES}/linux-2.6.19-m68k-20061226.diff | patch -p1
                 ;;
-            ( linux-2.6.20 | linux-2.6.20-* )
+            ( linux-2.6.20 | linux-2.6.20[.-]* )
                 decompress ${BTC_PATCHES}/linux-2.6.20-m68k-20070303.diff | patch -p1
                 ;;
-            ( linux-2.6.22 | linux-2.6.22-* )
+            ( linux-2.6.22 | linux-2.6.22[.-]* )
                 decompress ${BTC_PATCHES}/linux-2.6.22-m68k-20070827.diff | patch -p1
                 ;;
-            ( linux-2.6.24 | linux-2.6.24-* )
+            ( linux-2.6.24 | linux-2.6.24[.-]* )
                 decompress ${BTC_PATCHES}/linux-2.6.24-m68k-20080212.diff | patch -p1
                 ;;
-            ( linux-2.6.29 | linux-2.6.29-* )
+            ( linux-2.6.29 | linux-2.6.29[.-]* )
                 decompress ${BTC_PATCHES}/linux-2.6.29-m68k-20090520.diff | patch -p1
                 ;;
-            ( linux-2.6.3[23] | linux-2.6.3[23]-* )
-                patch -p1 < ${BTC_PATCHES}/linux-m68k-kuvyrkov-1-nptl-support.patch
-                patch -p1 < ${BTC_PATCHES}/linux-m68k-kuvyrkov-2-siginfo-layout-generic.patch
+            ( linux-2.6.32 | linux-2.6.32[.-]* )
+#                patch -p1 < ${BTC_PATCHES}/linux-2.6.git-5da3a65d2d1ba333d61999640ef241f150c69c6b.patch
+#                patch -p1 < ${BTC_PATCHES}/linux-2.6.git-9674cdc74d63f346870943ef966a034f8c71ee57.patch
+                 decompress ${BTC_PATCHES}/linux-2.6_2.6.32-23-debian-m68k.diff | patch -p1
                 ;;
             esac
             case ${1} in
-            ( linux-2.6.1[89] | linux-2.6.1[89]-* | \
-              linux-2.6.2[02] | linux-2.6.2[02]-* )
+            ( linux-2.6.1[89] | linux-2.6.1[89][.-]* | \
+              linux-2.6.2[02] | linux-2.6.2[02][.-]* )
                 patch -p1 < ${BTC_PATCHES}/linux-2.6.17-m68k-20060622-Os-strcpy.diff
                 ;;
-            ( linux-2.6.2[34] | linux-2.6.2[34]-* )
+            ( linux-2.6.2[34] | linux-2.6.2[34][.-]* )
                 patch -p1 < ${BTC_PATCHES}/linux-2.6.23-Os-strcpy.diff
                 ;;
             ( linux-2.6.26 | linux-2.6.26[.-]* )
@@ -288,16 +289,14 @@ function build_linux () {
 function package_linux () {
     LINUX_IMAGE=${BTC_BUILD}/${1}-${TARGET_ARCH}-image
     test -e $LINUX_IMAGE.tar.gz && echo kernel tarball already present && return
+    test -e $LINUX_IMAGE && echo kernel image already present && return
 
-    rm -fr ${LINUX_IMAGE}
     mkdir -p ${LINUX_IMAGE}/boot
     pushd ${BTC_BUILD}/${1} >/dev/null
     make INSTALL_MOD_PATH=${LINUX_IMAGE} ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET}- modules_install
     cd ${LINUX_IMAGE}/lib/modules
     ver=`ls -d [0-9]*`
-    if [ x${ver} = x ]; then
-        exit
-    fi
+    if [ x${ver} = x ]; then exit ; fi
     cd ${BTC_BUILD}/${1}
     if [ -e arch/${TARGET_ARCH}/boot/bzImage ]; then
         cp arch/${TARGET_ARCH}/boot/bzImage ${LINUX_IMAGE}/boot/bzImage-${ver}
@@ -314,12 +313,10 @@ function package_linux () {
     cp System.map ${LINUX_IMAGE}/boot/System.map-${ver}
     cp .config ${LINUX_IMAGE}/boot/config-${ver}
     cd ${LINUX_IMAGE}/boot
-    sudo ln -s System.map-${ver} System.map
+    ln -s System.map-${ver} System.map
     cd ${LINUX_IMAGE}
     rm -f lib/modules/${ver}/{build,source}
     chmod -R g-w,o-w ${LINUX_IMAGE}
-    sudo chown -R 0:0 ${LINUX_IMAGE}
-    tar -czf ${BTC_BUILD}/${1}-${TARGET_ARCH}-image.tar.gz .
-    sudo rm -r ${LINUX_IMAGE}
+    tar -cz --owner=0 --group=0 -f ${BTC_BUILD}/${1}-${TARGET_ARCH}-image.tar.gz .
     popd >/dev/null
 }

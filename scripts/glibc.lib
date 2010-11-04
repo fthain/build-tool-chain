@@ -4,7 +4,7 @@
 
 function prep_glibc () {
     local mirrors
-    mirrors="ftp://ftp.gnu.org/gnu/glibc ftp://sources.redhat.com/pub/glibc/releases"
+    mirrors="ftp://ftp.gnu.org/gnu/glibc/ ftp://sources.redhat.com/pub/glibc/releases/"
     cd ${BTC_BUILD}
     test -e $1 && echo $1 already exists && return
     untar $1 $mirrors
@@ -141,9 +141,7 @@ function prep_glibc () {
         ;;
     ( glibc-2.11 )
         # Debian sources
-        decompress ${BTC_PATCHES}/eglibc-source_2.11.2-3_all-debian.diff | patch -p1
-        # Add the commit that went wrong in Debian's 2.11.2-3 source package
-        patch -p1 -d ports < ${BTC_PATCHES}/glibc-ports-0a124d8bc7a3d99f461af942aebdd3a8848672e9.patch
+        decompress ${BTC_PATCHES}/eglibc-source_2.11.2-5_all-debian.diff | patch -p1
         # build failure
         patch -p1 < ${BTC_PATCHES}/glibc-2.5-m68k-fchownat.patch
         # darwin portability

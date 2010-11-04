@@ -1,0 +1,9 @@
+--- trunk/gcc/lto/Make-lang.in	2010/10/18 14:05:56	165637
++++ trunk/gcc/lto/Make-lang.in	2010/10/18 15:16:07	165638
+@@ -94,3 +94,6 @@
+ lto/lto-macho.o: lto/lto-macho.c $(CONFIG_H) coretypes.h $(SYSTEM_H) \
+ 	toplev.h $(LTO_H) $(TM_H) $(LIBIBERTY_H) $(GGC_H) $(LTO_STREAMER_H) \
+ 	lto/lto-macho.h lto/lto-endian.h
++
++# LTO testing is done as part of C/C++/Fortran etc. testing.
++check-lto:

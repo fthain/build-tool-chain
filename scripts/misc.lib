@@ -24,17 +24,19 @@ function fetch () {
         dir_urls=($BTC_MIRRORS "$@")
     fi
     declare -a urls
+    urls=( "" )
     for u in "${dir_urls[@]}" ; do
-        if test -z "${urls[*]:-}" ; then
-            urls=("$u/$dist.tar.bz2" "$u/$dist.tar.gz")
+        if [ -z "${u##*/}" ] ; then
+            urls=( "${urls[@]}" "$u/$dist.tar.bz2" "$u/$dist.tar.gz" )
         else
-            urls=("${urls[@]}" "$u/$dist.tar.bz2" "$u/$dist.tar.gz")
+            urls=( "${urls[@]}" "$u" )
         fi
     done
     (
         cd $BTC_SOURCES
         umask 0333
         for u in "${urls[@]}" ; do
+            test -z "$u" && continue
             echo fetch: trying $u 1>&2
             if type -t wget >/dev/null 2>&1 ; then
                 wget -nv "$u" && return
@@ -51,8 +53,18 @@ function fetch () {
 }
 
 function untar () {
+    local dist
+    dist="${1%tar.bz2}"
+    dist="${dist%tar.gz}"
+    dist="${dist%tar}"
+    local -a candidates
+    if [ "$1" = "$dist" ] ; then
+        candidates=( "$BTC_SOURCES/$1"* )
+    else
+        candidates=( "$BTC_SOURCES/$dist" )
+    fi
     local globbed
-    for globbed in $BTC_SOURCES/$1*; do
+    for globbed in "${candidates[@]}" ; do
         case $globbed in
         ( $BTC_SOURCES/$1.tar.bz2 )
             echo untar $globbed 1>&2
@@ -67,7 +79,7 @@ function untar () {
             tar -xf $globbed
             ;;
         ( * )
-            if [ "$*" != "$1" ] ; then
+            if [ "$#" != 1 ] ; then
                 fetch "$@"
                 untar $1
             else

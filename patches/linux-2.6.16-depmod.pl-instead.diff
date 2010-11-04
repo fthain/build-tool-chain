@@ -1,4 +1,3 @@
-diff -Nur a/Makefile b/Makefile
 --- a/Makefile	Mon Mar 20 16:53:29 2006
 +++ b/Makefile	Wed Apr  5 18:26:22 2006
 @@ -315,7 +315,7 @@
@@ -32,7 +31,7 @@ diff -Nur a/Makefile b/Makefile
  .PHONY: _modinst_post
  _modinst_post: _modinst_
 -	if [ -r System.map -a -x $(DEPMOD) ]; then $(DEPMOD) -ae -F System.map $(depmod_opts) $(KERNELRELEASE); fi
-+	if [ -r System.map ]; then $(DEPMOD) $(depmod_opts) -k vmlinux; fi
++	if [ -r System.map ]; then NM=$(CROSS_COMPILE)nm $(DEPMOD) -a -F System.map $(depmod_opts) ; fi
  
  else # CONFIG_MODULES
  

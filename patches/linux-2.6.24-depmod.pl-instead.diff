@@ -1,4 +1,4 @@
---- a/Makefile.orig	2008-01-25 09:58:37.000000000 +1100
+--- a/Makefile	2008-01-25 09:58:37.000000000 +1100
 +++ b/Makefile	2008-02-10 01:19:18.000000000 +1100
 @@ -308,7 +308,7 @@
  OBJDUMP		= $(CROSS_COMPILE)objdump
@@ -21,14 +21,14 @@
  	@rm -rf $(MODLIB)/kernel
  	@rm -f $(MODLIB)/source
  	@mkdir -p $(MODLIB)/kernel
-@@ -1525,8 +1520,8 @@
+@@ -1525,8 +1520,6 @@
        cmd_depmod = \
- 	if [ -r System.map -a -x $(DEPMOD) ]; then                              \
- 		$(DEPMOD) -ae -F System.map                                     \
+-	if [ -r System.map -a -x $(DEPMOD) ]; then                              \
+-		$(DEPMOD) -ae -F System.map                                     \
 -		$(if $(strip $(INSTALL_MOD_PATH)), -b $(INSTALL_MOD_PATH) -r)   \
 -		$(KERNELRELEASE);                                               \
-+		-b $(INSTALL_MOD_PATH)/lib/modules/$(KERNELRELEASE)             \
-+		-k vmlinux;                                                     \
++	if [ -r System.map ]; then                              		\
++		NM=$(CROSS_COMPILE)nm $(DEPMOD) -a -F System.map -b $(INSTALL_MOD_PATH)/lib/modules/$(KERNELRELEASE); \
  	fi
  
  # Create temporary dir for module support files
