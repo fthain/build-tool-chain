@@ -1,0 +1,6 @@
+GCC_DIST=gcc-4.5-20101021
+TARGET=m68k-uclinux
+# DEFAULT_CPU=5407
+LINUX_ARCH=m68knommu
+
+. ${BTC_PROFILES}/U-dev

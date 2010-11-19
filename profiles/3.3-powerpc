@@ -1,5 +1,5 @@
 GCC_DIST=gcc-3.3.6
 TARGET=powerpc-linux-gnu
-TARGET_ARCH=ppc
+LINUX_ARCH=ppc
 
 . ${BTC_PROFILES}/B

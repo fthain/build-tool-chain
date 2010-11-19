@@ -1,0 +1,13 @@
+--- uClibc-0.9.30.1/Makefile.in.orig	2010-11-16 17:32:50.000000000 +1100
++++ uClibc-0.9.30.1/Makefile.in	2010-11-16 17:35:29.000000000 +1100
+@@ -483,8 +483,8 @@
+ 	$(Q)./extra/config/conf -n extra/Configs/Config.in
+ 
+ defconfig: extra/config/conf
+-	$(Q)./extra/config/conf -d extra/Configs/Config.in \
+-		-D extra/Configs/defconfigs/$(ARCH)
++	$(Q)./extra/config/conf -d -D extra/Configs/defconfigs/$(ARCH) \
++		extra/Configs/Config.in
+ 
+ include_clean:
+ 	$(Q)$(RM) include/fpu_control.h include/dl-osinfo.h include/hp-timing.h

@@ -109,6 +109,7 @@ check_digest 'glibc-ports-2.11.tar.bz2', '4856ad0f54a83fc3c1a9b5d3c820a230';
 check_digest 'gmp-4.3.1.tar.bz2', '26cec15a90885042dd4a15c4003b08ae';
 check_digest 'gmp-4.3.2.tar.bz2', 'dd60683d7057917e34630b4a787932e8';
 check_digest 'kbd-1.12.tar.gz', '7892c7010512a9bc6697a295c921da25';
+check_digest 'libelf-0.8.13.tar.gz', '4136d7b4c04df68b686570afa26988ac';
 check_digest 'linux-2.2.26.tar.bz2', '4fa42c5112ddd2cc20dedfbd61d588a1';
 check_digest 'linux-2.4.36.tar.bz2', '230caed7f3caf23a96ded604ba0ad6ae';
 check_digest 'linux-2.6.18.tar.bz2', '296a6d150d260144639c3664d127d174';

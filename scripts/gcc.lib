@@ -8,7 +8,8 @@ function prep_gcc_core () {
     c=${1/gcc/gcc-core}
     test -e $c && echo $c already exists && return
     test -e $1 && echo not overwriting $1 && return 1
-    untar $c ftp://sourceware.org/pub/gcc/releases/$1/ ftp://ftp.gnu.org/gnu/gcc/$1/
+    untar $c ftp://sourceware.org/pub/gcc/releases/$1/ \
+             ftp://ftp.gnu.org/gnu/gcc/$1/
     mv $1 $c
     cd $c
 
@@ -155,7 +156,8 @@ function prep_gcc_core () {
 function prep_gcc () {
     cd ${BTC_BUILD}
     test -e $1 && echo $1 already exists && return
-    untar $1 ftp://sourceware.org/pub/gcc/releases/$1/ ftp://ftp.gnu.org/gnu/gcc/$1/
+    untar $1 ftp://sourceware.org/pub/gcc/releases/$1/ \
+             ftp://ftp.gnu.org/gnu/gcc/$1/
     cd $1
 
     # Debian sources, etc
@@ -200,12 +202,15 @@ function prep_gcc () {
             patch -p1 < ${BTC_PATCHES}/gcc-PR41302.patch
             patch -p0 < ${BTC_PATCHES}/gcc-pr43804.diff
             patch -p1 < ${BTC_PATCHES}/gcc-pr37053.patch
+            patch -p1 < ${BTC_PATCHES}/gcc-pr46179.diff
             ;;
         ( gcc-4.5.1 )
             patch -p0 < ${BTC_PATCHES}/gcc-pr43804.diff
+            patch -p1 < ${BTC_PATCHES}/gcc-pr46179.diff
             ;;
         ( gcc-4.5-* )
-            patch -p1 < ${BTC_PATCHES}/gcc-pr45638.diff
+            patch -p1 < ${BTC_PATCHES}/gcc-pr45638.patch
+            patch -p1 < ${BTC_PATCHES}/gcc-pr46179.diff
             ;;
         esac
         ;;
@@ -276,7 +281,7 @@ function prep_gcc () {
     ( gcc-3.3[.-]* )
         patch -p1 < ${BTC_PATCHES}/gcc-3.3.4-zecke-xgcc-cpp.patch
         # f77 build failure
-        patch -p1 < ${BTC_PATCHES}/gcc-pr26709.diff
+        patch -p1 < ${BTC_PATCHES}/gcc-3.3-pr26709.diff
         ;;
     ( gcc-3.4[.-]* )
         patch -p1 < ${BTC_PATCHES}/gcc-3.4.1-btc-use-target-cpp-for-lib-configure.patch
@@ -301,6 +306,13 @@ function prep_gcc () {
     esac
 }
 
+function get_gcc_arch () {
+    case ${TARGET} in
+    ( m68k-* ) 
+        test -z "${DEFAULT_CPU##5*}" && echo " --with-arch=cf" ;;
+    esac
+}
+
 function install_gcc_core_static () {
     cd ${BTC_BUILD}
     test -e $1 && echo $1 already exists && return
@@ -317,11 +329,14 @@ function install_gcc_core_static () {
     ../${GCC_DIST/gcc/gcc-core}/configure \
     --prefix=${TC_PREFIX} --target=${TARGET} \
     ${GCC_CONFIG_OPTS} \
+    $(get_gcc_arch) \
+    --with-gnu-ld \
+    --with-gnu-as \
     --with-newlib \
-    --disable-multilib \
     --disable-nls \
     --enable-threads=posix \
     --enable-languages=c \
+    --disable-multilib \
     --disable-lto \
     --disable-shared \
     --disable-libgomp \
@@ -361,11 +376,14 @@ function install_gcc_core_shared () {
     ../${GCC_DIST/gcc/gcc-core}/configure \
     --prefix=${TC_PREFIX} --target=${TARGET} \
     ${GCC_CONFIG_OPTS} \
+    $(get_gcc_arch) \
+    --with-gnu-ld \
+    --with-gnu-as \
     --with-newlib \
-    --disable-multilib \
     --disable-nls \
     --enable-threads=posix \
     --enable-languages=c \
+    --disable-multilib \
     --disable-lto \
     --enable-shared \
     --disable-libgomp \
@@ -375,7 +393,8 @@ function install_gcc_core_shared () {
     --disable-decimal-float
 
     mkdir -p gcc
-    cp ../glibc-${TARGET}-2/csu/crt[1in].o gcc
+    cp ../c-runtime/crt[1in].o gcc/
+
     make ${MAKE_OPTS} all-gcc
     make install-gcc 
     case ${GCC_DIST} in
@@ -408,18 +427,26 @@ function install_gcc () {
         ldflags="-Wl,-rpath,${HOST_TOOLS_PREFIX}/lib"
     fi
 
+    locale_opt="--enable-clocale=gnu"
+    case ${TARGET}- in
+    ( *-uclinux-* ) locale_opt= ;;
+    esac
+
     CFLAGS="-O2 $HOST_CFLAGS" LDFLAGS="$ldflags" \
     ../${GCC_DIST}/configure \
     --prefix=${TC_PREFIX} --target=${TARGET} \
     ${GCC_CONFIG_OPTS} \
+    $(get_gcc_arch) \
+    ${locale_opt} \
+    --with-gnu-ld \
+    --with-gnu-as \
     --enable-threads=posix \
-    --enable-languages=c,c++,$fortran \
-    --enable-multilib \
+    --enable-languages=c,c++ \
     --enable-lto \
     --enable-symvers=gnu \
     --enable-__cxa_atexit \
     --enable-shared \
-    --enable-clocale=gnu
+    --disable-libstdcxx-pch
 
     make all
     make install
@@ -428,4 +455,24 @@ function install_gcc () {
 
     manifest install_gcc
     copy_license ${GCC_DIST}
+}
+
+function get_gcc_arch_defs () {
+    case ${TARGET} in
+    ( alpha-* )
+        echo " -D__WORDSIZE=64"
+        ;;
+    ( arm-* )
+        echo " -D__ARM_EABI__"
+        ;;
+    ( mipsel-* )  # and mips, mipseb?
+        echo " -DABIO32=1 -D_MIPS_SIM=_ABIO32 -D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32 -D__WORDSIZE=32 -D_MIPS_FPSET=16 -D_MIPS_SZINT=32 -D_MIPS_ISA=2 -D__mips=2"
+        ;;
+    esac
+}
+
+function get_target_cflags () {
+    if [ -n "${DEFAULT_CPU:-}" ] ; then
+        echo " -mcpu=${DEFAULT_CPU}"
+    fi
 }

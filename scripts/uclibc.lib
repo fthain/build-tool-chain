@@ -1,0 +1,79 @@
+##############################################
+#
+# Functions relating to uClibc
+
+function prep_uclibc () {
+    local mirrors
+    cd ${BTC_BUILD}
+    test -e $1 && echo $1 already exists && return
+    untar $1 http://www.uclibc.org/downloads/ \
+             http://www.uclibc.org/downloads/snapshots/
+    test -d uClibc && mv uClibc $1
+    cd $1
+
+    case $1 in
+    ( uClibc-0.9.30.1 )
+        patch -p1 < ${BTC_PATCHES}/uclibc-0.9.30-extra-scripts-getline.diff
+        patch -p1 < ${BTC_PATCHES}/uclibc-0.9.30.1-fix-building-on-systems-w-o-ldso-support.patch
+        patch -p1 < ${BTC_PATCHES}/uclibc-getopt-portability.diff
+        ;;
+    esac
+}
+
+function install_uclibc_headers () {
+    test -e ${LIBC_HEADERS}/stdlib.h && echo uclibc headers already installed && return
+    cd ${BTC_BUILD}/$1
+
+    make ARCH=${UCLIBC_ARCH} defconfig
+    make ARCH=${UCLIBC_ARCH} clean
+
+    sed -i \
+        -e '/^CROSS_COMPILER_PREFIX/s,=.*,="'${TARGET}-'",' \
+        -e '/^KERNEL_HEADERS/s,=.*,="'${LIBC_HEADERS}'",' \
+        -e '/^SHARED_LIB_LOADER_PREFIX/s,=.*,="/lib",' \
+        -e '/^DEVEL_PREFIX/s,=.*,="/usr",' \
+        -e '/^RUNTIME_PREFIX/s,=.*,="/",' \
+        -e '/^UCLIBC_EXTRA_CFLAGS/s,=.*,="'"$(get_target_cflags)"'",' \
+        .config
+
+    sed -i \
+        -e '/ARCH_USE_MMU/d' \
+        -e '/UCLIBC_FORMAT_/d' \
+        -e '/DOPIC/d' \
+        .config
+
+    cat >> .config <<EOF
+# ARCH_USE_MMU is not set
+# DOPIC is not set
+UCLIBC_FORMAT_FLAT=y
+EOF
+
+    (yes "" || true) | make ARCH=${UCLIBC_ARCH} oldconfig
+
+    make ARCH=${UCLIBC_ARCH} headers
+    make ARCH=${UCLIBC_ARCH} DESTDIR=${LIBC_INSTALL_ROOT} install_headers
+
+    manifest install_uclibc_headers
+}
+
+function make_uclibc_runtime () {
+    cd ${BTC_BUILD}
+    test -e c-runtime && echo $1 already exists && return
+    cd $1
+
+    make ARCH=${UCLIBC_ARCH} lib/crt{1,i,n}.o
+
+    mkdir -p ../c-runtime
+    cp lib/crt[1in].o ../c-runtime
+}
+
+function install_uclibc () {
+    test -e ${LIBC_INSTALL_ROOT}/usr/lib/libc.a && echo uclibc already installed && return
+    cd ${BTC_BUILD}/$1
+
+    make ARCH=${UCLIBC_ARCH}
+    make ARCH=${UCLIBC_ARCH} DESTDIR=${LIBC_INSTALL_ROOT} install
+
+    manifest install_uclibc
+    copy_license ${UCLIBC_DIST}
+}

@@ -1,0 +1,22 @@
+--- elf2flt-20101110/cygwin-elf.h.orig	2010-11-16 14:03:18.000000000 +1100
++++ elf2flt-20101110/cygwin-elf.h	2010-11-16 16:24:57.000000000 +1100
+@@ -20,7 +20,7 @@
+ #ifndef _ELF_H
+ #define	_ELF_H 1
+ 
+-#if	defined(__MINGW32__)
++#if	defined(__MINGW32__) || defined(__APPLE__)
+ #include <stdint.h>
+ typedef uint16_t u_int16_t;
+ typedef uint32_t u_int32_t;
+--- elf2flt-20101110/elf2flt.c.orig	2010-11-16 14:01:10.000000000 +1100
++++ elf2flt-20101110/elf2flt.c	2010-11-16 16:25:44.000000000 +1100
+@@ -54,7 +54,7 @@
+ 
+ #if defined(TARGET_h8300)
+ #include <elf/h8.h>      /* TARGET_* ELF support for the BFD library            */
+-#elif defined(__CYGWIN__) || defined(__MINGW32__) || defined(TARGET_nios) || defined(TARGET_nios2)
++#elif defined(__CYGWIN__) || defined(__MINGW32__) || defined(__MACH__) || defined(TARGET_nios) || defined(TARGET_nios2)
+ #include "cygwin-elf.h"	/* Cygwin uses a local copy */
+ #elif defined(TARGET_microblaze)
+ #include <elf/microblaze.h>	/* TARGET_* ELF support for the BFD library */

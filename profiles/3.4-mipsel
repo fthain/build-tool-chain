@@ -1,6 +1,6 @@
 GCC_DIST=gcc-3.4.6
 TARGET=mipsel-linux-gnu
-TARGET_ARCH=mips
+LINUX_ARCH=mips
 
 . ${BTC_PROFILES}/C
 #LINUX_DIST=linux-2.6.20

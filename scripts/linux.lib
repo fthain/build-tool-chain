@@ -11,7 +11,7 @@ function prep_linux () {
     case ${1} in
     ( linux-2.2.26 )
         patch -p0 < ${BTC_PATCHES}/linux-2.2.25-btc-Makefile.patch
-        case ${TARGET_ARCH} in
+        case ${LINUX_ARCH} in
         ( m68k )
             # Linux-mac68k CVS snapshot
             decompress ${BTC_PATCHES}/linux-2.2.27-rc2-mac68k-20050408.diff | patch -p1 ;;
@@ -19,7 +19,7 @@ function prep_linux () {
         ;;
     ( linux-2.4.* )
         patch -p1 < ${BTC_PATCHES}/linux-2.4-btc-Makefile.patch
-        case ${TARGET_ARCH} in
+        case ${LINUX_ARCH} in
         ( m68k )
             # Linux-m68k CVS snapshot
             decompress ${BTC_PATCHES}/linux-2.4.35-m68k.diff | patch -p1
@@ -140,7 +140,7 @@ function prep_linux () {
             ;;
         esac
 
-        case ${TARGET_ARCH} in
+        case ${LINUX_ARCH} in
         ( powerpc | ppc )
             case ${1} in
             ( linux-2.6.[0-9] | linux-2.6.[0-9][.-]* | \
@@ -213,38 +213,38 @@ function prep_linux () {
 }
 
 function copy_linux_headers () {
-    cp -r include/linux ${GLIBC_HEADERS}
-    cp -r include/asm-generic ${GLIBC_HEADERS}
-    mkdir ${GLIBC_HEADERS}/asm
-    if test -d arch/${TARGET_ARCH}/include/asm ; then
-      cp -r arch/${TARGET_ARCH}/include/asm/* ${GLIBC_HEADERS}/asm
+    cp -r include/linux ${LIBC_HEADERS}
+    cp -r include/asm-generic ${LIBC_HEADERS}
+    mkdir ${LIBC_HEADERS}/asm
+    if test -d arch/${LINUX_ARCH}/include/asm ; then
+      cp -r arch/${LINUX_ARCH}/include/asm/* ${LIBC_HEADERS}/asm
     fi
-    if test -d include/asm-${TARGET_ARCH} ; then
-      cp -r include/asm-${TARGET_ARCH}/* ${GLIBC_HEADERS}/asm
+    if test -d include/asm-${LINUX_ARCH} ; then
+      cp -r include/asm-${LINUX_ARCH}/* ${LIBC_HEADERS}/asm
     fi
 }
 
 function install_linux_headers () {
-    test -d $GLIBC_HEADERS/linux && echo kernel headers already present && return
+    test -d $LIBC_HEADERS/linux && echo kernel headers already present && return
     cd $BTC_BUILD/$1
 
-    mkdir -p ${GLIBC_HEADERS}
+    mkdir -p ${LIBC_HEADERS}
 
-    make ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET}- mrproper
+    make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- mrproper
     case ${1} in
     ( linux-2.[24].* )
-        yes "" | make ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET}- config || true
-        make ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET}- symlinks include/linux/version.h
+        (yes "" || true) | make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- config
+        make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- symlinks include/linux/version.h
         copy_linux_headers
         ;;
     ( linux-2.6.[0-9] | linux-2.6.[0-9][.-]* | linux-2.6.[12][0-9] | linux-2.6.[12][0-9][.-]* )
-        make ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET}- defconfig
-        make ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET}- include/asm include/linux/version.h
+        make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- defconfig
+        make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- include/asm include/linux/version.h
         copy_linux_headers
         ;;
     ( linux-2.6.* )
-        make ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET}- defconfig
-        make ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET}- INSTALL_HDR_PATH=${GLIBC_HEADERS%/include} headers_install
+        make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- defconfig
+        make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- INSTALL_HDR_PATH=${LIBC_HEADERS%/include} headers_install
         ;;
     esac
 
@@ -257,20 +257,20 @@ function build_linux () {
     pushd $BTC_BUILD/$1 >/dev/null
 
     local config
-    config=${BTC_CONFIGS}/${DOTCONFIG:-${1}-${TARGET_ARCH}-dot-config}
+    config=${BTC_CONFIGS}/${DOTCONFIG:-${1}-${LINUX_ARCH}-dot-config}
     if [ -f $config ] ; then
-        make ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET}- clean
+        make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- clean
         cp ${config} .config
     else
-        make ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET}- defconfig || true
+        make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- defconfig || true
     fi
-    (yes "" || true) | make ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET}- CONFIG_SHELL=/bin/bash oldconfig
+    (yes "" || true) | make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- CONFIG_SHELL=/bin/bash oldconfig
 
     case ${1} in
     ( linux-2.[24].* )
-        make ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET}- dep
-        make ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET}- vmlinux
-        make ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET}- modules
+        make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- dep
+        make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- vmlinux
+        make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- modules
         ;;
     ( linux-2.6.* )
         ## this hack is for non-ELF platforms, like Darwin
@@ -278,8 +278,8 @@ function build_linux () {
         #    ( linux-2.6.[0-7] | linux-2.6.[0-7]-* ) out=scripts/elf.h ;;
         #    ( * )                                   out=scripts/mod/elf.h ;;
         #esac
-        #sed 's/^#include <features.h>$//' < ${GLIBC_HEADERS}/elf.h > $out
-        make ${MAKE_OPTS} ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET}-
+        #sed 's/^#include <features.h>$//' < ${LIBC_HEADERS}/elf.h > $out
+        make ${MAKE_OPTS} ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}-
         ;;
     esac
     touch .compiled
@@ -287,22 +287,22 @@ function build_linux () {
 }
 
 function package_linux () {
-    LINUX_IMAGE=${BTC_BUILD}/${1}-${TARGET_ARCH}-image
+    LINUX_IMAGE=${BTC_BUILD}/${1}-${LINUX_ARCH}-image
     test -e $LINUX_IMAGE.tar.gz && echo kernel tarball already present && return
     test -e $LINUX_IMAGE && echo kernel image already present && return
 
     mkdir -p ${LINUX_IMAGE}/boot
     pushd ${BTC_BUILD}/${1} >/dev/null
-    make INSTALL_MOD_PATH=${LINUX_IMAGE} ARCH=${TARGET_ARCH} CROSS_COMPILE=${TARGET}- modules_install
+    make INSTALL_MOD_PATH=${LINUX_IMAGE} ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- modules_install
     cd ${LINUX_IMAGE}/lib/modules
     ver=`ls -d [0-9]*`
     if [ x${ver} = x ]; then exit ; fi
     cd ${BTC_BUILD}/${1}
-    if [ -e arch/${TARGET_ARCH}/boot/bzImage ]; then
-        cp arch/${TARGET_ARCH}/boot/bzImage ${LINUX_IMAGE}/boot/bzImage-${ver}
+    if [ -e arch/${LINUX_ARCH}/boot/bzImage ]; then
+        cp arch/${LINUX_ARCH}/boot/bzImage ${LINUX_IMAGE}/boot/bzImage-${ver}
     else
-        if [ -e arch/${TARGET_ARCH}/boot/vmlinux.gz ]; then
-            cp arch/${TARGET_ARCH}/boot/vmlinux.gz ${LINUX_IMAGE}/boot/vmlinux-${ver}.gz
+        if [ -e arch/${LINUX_ARCH}/boot/vmlinux.gz ]; then
+            cp arch/${LINUX_ARCH}/boot/vmlinux.gz ${LINUX_IMAGE}/boot/vmlinux-${ver}.gz
         elif [ -e vmlinux.gz ]; then
             cp vmlinux.gz ${LINUX_IMAGE}/boot/vmlinux-${ver}.gz
         fi
@@ -317,6 +317,6 @@ function package_linux () {
     cd ${LINUX_IMAGE}
     rm -f lib/modules/${ver}/{build,source}
     chmod -R g-w,o-w ${LINUX_IMAGE}
-    tar -cz --owner=0 --group=0 -f ${BTC_BUILD}/${1}-${TARGET_ARCH}-image.tar.gz .
+    tar -cz --owner=0 --group=0 -f ${BTC_BUILD}/${1}-${LINUX_ARCH}-image.tar.gz .
     popd >/dev/null
 }

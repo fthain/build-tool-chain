@@ -83,6 +83,7 @@ function untar () {
                 fetch "$@"
                 untar $1
             else
+                echo "$1: no file and no download were found" >&2
                 return 1
             fi
             ;;
@@ -122,5 +123,5 @@ function log () {
 
 function copy_license () {
     mkdir -p ${TC_PREFIX}/share/doc
-    cat ${BTC_BUILD}/${1}/COPYING > ${TC_PREFIX}/share/doc/${1%%-[0-9]*}-license
+    cat ${BTC_BUILD}/$1/COPYING* > ${TC_PREFIX}/share/doc/${1%%-[0-9]*}-licenses
 }

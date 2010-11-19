@@ -6,9 +6,7 @@ function host_tool_license () {
     mkdir -p ${HOST_TOOLS_PREFIX}/share/doc
     local pn
     pn=${1%%-[0-9]*}
-    cat ${1}/COPYING > ${HOST_TOOLS_PREFIX}/share/doc/${pn}-license ||
-      cat ${1}/COPYING.LIB > ${HOST_TOOLS_PREFIX}/share/doc/${pn}-license ||
-        cat ${1}/LICENSE > ${HOST_TOOLS_PREFIX}/share/doc/${pn}-license
+    cat ${1}/COPYING* > ${HOST_TOOLS_PREFIX}/share/doc/${pn}-licenses
 }
 
 function host_tool_install () {
@@ -306,6 +304,7 @@ function install_cloog_ppl () {
     popd >/dev/null
 
     host_tool_merge include lib
+    mv $1/{LICENSE,COPYING}
     host_tool_license $1
 }
 

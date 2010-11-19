@@ -1,0 +1,37 @@
+##############################################
+#
+# Functions relating to elf2flt
+
+function prep_elf2flt () {
+    cd ${BTC_BUILD}
+    test -e $1 && echo $1 already exists && return
+    untar $1
+    mv ${1%-*} $1
+    cd $1
+
+    patch -p1 < ${BTC_PATCHES}/elf2flt-darwin-build.diff
+
+    sed -i -e 's,$(target_libdir)/$(LDFILE),$(target_libdir)/ldscripts/$(LDFILE),' Makefile.in 
+    sed -i -e '/tooldir, "...lib"/s,lib,lib/ldscripts,' ld-elf2flt.c
+    sed -i -e '/"${TOOLDIR}....lib"/s,lib,lib/ldscripts,' ld-elf2flt.in  
+    mv LICENSE.TXT COPYING
+}
+
+function install_elf2flt () {
+    cd ${BTC_BUILD}
+    test -e $1 && echo $1 already exists && return
+    mkdir $1
+    cd $1
+
+    ../${ELF2FLT_DIST}/configure --target=${TARGET} --prefix=${TC_PREFIX} \
+    --with-bfd-include-dir=${TC_PREFIX}/${BUILD}/${TARGET}/include \
+    --with-binutils-include-dir=${BTC_BUILD}/binutils-elf2flt \
+    --with-libbfd=${BTC_BUILD}/binutils-elf2flt/libbfd.a \
+    --with-libiberty=${BTC_BUILD}/binutils-elf2flt/libiberty.a
+
+    make ${MAKE_OPTS}
+    make install
+
+    manifest install_elf2flt
+    copy_license ${ELF2FLT_DIST}
+}

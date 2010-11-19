@@ -1,6 +1,5 @@
 GCC_DIST=gcc-3.3.6
 TARGET=alpha-linux-gnu
-TARGET_ARCH=alpha
 
 . ${BTC_PROFILES}/B
 BINUTILS_DIST=binutils-2.19.51

@@ -1,0 +1,6 @@
+# Testing & development
+METHOD=U
+LINUX_DIST=linux-2.6.34
+UCLIBC_DIST=uClibc-0.9.30.1
+ELF2FLT_DIST=elf2flt-20101110
+BINUTILS_DIST=binutils-20101024

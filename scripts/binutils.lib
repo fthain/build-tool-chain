@@ -113,12 +113,15 @@ function install_binutils () {
 
     # There's no readelf on Darwin & glibc configure won't use ${TARGET}-readelf
     # See http://sources.redhat.com/bugzilla/show_bug.cgi?id=3004
-    # wherein his highness determines that a cross binutils is not "sane".
     ln -nsf ${TARGET}-readelf ${TC_PREFIX}/bin/readelf
 
-    find ${TC_PREFIX} -type f \( -name '*.la' -o -name '*.a' \) -print0 | xargs -0 rm -fv
+    find ${TC_PREFIX} -type f -name '*.la' -print0 | xargs -0 rm -fv
 
-    rm -f ${TC_PREFIX}/lib/libiberty.a
+    # The elf2flt build uses these
+    mkdir -p ${BTC_BUILD}/binutils-elf2flt
+    cd ${BTC_BUILD}/binutils-elf2flt
+    find ${TC_PREFIX} -type f -name '*.a' -print0 | xargs -0 sh -c 'mv "$@" .' none
+    cp ../${BINUTILS_DIST}/include/{filenames,libiberty}.h .
 
     # The link is sufficient for man AUTOPATH
     ln -nsf share/man ${TC_PREFIX}/man

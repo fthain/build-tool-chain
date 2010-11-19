@@ -1,18 +1,20 @@
 
-Fix a build failure in glibc when configured with "--enable-kernel=x.y.z" if x.y.z is too new.
+[ See also: <http://sourceware.org/ml/glibc-cvs/2010-q4/msg00073.html> ]
 
-/tmp/build/glibc-m68k-linux-gnu-3/libc_pic.os: In function `fchownat':
+Fix a build failure in glibc when configured with "--enable-kernel=x.y.z" if x.y.z is >2.6.16.
+
+/home/fthain/build/glibc-m68k-linux-gnu-3/libc_pic.os: In function `fchownat':
 (.text+0x911c2): undefined reference to `__atfct_seterrno'
-/tmp/gcc-4.4.1/lib/gcc/m68k-linux-gnu/4.4.1/../../../../m68k-linux-gnu/bin/ld:
-/tmp/build/glibc-m68k-linux-gnu-3/libc.so: hidden symbol `__atfct_seterrno' isn't defined
-/tmp/gcc-4.4.1/lib/gcc/m68k-linux-gnu/4.4.1/../../../../m68k-linux-gnu/bin/ld:
+/home/fthain/gcc-4.4.1/lib/gcc/m68k-linux-gnu/4.4.1/../../../../m68k-linux-gnu/bin/ld:
+/home/fthain/build/glibc-m68k-linux-gnu-3/libc.so: hidden symbol `__atfct_seterrno' isn't defined
+/home/fthain/gcc-4.4.1/lib/gcc/m68k-linux-gnu/4.4.1/../../../../m68k-linux-gnu/bin/ld:
 final link failed: Nonrepresentable section on output
 collect2: ld returned 1 exit status
-make[1]: *** [/tmp/build/glibc-m68k-linux-gnu-3/libc.so] Error 1
-make[1]: Leaving directory `/tmp/build/glibc-2.10.1'
+make[1]: *** [/home/fthain/build/glibc-m68k-linux-gnu-3/libc.so] Error 1
+make[1]: Leaving directory `/home/fthain/build/glibc-2.10.1'
 make: *** [all] Error 2
 
-http://sources.redhat.com/ml/libc-hacker/2006-08/msg00004.html
+http://www.sourceware.org/ml/libc-hacker/2006-08/msg00004.html
 
 http://www.linuxfromscratch.org/patches/downloads/glibc/glibc-2.4-openat-3.patch
 

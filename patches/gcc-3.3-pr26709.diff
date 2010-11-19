@@ -1,0 +1,18 @@
+
+http://gcc.gnu.org/bugzilla/show_bug.cgi?id=26709
+
+../../../gcc-2.95.3/gcc/f/com.c:11544: error: conflicting types for 'ffecom_gfrt_basictype'
+../../../gcc-2.95.3/gcc/f/com.h:313: error: previous declaration of 'ffecom_gfrt_basictype' was
+ here
+
+--- gcc-3.3.6/gcc/f/com.h.orig	2003-03-23 02:24:51.000000000 +1100
++++ gcc-3.3.6/gcc/f/com.h	2010-11-15 11:39:16.960293285 +1100
+@@ -233,7 +233,7 @@
+ void ffecom_finish_progunit (void);
+ tree ffecom_get_invented_identifier (const char *pattern, ...)
+   ATTRIBUTE_PRINTF_1;
+-ffeinfoKindtype ffecom_gfrt_basictype (ffecomGfrt ix);
++ffeinfoBasictype ffecom_gfrt_basictype (ffecomGfrt ix);
+ ffeinfoKindtype ffecom_gfrt_kindtype (ffecomGfrt ix);
+ void ffecom_init_0 (void);
+ void ffecom_init_2 (void);

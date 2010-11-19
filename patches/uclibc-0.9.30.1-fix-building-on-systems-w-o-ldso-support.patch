@@ -1,0 +1,57 @@
+From 82be16427666e8e63af7233345ca949f471acaa6 Mon Sep 17 00:00:00 2001
+From: Mike Frysinger <vapier@gentoo.org>
+Date: Mon, 20 Jul 2009 18:05:44 +0000
+Subject: fix building for systems w/out ldso support
+
+If an arch (like alpha and others) have no ldso support at all, then there
+is no point in attempting to walk loaded modules in the dl-* helper funcs.
+
+Signed-off-by: Mike Frysinger <vapier@gentoo.org>
+---
+diff --git a/ldso/include/ldso.h b/ldso/include/ldso.h
+index eeccde0..dc4d92d 100644
+--- a/ldso/include/ldso.h
++++ b/ldso/include/ldso.h
+@@ -33,6 +33,7 @@
+ /* Pull in the arch specific page size */
+ #include <bits/uClibc_page.h>
+ /* Pull in the ldso syscalls and string functions */
++#ifndef __ARCH_HAS_NO_SHARED__
+ #include <dl-syscall.h>
+ #include <dl-string.h>
+ /* Now the ldso specific headers */
+@@ -133,4 +134,8 @@ extern void _dl_get_ready_to_run(struct elf_resolve *tpnt, DL_LOADADDR_TYPE load
+ #include <dl-inlines.h>
+ #endif
+ 
++#else /* __ARCH_HAS_NO_SHARED__ */
++#include <dl-defs.h>
++#endif
++
+ #endif /* _LDSO_H_ */
+diff --git a/libc/misc/elf/dl-iterate-phdr.c b/libc/misc/elf/dl-iterate-phdr.c
+index a2bb9e0..6561ed6 100644
+--- a/libc/misc/elf/dl-iterate-phdr.c
++++ b/libc/misc/elf/dl-iterate-phdr.c
+@@ -24,9 +24,10 @@ hidden_proto(__dl_iterate_phdr)
+ int
+ __dl_iterate_phdr (int (*callback) (struct dl_phdr_info *info, size_t size, void *data), void *data)
+ {
++	int ret = 0;
++#ifndef __ARCH_HAS_NO_SHARED__
+ 	struct elf_resolve *l;
+ 	struct dl_phdr_info info;
+-	int ret = 0;
+ 
+ 	for (l = _dl_loaded_modules; l != NULL; l = l->next) {
+ 		info.dlpi_addr = l->loadaddr;
+@@ -37,6 +38,7 @@ __dl_iterate_phdr (int (*callback) (struct dl_phdr_info *info, size_t size, void
+ 		if (ret)
+ 			break;
+ 	}
++#endif
+ 	return ret;
+ }
+ hidden_def (__dl_iterate_phdr)
+--
+cgit v0.8.2.1
