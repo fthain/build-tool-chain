@@ -373,3 +373,23 @@ function install_depmod () {
     decompress ${BTC_SOURCES}/${1} > depmod.pl
     chmod 755 depmod.pl
 }
+
+function install_rsh_redone () {
+    echo unpacking $1
+    cd $BTC_BUILD
+    untar $1.orig ftp://ftp.debian.org/debian/pool/main/r/rsh-redone/
+    PV=${1/_/-}
+
+    pushd $PV >/dev/null
+    echo building and installing $PV
+
+    rm -rf ${BTC_BUILD}/image
+    make ${MAKE_OPTS} \
+         CFLAGS="-O2" \
+         PREFIX=${HOST_TOOLS_PREFIX} \
+         DESTDIR=${BTC_BUILD}/image \
+         install
+    popd >/dev/null
+
+    host_tool_merge bin/{rsh,rlogin}
+}

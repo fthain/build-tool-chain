@@ -29,15 +29,16 @@ function install_gdb () {
     echo 'am_cv_func_iconv=${am_cv_func_iconv=no}' >intl/config.cache
 
     CFLAGS="-O2 $HOST_CFLAGS" AR=ar RANLIB=ranlib \
-    ../${GDB_DIST}/configure --prefix=${TC_PREFIX}/${1} --target=${TARGET} \
+    ../${GDB_DIST}/configure --prefix=${BTC_PRODUCE}/${1} --target=${TARGET} \
     --cache-file=config.cache \
     --build=${BUILD} \
+    --with-system-readline \
     --without-python \
     --disable-expat \
     --disable-static \
     --disable-shared \
     --disable-werror
 
-    make ${MAKE_OPTS}
+    make
     make install
 }

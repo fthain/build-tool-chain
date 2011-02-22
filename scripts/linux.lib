@@ -288,7 +288,6 @@ function build_linux () {
 
 function package_linux () {
     LINUX_IMAGE=${BTC_BUILD}/${1}-${LINUX_ARCH}-image
-    test -e $LINUX_IMAGE.tar.gz && echo kernel tarball already present && return
     test -e $LINUX_IMAGE && echo kernel image already present && return
 
     mkdir -p ${LINUX_IMAGE}/boot
@@ -317,6 +316,6 @@ function package_linux () {
     cd ${LINUX_IMAGE}
     rm -f lib/modules/${ver}/{build,source}
     chmod -R g-w,o-w ${LINUX_IMAGE}
-    tar -cz --owner=0 --group=0 -f ${BTC_BUILD}/${1}-${LINUX_ARCH}-image.tar.gz .
+    tar -cz --owner=0 --group=0 -f ${BTC_BUILD}/kernel-binary-${ver}.tar.gz .
     popd >/dev/null
 }

@@ -56,8 +56,10 @@ function prep_gcc_core () {
             patch -p0 < ${BTC_PATCHES}/gcc-pr43804.diff
             patch -p1 < ${BTC_PATCHES}/gcc-pr37053.patch
             ;;
-        ( gcc-4.5.1 )
+        ( gcc-4.5[.-]* )
             patch -p0 < ${BTC_PATCHES}/gcc-pr43804.diff
+            patch -p1 < ${BTC_PATCHES}/gcc-pr45638.patch
+            patch -p1 < ${BTC_PATCHES}/gcc-pr46179.diff
             ;;
         esac
         ;;
@@ -204,11 +206,8 @@ function prep_gcc () {
             patch -p1 < ${BTC_PATCHES}/gcc-pr37053.patch
             patch -p1 < ${BTC_PATCHES}/gcc-pr46179.diff
             ;;
-        ( gcc-4.5.1 )
+        ( gcc-4.5[.-]* )
             patch -p0 < ${BTC_PATCHES}/gcc-pr43804.diff
-            patch -p1 < ${BTC_PATCHES}/gcc-pr46179.diff
-            ;;
-        ( gcc-4.5-* )
             patch -p1 < ${BTC_PATCHES}/gcc-pr45638.patch
             patch -p1 < ${BTC_PATCHES}/gcc-pr46179.diff
             ;;
@@ -306,11 +305,25 @@ function prep_gcc () {
     esac
 }
 
-function get_gcc_arch () {
-    case ${TARGET} in
-    ( m68k-* ) 
-        test -z "${DEFAULT_CPU##5*}" && echo " --with-arch=cf" ;;
+function get_host_ldflags () {
+    case ${BUILD} in
+    ( *-apple-darwin* )
+        ;;
+    ( * )
+        echo " -Wl,-rpath,${HOST_TOOLS_PREFIX}/lib"
+        ;;
     esac
+}
+
+function get_gcc_cpu () {
+    if [ -n "${DEFAULT_CPU}" ] ; then
+        case ${TARGET} in
+        ( m68k-* ) 
+            test -z "${DEFAULT_CPU##5*}" && echo " --with-arch=cf"
+            ;;
+        esac
+        echo " --with-cpu=${DEFAULT_CPU}"
+    fi
 }
 
 function install_gcc_core_static () {
@@ -319,17 +332,11 @@ function install_gcc_core_static () {
     mkdir $1
     cd $1
 
-    local ldflags
-    ldflags=
-    if [ ${BUILD} = ${BUILD%-apple-darwin*} ] ; then
-        ldflags="-Wl,-rpath,${HOST_TOOLS_PREFIX}/lib"
-    fi
-
-    CFLAGS="-O2 $HOST_CFLAGS" LDFLAGS="$ldflags" \
+    CFLAGS="-O2 $HOST_CFLAGS" LDFLAGS="$(get_host_ldflags)" \
     ../${GCC_DIST/gcc/gcc-core}/configure \
     --prefix=${TC_PREFIX} --target=${TARGET} \
     ${GCC_CONFIG_OPTS} \
-    $(get_gcc_arch) \
+    $(get_gcc_cpu) \
     --with-gnu-ld \
     --with-gnu-as \
     --with-newlib \
@@ -366,17 +373,11 @@ function install_gcc_core_shared () {
     mkdir $1
     cd $1
 
-    local ldflags
-    ldflags=
-    if [ ${BUILD} = ${BUILD%-apple-darwin*} ] ; then
-        ldflags="-Wl,-rpath,${HOST_TOOLS_PREFIX}/lib"
-    fi
-
-    CFLAGS="-O2 $HOST_CFLAGS" LDFLAGS="$ldflags" \
+    CFLAGS="-O2 $HOST_CFLAGS" LDFLAGS="$(get_host_ldflags)" \
     ../${GCC_DIST/gcc/gcc-core}/configure \
     --prefix=${TC_PREFIX} --target=${TARGET} \
     ${GCC_CONFIG_OPTS} \
-    $(get_gcc_arch) \
+    $(get_gcc_cpu) \
     --with-gnu-ld \
     --with-gnu-as \
     --with-newlib \
@@ -421,22 +422,16 @@ function install_gcc () {
         fortran=f77 ;;
     esac
 
-    local ldflags
-    ldflags=
-    if [ ${BUILD} = ${BUILD%-apple-darwin*} ] ; then
-        ldflags="-Wl,-rpath,${HOST_TOOLS_PREFIX}/lib"
-    fi
-
     locale_opt="--enable-clocale=gnu"
     case ${TARGET}- in
     ( *-uclinux-* ) locale_opt= ;;
     esac
 
-    CFLAGS="-O2 $HOST_CFLAGS" LDFLAGS="$ldflags" \
+    CFLAGS="-O2 $HOST_CFLAGS" LDFLAGS="$(get_host_ldflags)" \
     ../${GCC_DIST}/configure \
     --prefix=${TC_PREFIX} --target=${TARGET} \
     ${GCC_CONFIG_OPTS} \
-    $(get_gcc_arch) \
+    $(get_gcc_cpu) \
     ${locale_opt} \
     --with-gnu-ld \
     --with-gnu-as \

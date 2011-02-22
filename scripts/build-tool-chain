@@ -267,6 +267,7 @@ case ${GCC_DIST#*-} in
     ;;
 esac
 log install_depmod depmod.pl-1_15_stable
+# log install_rsh_redone rsh-redone_85 # binaries must be suid root
 
 ##############################################
 #
