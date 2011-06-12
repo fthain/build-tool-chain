@@ -153,6 +153,10 @@ function prep_glibc () {
         # build failure
         patch -p0 -d ports < ${BTC_PATCHES}/glibc-ports-3ef58249ea2450639bb135d6978009d26aba634f.patch
         ;;
+    ( glibc-2.13 )
+        # Debian sources
+        decompress ${BTC_PATCHES}/eglibc-source_2.13-6_all-debian.diff | patch -p1
+        ;;
     esac
 
     case ${1} in

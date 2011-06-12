@@ -46,15 +46,20 @@ function prep_gcc_core () {
             # Reverse Debian inline-gnu99 hack
             patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
             ;;
-        ( gcc-4.4.4 )
-            decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.4-8-debian-m68k.diff | patch -p1
+        ( gcc-4.4.5 )
+            decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.5-8-debian-m68k.diff | patch -p1
             # Reverse Debian libgomp info rename
             patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
             # Bug fixes
             patch -p1 < ${BTC_PATCHES}/gcc-pr39531.patch
-            patch -p1 < ${BTC_PATCHES}/gcc-PR41302.patch
+            patch -p1 < ${BTC_PATCHES}/gcc-pr41302.patch
             patch -p0 < ${BTC_PATCHES}/gcc-pr43804.diff
             patch -p1 < ${BTC_PATCHES}/gcc-pr37053.patch
+            ;;
+        ( gcc-4.4.6 )
+            decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.6-5-debian-m68k.diff | patch -p1
+            # Reverse Debian libgomp info rename
+            patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
             ;;
         ( gcc-4.5[.-]* )
             patch -p0 < ${BTC_PATCHES}/gcc-pr43804.diff
@@ -94,8 +99,8 @@ function prep_gcc_core () {
             # Reverse Debian inline-gnu99 hack
             patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
             ;;
-        ( gcc-4.4.4 )
-            decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.4-8-debian-powerpc.diff | patch -p1
+        ( gcc-4.4.5 )
+            decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.5-8-debian-powerpc.diff | patch -p1
             # Reverse Debian libgomp info rename
             patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
             ;;
@@ -195,16 +200,21 @@ function prep_gcc () {
             # Reverse Debian inline-gnu99 hack
             patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
             ;;
-        ( gcc-4.4.4 )
-            decompress ${BTC_PATCHES}/gcc-4.4_4.4.4-8-debian-m68k.diff | patch -p1
+        ( gcc-4.4.5 )
+            decompress ${BTC_PATCHES}/gcc-4.4_4.4.5-8-debian-m68k.diff | patch -p1
             # Reverse Debian libgomp info rename
             patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
             # Bug fixes
             patch -p1 < ${BTC_PATCHES}/gcc-pr39531.patch
-            patch -p1 < ${BTC_PATCHES}/gcc-PR41302.patch
+            patch -p1 < ${BTC_PATCHES}/gcc-pr41302.patch
             patch -p0 < ${BTC_PATCHES}/gcc-pr43804.diff
             patch -p1 < ${BTC_PATCHES}/gcc-pr37053.patch
             patch -p1 < ${BTC_PATCHES}/gcc-pr46179.diff
+            ;;
+        ( gcc-4.4.6 )
+            decompress ${BTC_PATCHES}/gcc-4.4_4.4.6-5-debian-m68k.diff | patch -p1
+            # Reverse Debian libgomp info rename
+            patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
             ;;
         ( gcc-4.5[.-]* )
             patch -p0 < ${BTC_PATCHES}/gcc-pr43804.diff
@@ -244,8 +254,8 @@ function prep_gcc () {
             # Reverse Debian inline-gnu99 hack
             patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
             ;;
-        ( gcc-4.4.4 )
-            decompress ${BTC_PATCHES}/gcc-4.4_4.4.4-8-debian-powerpc.diff | patch -p1
+        ( gcc-4.4.5 )
+            decompress ${BTC_PATCHES}/gcc-4.4_4.4.5-8-debian-powerpc.diff | patch -p1
             # Reverse Debian libgomp info rename
             patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
             ;;

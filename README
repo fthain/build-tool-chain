@@ -1,6 +1,6 @@
 Build Tool Chain
 http://www.telegraphics.com.au/~fthain/sw/build-tool-chain
-(c) 2004-2010 Finn Thain
+(c) 2004-2011 Finn Thain
 
 
 PURPOSE
@@ -11,24 +11,25 @@ compiling the Linux kernel.
 
 They differ from other similar scripts in that they work under both Mac OS X
 and Linux. Development of btc began before crosstool supported Mac OS X and
-NPTL, as an experiment.
+NPTL but it is mostly a useful and educational exercise for its author.
 
 The tool-chains built by btc include (e)glibc (with NPTL or linuxthreads) and
-support cross-compilation of packages using shared libraries. UClibc is also
-catered for in a rudimentary way. You can also chroot your target machine into
-the tool-chain sysroot for testing, or export the sysroot as an NFS root
-filesystem, and so on.
+permit cross-compilation of packages using shared libraries. UClibc is also
+catered for to some extent. You can chroot your target machine into the
+tool-chain sysroot for testing, or export the sysroot for use as an NFS root
+filesystem.
 
-Another option for building the tool-chain is crosstool (or its successors).
-If you need to cross-build an entire glibc-based system, you may want to
-check out Cross Linux From Scratch (CLFS). Also see bitbake.
+An alternative to btc for building a tool-chain is crosstool (or its
+successors). Or if you need to cross-build an entire glibc-based system, you
+may want to check out Cross Linux From Scratch (CLFS). Also see bitbake and
+Yocto.
 
 
 NOTA BENE
 
 The resulting tools are not expected to be bug free. If you want more
-confidence in the results, you may wish to use mature package sources
-maintained by CodeSourcery or the various Linux distro's.
+confidence in the results, you may wish to use mature package sources such
+as those maintained by CodeSourcery and the various Linux distro's.
 
 This script applies numerous patches to hack around build issues. Use these
 patches at your peril.
@@ -37,8 +38,8 @@ As with any cross compiler, test suites can't be run easily and no stage 2 or
 stage 3 GCC is built. Bootstrapping GCC natively on the target may improve
 your chances of getting correct results.
 
-The same apparently applies to glibc. According to the glibc documentation,
-you should build glibc under the latest glibc! Eglibc, on the other hand, is
+The same applies to glibc. According to the glibc documentation, you should
+build glibc under the latest glibc (!) Eglibc, on the other hand, is
 intended to permit cross-compilation.
 
 If you are building certain Linux kernels, do not enable symbol versioning
@@ -59,13 +60,13 @@ INSTRUCTIONS (not a good substitute for reading the scripts)
     directory to hold the build results. This needs to be a filesystem with
     plenty of free space (around 4 GB to build recent tools). It must be a
     case-sensitive filesystem. A disk image is a convenient way to obtain this
-    on Mac OS X, which uses a case-insensitive root filesystem by default.
+    on Mac OS X, which has a case-insensitive root filesystem by default.
 
-  + Change MAKE_OPTS if you want to increase parallelism etc.
+  + Change MAKE_OPTS if you want to increase parallelism.
 
   + Change BTC_MIRROR if you want to download sources from a local cache. The
     necessary source packages will be downloaded into the $BTC_SOURCES
-    directory as required.
+    directory as and when required.
 
   + Create an appropriate profile for your target system or select one
     of the provided ones. The profile is sourced by build-tool-chain in order
@@ -73,33 +74,34 @@ INSTRUCTIONS (not a good substitute for reading the scripts)
 
     In particular, the profile will define the TARGET and the build METHOD
     as well as package versions given in the variables BINUTILS_DIST,
-    GCC_DIST, GLIBC_DIST, GLIBC_ADD_ONS and LINUX_DIST. The profile may also
+    GCC_DIST, GLIBC_DIST, GLIBC_ADD_ONS and LINUX_DIST. The profile should also
     specify LINUX_ARCH and UCLIBC_ARCH if these do not match the arch from the
     TARGET tuple.
 
-- Any given host system will probably lack some of the neccessary tools.
+- Any given host system will probably lack some of the necessary tools.
 
-  The GNU compiler and libc are not very portable in that they require GNU
-  versions of awk, sed, make, gettext and one or two other commands. These are
-  built and added to the search path before the host's binaries.
+  The GNU compilers and libc are not very portable in that they require GNU
+  versions of awk, sed, make, gettext and one or two other commands. So these
+  are built by btc and added to the search path before the host's binaries.
 
   To build the older GCC you will need autoconf-2.13. Also, texinfo and
   ncurses-dev may have to be installed on Debian-based systems. Gentoo systems
-  do not need any extra tools installed other than the old bison and flex, so
-  the btc provides those for its use. Some Linux systems use mawk so gawk is
-  provided too. GMP and MPFR are required by gcc-4.3 and later. PPL and CLOOG
-  are required by gcc-4.4 and later and these tools in turn require a recent m4.
+  do not need any extra tools installed other than the old bison and flex
+  which btc provides. Some Linux systems use mawk so btc provides gawk.
+
+  GMP and MPFR are required by gcc-4.3 and later. PPL and CLOOG
+  are required by gcc-4.4 and later. These tools in turn require a recent m4.
   MPC and libelf are used by gcc-4.5 or later.
 
   The old bison is needed to build gcc-2.95. flex is for binutils-2.12. loadkeys
-  (from kbd) is used for generating v2.2 Linux keymaps.
+  (from kbd) is used for generating linux-2.2 keymaps.
 
 - If you provide a Linux configuration in the $BTC_CONFIGS directory it will be
   used in preference to the default config. Name it something like
   linux-2.4.27-powerpc-dot-config
 
 - Run build-tool-chain, as an unprivileged user, as follows. Substitute
-  your choice of tool-chain, e.g. profiles/4.4-m68k.
+  your choice of PROFILE, e.g. 'profiles/4.4-m68k'.
 
 scripts/build-tool-chain -p PROFILE
 
@@ -108,14 +110,15 @@ scripts/build-tool-chain -p PROFILE
 scripts/build-tool-chain -p PROFILE -c 'rm -rf ${BTC_BUILD}'
 
 - If you then want to build a tool-chain for a different architecture,
-  use the same script:
+  for example, just run the script again:
 
 scripts/build-tool-chain -p ANOTHER_PROFILE
 
-  The tool-chain will be created under a $TC_PREFIX determined by the profile.
+  The resulting tools will be installed under a unique $TC_PREFIX determined
+  by the profile.
 
 - If you want to unpack the Linux source and build it using one of the
-  cross-compilers that you have built, you could do that as follows.
+  cross-compilers that you have built, you could do so as follows.
 
 scripts/build-tool-chain -p PROFILE -c bash # set environment and spawn shell
 prep_kernel linux-2.6.34
@@ -124,9 +127,8 @@ build_kernel linux-2.6.34
 package_kernel linux-2.6.34
 exit
 
-  Alternatively, to simply use the cross-compiler as would any other, just set
-  your PATH variable to something like the value used by the build-tool-chain
-  script itself. That is,
+  To simply use the cross-compiler as would any other tool, just use the PATH
+  setting that the build-tool-chain script itself uses:
 
 scripts/build-tool-chain -p PROFILE -c 'echo $PATH'
 
@@ -136,7 +138,7 @@ ACKNOWLEDGEMENTS
 btc was inspired by Philippe Trottier's Xcompiler V0.93. Ryan Oliver provided
 encouragement and crucial assistance with the build method, as well as patches
 for glibc. Some ideas come from Dan Kegel's crosstool and other scripts
-elsewhere on the 'net. Martin Schaffner contributed some changes to the Linux
+elsewhere on the 'Net. Martin Schaffner contributed some changes to the Linux
 make commands. My gratitude goes to the Gentoo, LFS and Debian projects and
-the many mailing list denizens who have provided patches that make this stuff
+the many mailing list denizens who have provided patches to make this stuff
 actually work.

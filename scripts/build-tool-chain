@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Cross-tool-chain build script, for hosting on Mac OS X or Linux, targeting Linux.
-# Copyright (c) 2004-2010 Finn Thain
+# Copyright (c) 2004-2011 Finn Thain
 # fthain@telegraphics.com.au
 
 set -o pipefail 2>/dev/null
@@ -212,7 +212,7 @@ case "${1:-}" in
 ( '' )
     ;;
 ( * )
-    echo usage: $0 '-p <profile> [ -c command... ]'
+    echo usage: $0 '-p <profile> [ -c command ]'
     exit 1
     ;;
 esac

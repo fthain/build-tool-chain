@@ -73,6 +73,14 @@ function prep_binutils () {
         # Darwin link problem
         patch -p1 < ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
         ;;
+    ( binutils-2.21.52 )
+        # Debian source package
+        decompress ${BTC_PATCHES}/binutils_2.21.52.20110606-2-debian-all.diff | patch -p1
+        # Avoid fatal compiler warnings
+        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        # Darwin link problem
+        patch -p1 < ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
+        ;;
     esac
 ## Apply HJL patches according to patches/README, e.g.
 ##    patch -p1 < patches/libtool-dso.patch

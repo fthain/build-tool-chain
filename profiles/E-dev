@@ -1,7 +1,0 @@
-# Testing & development
-METHOD=E
-LINUX_DIST=linux-2.6.37
-GLIBC_DIST=glibc-2.12-20110111
-GLIBC_ADD_ONS=ports
-BINUTILS_DIST=binutils-2.21.51.0.3
-GDB_DIST=gdb-7.2

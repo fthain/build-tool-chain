@@ -3,4 +3,4 @@ TARGET=m68k-uclinux
 # DEFAULT_CPU=5407
 LINUX_ARCH=m68knommu
 
-. ${BTC_PROFILES}/U-dev
+. ${BTC_PROFILES}/U

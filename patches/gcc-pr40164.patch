@@ -1,0 +1,34 @@
+#--- trunk/gcc/ChangeLog	2009/08/14 11:34:49	150750
+#+++ trunk/gcc/ChangeLog	2009/08/14 11:36:45	150751
+#@@ -1,3 +1,10 @@
+#+2009-08-14  Hans-Peter Nilsson  <hp@axis.com>
+#+
+#+	PR rtl-optimization/41064
+#+	* reload1.c (reload_as_needed): Don't call extract_insn
+#+	for known invalid replacements after calling
+#+	validate_replace_rtx_group and verify_changes.
+#+
+# 2009-08-14  Uros Bizjak  <ubizjak@gmail.com>
+# 
+# 	PR target/41019
+--- trunk/gcc/reload1.c	2009/08/14 11:34:49	150750
++++ trunk/gcc/reload1.c	2009/08/14 11:36:45	150751
+@@ -4312,10 +4312,15 @@
+ 			      n = verify_changes (0);
+ 
+ 			      /* We must also verify that the constraints
+-				 are met after the replacement.  */
+-			      extract_insn (p);
++				 are met after the replacement.  Make sure
++				 extract_insn is only called for an insn
++				 where the replacements were found to be
++				 valid so far. */
+ 			      if (n)
+-				n = constrain_operands (1);
++				{
++				  extract_insn (p);
++				  n = constrain_operands (1);
++				}
+ 
+ 			      /* If the constraints were not met, then
+ 				 undo the replacement, else confirm it.  */
