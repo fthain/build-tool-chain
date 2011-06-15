@@ -89,8 +89,12 @@ function prep_linux () {
                 patch -p1 < ${BTC_PATCHES}/linux-2.6.30-btc-darwin.diff
                 patch -p0 < ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
                 ;;
-            ( * )
+            ( linux-2.6.3[2-7] | linux-2.6.3[2-7][.-]* )
                 patch -p1 < ${BTC_PATCHES}/linux-2.6.32-btc-darwin.diff
+                patch -p0 < ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
+                ;;
+            ( * )
+                patch -p1 < ${BTC_PATCHES}/linux-2.6.38-btc-darwin.diff
                 patch -p0 < ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
                 ;;
             esac

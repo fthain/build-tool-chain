@@ -152,10 +152,18 @@ function prep_glibc () {
     ( glibc-2.12 )
         # build failure
         patch -p0 -d ports < ${BTC_PATCHES}/glibc-ports-3ef58249ea2450639bb135d6978009d26aba634f.patch
+        # darwin portability
+        patch -p1 < ${BTC_PATCHES}/glibc-2.10-non-gnu-portability-hacks.diff
+        # hack for installing headers
+        patch -p1 < ${BTC_PATCHES}/glibc-2.10-old-gcc.diff
         ;;
     ( glibc-2.13 )
         # Debian sources
         decompress ${BTC_PATCHES}/eglibc-source_2.13-6_all-debian.diff | patch -p1
+        # darwin portability
+        patch -p1 < ${BTC_PATCHES}/glibc-2.10-non-gnu-portability-hacks.diff
+        # hack for installing headers
+        patch -p1 < ${BTC_PATCHES}/glibc-2.10-old-gcc.diff
         ;;
     esac
 

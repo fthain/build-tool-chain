@@ -32,12 +32,12 @@ function install_gdb () {
     ../${GDB_DIST}/configure --prefix=${BTC_PRODUCE}/${1} --target=${TARGET} \
     --cache-file=config.cache \
     --build=${BUILD} \
-    --with-system-readline \
     --without-python \
     --disable-expat \
     --disable-static \
     --disable-shared \
     --disable-werror
+#    --with-system-readline
 
     make
     make install
