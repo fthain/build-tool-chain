@@ -53,7 +53,7 @@ INSTRUCTIONS (not a good substitute for reading the scripts)
 
 - Edit the build-tool-chain script as follows:
 
-  + Adjust the DIST_ROOT definition to the absolute pathname of the btc
+  + Adjust the BTC_DIST definition to the absolute pathname of the btc
     directory or workarea.
 
   + Modify the BTC_PRODUCE definition to be the absolute pathname of the
@@ -121,10 +121,10 @@ scripts/build-tool-chain -p ANOTHER_PROFILE
   cross-compilers that you have built, you could do so as follows.
 
 scripts/build-tool-chain -p PROFILE -c bash # set environment and spawn shell
-prep_kernel linux-2.6.34
+prep_kernel linux-2.6.39
 cd ..
-build_kernel linux-2.6.34
-package_kernel linux-2.6.34
+build_kernel linux-2.6.39
+package_kernel linux-2.6.39
 exit
 
   To simply use the cross-compiler as would any other tool, just use the PATH
