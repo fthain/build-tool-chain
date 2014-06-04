@@ -33,7 +33,7 @@ function fetch () {
         fi
     done
     (
-        cd $BTC_SOURCES
+        pushd $BTC_SOURCES > /dev/null
         umask 0333
         for u in "${urls[@]}" ; do
             test -z "$u" && continue
@@ -111,7 +111,18 @@ function decompress () {
 }
 
 function manifest () {
-    ( cd ${TC_PREFIX} && find . | sort | bzip2 -c > ${BTC_LOGS}/${1}.list.bz2 )
+    local tag
+    tag=$1
+    shift
+    find ${TC_PREFIX} | sort > ${BTC_LOGS}/_a
+    "$@"
+    find ${TC_PREFIX} | sort > ${BTC_LOGS}/_b
+    comm -13 ${BTC_LOGS}/_{a,b} | bzip2 > ${BTC_LOGS}/${tag}.list.bz2
+    rm ${BTC_LOGS}/_{a,b}
+}
+
+function list_manifest () {
+    bzip2 -dc ${BTC_LOGS}/$1.list.bz2
 }
 
 function log () {

@@ -30,8 +30,7 @@ function install_elf2flt () {
     --with-libiberty=${BTC_BUILD}/binutils-elf2flt/libiberty.a
 
     make ${MAKE_OPTS}
-    make install
+    manifest install_elf2flt make install
 
-    manifest install_elf2flt
     copy_license ${ELF2FLT_DIST}
 }

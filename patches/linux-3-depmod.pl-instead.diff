@@ -1,0 +1,21 @@
+--- Makefile.orig	2012-04-20 23:04:08.000000000 +1000
++++ Makefile	2012-04-20 23:08:41.000000000 +1000
+@@ -340,7 +340,7 @@
+ AWK		= awk
+ GENKSYMS	= scripts/genksyms/genksyms
+ INSTALLKERNEL  := installkernel
+-DEPMOD		= /sbin/depmod
++DEPMOD		= depmod.pl
+ KALLSYMS	= scripts/kallsyms
+ PERL		= perl
+ CHECK		= sparse
+@@ -1528,8 +1528,7 @@
+ 
+ # Run depmod only if we have System.map and depmod is executable
+ quiet_cmd_depmod = DEPMOD  $(KERNELRELEASE)
+-      cmd_depmod = $(CONFIG_SHELL) $(srctree)/scripts/depmod.sh $(DEPMOD) \
+-                   $(KERNELRELEASE)
++      cmd_depmod = test -r System.map && NM=$(CROSS_COMPILE)nm $(DEPMOD) -a -F System.map -b $(MODLIB)
+ 
+ # Create temporary dir for module support files
+ # clean it up only when building all modules

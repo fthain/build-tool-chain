@@ -51,9 +51,7 @@ EOF
     (yes "" || true) | make ARCH=${UCLIBC_ARCH} oldconfig
 
     make ARCH=${UCLIBC_ARCH} headers
-    make ARCH=${UCLIBC_ARCH} DESTDIR=${LIBC_INSTALL_ROOT} install_headers
-
-    manifest install_uclibc_headers
+    manifest install_uclibc_headers make ARCH=${UCLIBC_ARCH} DESTDIR=${LIBC_INSTALL_ROOT} install_headers
 }
 
 function make_uclibc_runtime () {
@@ -72,8 +70,7 @@ function install_uclibc () {
     cd ${BTC_BUILD}/$1
 
     make ARCH=${UCLIBC_ARCH}
-    make ARCH=${UCLIBC_ARCH} DESTDIR=${LIBC_INSTALL_ROOT} install
+    manifest install_uclibc make ARCH=${UCLIBC_ARCH} DESTDIR=${LIBC_INSTALL_ROOT} install
 
-    manifest install_uclibc
     copy_license ${UCLIBC_DIST}
 }

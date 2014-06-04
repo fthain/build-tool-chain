@@ -193,7 +193,7 @@ function prep_linux () {
             ( linux-2.6.32 | linux-2.6.32[.-]* )
 #                patch -p1 < ${BTC_PATCHES}/linux-2.6.git-5da3a65d2d1ba333d61999640ef241f150c69c6b.patch
 #                patch -p1 < ${BTC_PATCHES}/linux-2.6.git-9674cdc74d63f346870943ef966a034f8c71ee57.patch
-                 decompress ${BTC_PATCHES}/linux-2.6_2.6.32-23-debian-m68k.diff | patch -p1
+                 decompress ${BTC_PATCHES}/linux-2.6_2.6.32-38-debian-m68k.diff | patch -p1
                 ;;
             esac
             case ${1} in
@@ -239,20 +239,19 @@ function install_linux_headers () {
     ( linux-2.[24].* )
         (yes "" || true) | make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- config
         make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- symlinks include/linux/version.h
-        copy_linux_headers
+        manifest install_linux_headers copy_linux_headers
         ;;
     ( linux-2.6.[0-9] | linux-2.6.[0-9][.-]* | linux-2.6.[12][0-9] | linux-2.6.[12][0-9][.-]* )
         make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- defconfig
         make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- include/asm include/linux/version.h
-        copy_linux_headers
+        manifest install_linux_headers copy_linux_headers
         ;;
     ( linux-2.6.* )
         make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- defconfig
-        make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- INSTALL_HDR_PATH=${LIBC_HEADERS%/include} headers_install
+        manifest install_linux_headers make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- INSTALL_HDR_PATH=${LIBC_HEADERS%/include} headers_install
         ;;
     esac
 
-    manifest install_linux_headers
     copy_license ${LINUX_DIST}
 }
 

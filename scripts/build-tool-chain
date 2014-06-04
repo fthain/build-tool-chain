@@ -223,7 +223,9 @@ esac
 
 if [ ${BUILD} != ${BUILD%-apple-darwin*} ] ; then
     log install_sed       sed-4.2.1
-    log install_make      make-3.81
+fi
+log install_make      make-3.81
+if [ ${BUILD} != ${BUILD%-apple-darwin*} ] ; then
     log install_gettext   gettext-0.16.1
     log install_coreutils coreutils-8.5
     log install_loadkeys  kbd-1.12

@@ -67,7 +67,7 @@ function prep_binutils () {
         ;;
     ( binutils-2.20.1 )
         # Debian source package
-        decompress ${BTC_PATCHES}/binutils_2.20.1-12-debian-all.diff | patch -p1
+        decompress ${BTC_PATCHES}/binutils_2.20.1-16-debian-all.diff | patch -p1
         # Avoid fatal compiler warnings
         patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         # Darwin link problem
@@ -76,6 +76,14 @@ function prep_binutils () {
     ( binutils-2.21.52 )
         # Debian source package
         decompress ${BTC_PATCHES}/binutils_2.21.52.20110606-2-debian-all.diff | patch -p1
+        # Avoid fatal compiler warnings
+        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        # Darwin link problem
+        patch -p1 < ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
+        ;;
+    ( binutils-2.21.90 )
+        # Debian source package
+        decompress ${BTC_PATCHES}/binutils_2.21.90.20111025-1-debian-all.diff | patch -p1
         # Avoid fatal compiler warnings
         patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         # Darwin link problem
@@ -117,23 +125,22 @@ function install_binutils () {
     test -e ${TC_PREFIX}/bin/${TARGET}-as && echo binutils already installed && return
     cd ${BTC_BUILD}/${1}
 
-    make install
+    manifest install_binutils make install
 
     # There's no readelf on Darwin & glibc configure won't use ${TARGET}-readelf
     # See http://sources.redhat.com/bugzilla/show_bug.cgi?id=3004
     ln -nsf ${TARGET}-readelf ${TC_PREFIX}/bin/readelf
 
-    find ${TC_PREFIX} -type f -name '*.la' -print0 | xargs -0 rm -fv
+    list_manifest install_binutils | grep '[.]la$' | xargs -r rm -v
 
     # The elf2flt build uses these
     mkdir -p ${BTC_BUILD}/binutils-elf2flt
     cd ${BTC_BUILD}/binutils-elf2flt
-    find ${TC_PREFIX} -type f -name '*.a' -print0 | xargs -0 sh -c 'mv "$@" .' none
-    cp ../${BINUTILS_DIST}/include/{filenames,libiberty}.h .
+    list_manifest install_binutils | grep '[.]a$' | xargs -r sh -c 'mv "$@" .' sh
+    cp ${BTC_BUILD}/${BINUTILS_DIST}/include/{filenames,libiberty}.h .
 
     # The link is sufficient for man AUTOPATH
     ln -nsf share/man ${TC_PREFIX}/man
 
-    manifest install_binutils
     copy_license ${BINUTILS_DIST}
 }

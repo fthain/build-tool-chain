@@ -57,9 +57,11 @@ function prep_gcc_core () {
             patch -p1 < ${BTC_PATCHES}/gcc-pr37053.patch
             ;;
         ( gcc-4.4.6 )
-            decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.6-5-debian-m68k.diff | patch -p1
+            decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.6-11-debian-m68k.diff | patch -p1
             # Reverse Debian libgomp info rename
             patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
+            # Reverse Debian -print-file-name munging
+            patch -p2 -R < ${BTC_PATCHES}/gcc-print-file-name.diff
             ;;
         ( gcc-4.5[.-]* )
             patch -p0 < ${BTC_PATCHES}/gcc-pr43804.diff
@@ -89,18 +91,23 @@ function prep_gcc_core () {
             ;;
         ( gcc-4.3.2 )
             decompress ${BTC_PATCHES}/gcc-core-4.3_4.3.2-1.1-debian-powerpc.diff | patch -p1
-            # Reverse Debian inline-gnu99 hack
-            patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
             # Build failure
             patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
             ;;
         ( gcc-4.3.5 )
             decompress ${BTC_PATCHES}/gcc-core-4.3_4.3.5-2-debian-powerpc.diff | patch -p1
-            # Reverse Debian inline-gnu99 hack
-            patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
             ;;
         ( gcc-4.4.5 )
             decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.5-8-debian-powerpc.diff | patch -p1
+            # Reverse Debian libgomp info rename
+            patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
+            ;;
+        esac
+        ;;
+    ( x86_64-* )
+        case ${1} in
+        ( gcc-4.4.5 )
+            decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.5-8-debian-amd64.diff | patch -p1
             # Reverse Debian libgomp info rename
             patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
             ;;
@@ -212,9 +219,11 @@ function prep_gcc () {
             patch -p1 < ${BTC_PATCHES}/gcc-pr46179.diff
             ;;
         ( gcc-4.4.6 )
-            decompress ${BTC_PATCHES}/gcc-4.4_4.4.6-5-debian-m68k.diff | patch -p1
+            decompress ${BTC_PATCHES}/gcc-4.4_4.4.6-11-debian-m68k.diff | patch -p1
             # Reverse Debian libgomp info rename
             patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
+            # Reverse Debian -print-file-name munging
+            patch -p2 -R < ${BTC_PATCHES}/gcc-print-file-name.diff
             ;;
         ( gcc-4.5[.-]* )
             patch -p0 < ${BTC_PATCHES}/gcc-pr43804.diff
@@ -244,20 +253,27 @@ function prep_gcc () {
             ;;
         ( gcc-4.3.2 )
             decompress ${BTC_PATCHES}/gcc-4.3_4.3.2-1.1-debian-powerpc.diff | patch -p1
-            # Reverse Debian inline-gnu99 hack
-            patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
             # Build failure
             patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
             ;;
         ( gcc-4.3.5 )
             decompress ${BTC_PATCHES}/gcc-4.3_4.3.5-2-debian-powerpc.diff | patch -p1
-            # Reverse Debian inline-gnu99 hack
-            patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
             ;;
         ( gcc-4.4.5 )
             decompress ${BTC_PATCHES}/gcc-4.4_4.4.5-8-debian-powerpc.diff | patch -p1
             # Reverse Debian libgomp info rename
             patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
+            ;;
+        esac
+        ;;
+    ( x86_64-* )
+        case ${1} in
+        ( gcc-4.4.5 )
+            decompress ${BTC_PATCHES}/gcc-4.4_4.4.5-8-debian-amd64.diff | patch -p1
+            # Reverse Debian libgomp info rename
+            patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
+            # Start files are installed in sysroot/lib64 not sysroot/lib
+            patch -p1 < ${BTC_PATCHES}/gcc-4.4-uniarch-x86-64-start-file-paths.diff
             ;;
         esac
         ;;
@@ -302,6 +318,11 @@ function prep_gcc () {
     ( gcc-4.[123][.-]* )
         patch -p1 < ${BTC_PATCHES}/gcc-4.1.1-zecke-xgcc-cpp.patch
         ;;
+    ( gcc-4.[45][.-]* )
+        patch -p1 < ${BTC_PATCHES}/gcc-4.4.1-btc-use-target-cpp-for-lib-configure.patch
+        # Build failure
+        patch -p1 < ${BTC_PATCHES}/gcc-pr41818.patch
+        ;;
     ( gcc-4.* )
         patch -p1 < ${BTC_PATCHES}/gcc-4.4.1-btc-use-target-cpp-for-lib-configure.patch
         ;;
@@ -309,7 +330,7 @@ function prep_gcc () {
 
     case ${1} in
     ( gcc-[23].* | gcc-4.0[.-]* )
-        # build failure
+        # Build failure
         patch -p1 < ${BTC_PATCHES}/gcc-3-creat-needs-open3.patch
         ;;
     esac
@@ -364,17 +385,15 @@ function install_gcc_core_static () {
 #    --disable-libunwind-exceptions
 
     make ${MAKE_OPTS} all-gcc
-    make install-gcc 
+    manifest install_gcc_core_static make install-gcc 
     case ${GCC_DIST} in
     ( gcc-[23].* | gcc-4.[012][.-]* )
         ;;
     ( * )
         make all-target-libgcc
-        make install-target-libgcc 
+        manifest install_gcc_core_static_libgcc make install-target-libgcc 
         ;;
     esac
-
-    manifest install_gcc_core_static
 }
 
 function install_gcc_core_shared () {
@@ -407,17 +426,15 @@ function install_gcc_core_shared () {
     cp ../c-runtime/crt[1in].o gcc/
 
     make ${MAKE_OPTS} all-gcc
-    make install-gcc 
+    manifest install_gcc_core_shared make install-gcc 
     case ${GCC_DIST} in
     ( gcc-[23].* | gcc-4.[012][.-]* )
         ;;
     ( * )
         make all-target-libgcc
-        make install-target-libgcc 
+        manifest install_gcc_core_shared_libgcc make install-target-libgcc 
         ;;
     esac
-
-    manifest install_gcc_core_shared
 }
 
 function install_gcc () {
@@ -428,13 +445,17 @@ function install_gcc () {
 
     fortran=fortran
     case ${GCC_DIST} in
-    ( gcc-[23].* )
-        fortran=f77 ;;
+    ( gcc-[23].* ) fortran=f77 ;;
     esac
 
     locale_opt="--enable-clocale=gnu"
     case ${TARGET}- in
     ( *-uclinux-* ) locale_opt= ;;
+    esac
+
+    multilib_opt="--enable-multilib"
+    case ${TARGET}- in
+    ( x86_64-* ) multilib_opt="--disable-multilib" ;;
     esac
 
     CFLAGS="-O2 $HOST_CFLAGS" LDFLAGS="$(get_host_ldflags)" \
@@ -443,6 +464,7 @@ function install_gcc () {
     ${GCC_CONFIG_OPTS} \
     $(get_gcc_cpu) \
     ${locale_opt} \
+    ${multilib_opt} \
     --with-gnu-ld \
     --with-gnu-as \
     --enable-threads=posix \
@@ -454,11 +476,10 @@ function install_gcc () {
     --disable-libstdcxx-pch
 
     make all
-    make install
+    manifest install_gcc make install
 
     rm -f ${TC_PREFIX}/lib/libiberty.a
 
-    manifest install_gcc
     copy_license ${GCC_DIST}
 }
 

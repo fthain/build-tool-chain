@@ -1,6 +1,7 @@
 libc_cv_386_tls=${libc_cv_386_tls=yes}
 libc_cv_alpha_tls=${libc_cv_alpha_tls=yes}
 libc_cv_powerpc32_tls=${libc_cv_powerpc32_tls=yes}
+libc_cv_x86_64_tls=${libc_cv_x86_64_tls=yes}
 libc_cv_gcc___thread=${libc_cv_gcc___thread=yes}
 libc_cv_visibility_attribute=${libc_cv_visibility_attribute=yes}
 libc_cv_broken_visibility_attribute=${libc_cv_broken_visibility_attribute=no}

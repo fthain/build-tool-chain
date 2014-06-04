@@ -1,0 +1,37 @@
+
+Patch for uni-arch libgcc build failure:
+
+/Volumes/btc-0.12/gcc-4.4/x86_64-linux-gnu/bin/ld: crti.o: No such file: No such file or directory
+collect2: ld returned 1 exit status
+make[2]: *** [libgcc_s.so] Error 1
+make[2]: Leaving directory `/Volumes/btc-0.12/build/gcc-x86_64-linux-gnu-3/x86_64-linux-gnu/libgcc'
+make[1]: *** [all-target-libgcc] Error 2
+make[1]: Leaving directory `/Volumes/btc-0.12/build/gcc-x86_64-linux-gnu-3'
+make: *** [all] Error 2
+
+Another solution is to create the lib -> lib64 symlink.
+
+Some other approaches have been tried...
+
+http://buildd.emdebian.org/debian/gcccvs/gcc-2.96/debian/patches/gcc-sparc64-startfile.dpatch
+
+http://www.mail-archive.com/linux-390@vm.marist.edu/msg08370.html
+
+https://build.opensuse.org/package/view_file?file=biarch-startfile.patch&package=gcc32&project=home%3Adirkmueller&srcmd5=aa2f6448403f830fcd34e85dc953eb27
+
+http://gcc.gnu.org/ml/gcc-patches/2002-09/msg01230.html
+
+http://gcc.gnu.org/onlinedocs/gccint/Driver.html
+
+--- gcc-4.4.5/gcc/config/i386/x86-64.h	2011-11-25 19:56:10.000000000 +1100
++++ gcc-4.4.5/gcc/config/i386/x86-64.h	2011-11-25 19:56:14.000000000 +1100
+@@ -98,3 +98,9 @@
+ 
+ #undef TARGET_ASM_UNIQUE_SECTION
+ #define TARGET_ASM_UNIQUE_SECTION  x86_64_elf_unique_section
++
++#undef STANDARD_STARTFILE_PREFIX_1
++#define STANDARD_STARTFILE_PREFIX_1 "/usr/lib64/"
++
++#undef STANDARD_STARTFILE_PREFIX_2
++#define STANDARD_STARTFILE_PREFIX_2 "/lib64/"

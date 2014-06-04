@@ -141,7 +141,7 @@ function prep_glibc () {
         ;;
     ( glibc-2.11 )
         # Debian sources
-        decompress ${BTC_PATCHES}/eglibc-source_2.11.2-5_all-debian.diff | patch -p1
+        decompress ${BTC_PATCHES}/eglibc-source_2.11.2-10_all-debian.diff | patch -p1
         # build failure
         patch -p1 < ${BTC_PATCHES}/glibc-2.5-m68k-fchownat.patch
         # darwin portability
@@ -159,7 +159,7 @@ function prep_glibc () {
         ;;
     ( glibc-2.13 )
         # Debian sources
-        decompress ${BTC_PATCHES}/eglibc-source_2.13-6_all-debian.diff | patch -p1
+        decompress ${BTC_PATCHES}/eglibc-source_2.13-21_all-debian.diff | patch -p1
         # darwin portability
         patch -p1 < ${BTC_PATCHES}/glibc-2.10-non-gnu-portability-hacks.diff
         # hack for installing headers
@@ -241,7 +241,7 @@ function install_glibc_headers () {
     --with-binutils=${TC_PREFIX}/${TARGET}/bin
 
     rm ${LIBC_HEADERS}/assert.h
-    make btc_wrong_cc=yes install_root=${LIBC_INSTALL_ROOT} install-headers install-bootstrap-headers=yes
+    manifest install_glibc_headers make btc_wrong_cc=yes install_root=${LIBC_INSTALL_ROOT} install-headers install-bootstrap-headers=yes
     if [ ! -e ${LIBC_HEADERS}/features.h ] ; then
         cp ../${GLIBC_DIST}/include/features.h ${LIBC_HEADERS}
     fi
@@ -252,8 +252,6 @@ function install_glibc_headers () {
     if [ ! -e ${LIBC_HEADERS}/bits/stdio_lim.h ] ; then
         cp bits/stdio_lim.h ${LIBC_HEADERS}/bits/ || true
     fi
-
-    manifest install_glibc_headers
 }
 
 function make_glibc_runtime () {
@@ -312,8 +310,7 @@ function install_glibc () {
     else
         make
     fi
-    make install_root=${LIBC_INSTALL_ROOT} install
+    manifest install_glibc make install_root=${LIBC_INSTALL_ROOT} install
 
-    manifest install_glibc
     copy_license ${GLIBC_DIST}
 }

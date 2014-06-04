@@ -1,0 +1,388 @@
+diff -pruN make-3.82/default.c make-3.82-r4/default.c
+--- make-3.82/default.c	2010-07-13 11:20:39.000000000 +1000
++++ make-3.82-r4/default.c	2014-03-15 17:54:13.000000000 +1100
+@@ -522,9 +522,13 @@ static const char *default_variables[] =
+ #ifdef __MSDOS__
+     ".LIBPATTERNS", "lib%.a $(DJDIR)/lib/lib%.a",
+ #else
++#ifdef __APPLE__
++    ".LIBPATTERNS", "lib%.dylib lib%.a",
++#else
+     ".LIBPATTERNS", "lib%.so lib%.a",
+ #endif
+ #endif
++#endif
+ 
+ #endif /* !VMS */
+     0, 0
+diff -pruN make-3.82/expand.c make-3.82-r4/expand.c
+--- make-3.82/expand.c	2010-07-13 11:20:39.000000000 +1000
++++ make-3.82-r4/expand.c	2014-03-15 17:54:13.000000000 +1100
+@@ -197,7 +197,7 @@ variable_expand_string (char *line, cons
+ {
+   struct variable *v;
+   const char *p, *p1;
+-  char *abuf = NULL;
++  char *save;
+   char *o;
+   unsigned int line_offset;
+ 
+@@ -212,16 +212,11 @@ variable_expand_string (char *line, cons
+       return (variable_buffer);
+     }
+ 
+-  /* If we want a subset of the string, allocate a temporary buffer for it.
+-     Most of the functions we use here don't work with length limits.  */
+-  if (length > 0 && string[length] != '\0')
+-    {
+-      abuf = xmalloc(length+1);
+-      memcpy(abuf, string, length);
+-      abuf[length] = '\0';
+-      string = abuf;
+-    }
+-  p = string;
++  /* We need a copy of STRING: due to eval, it's possible that it will get
++     freed as we process it (it might be the value of a variable that's reset
++     for example).  Also having a nil-terminated string is handy.  */
++  save = length < 0 ? xstrdup (string) : xstrndup (string, length);
++  p = save;
+ 
+   while (1)
+     {
+@@ -411,8 +406,7 @@ variable_expand_string (char *line, cons
+       ++p;
+     }
+ 
+-  if (abuf)
+-    free (abuf);
++  free (save);
+ 
+   variable_buffer_output (o, "", 1);
+   return (variable_buffer + line_offset);
+diff -pruN make-3.82/function.c make-3.82-r4/function.c
+--- make-3.82/function.c	2010-07-13 11:20:39.000000000 +1000
++++ make-3.82-r4/function.c	2014-03-15 17:54:13.000000000 +1100
+@@ -706,7 +706,7 @@ func_words (char *o, char **argv, const
+   const char *word_iterator = argv[0];
+   char buf[20];
+ 
+-  while (find_next_token (&word_iterator, (unsigned int *) 0) != 0)
++  while (find_next_token (&word_iterator, NULL) != 0)
+     ++i;
+ 
+   sprintf (buf, "%d", i);
+@@ -1133,21 +1133,14 @@ func_sort (char *o, char **argv, const c
+ 
+   /* Find the maximum number of words we'll have.  */
+   t = argv[0];
+-  wordi = 1;
+-  while (*t != '\0')
++  wordi = 0;
++  while ((p = find_next_token (&t, NULL)) != 0)
+     {
+-      char c = *(t++);
+-
+-      if (! isspace ((unsigned char)c))
+-        continue;
+-
++      ++t;
+       ++wordi;
+-
+-      while (isspace ((unsigned char)*t))
+-        ++t;
+     }
+ 
+-  words = xmalloc (wordi * sizeof (char *));
++  words = xmalloc ((wordi == 0 ? 1 : wordi) * sizeof (char *));
+ 
+   /* Now assign pointers to each string in the array.  */
+   t = argv[0];
+diff -pruN make-3.82/job.c make-3.82-r4/job.c
+--- make-3.82/job.c	2010-07-24 18:27:50.000000000 +1000
++++ make-3.82-r4/job.c	2014-03-15 17:54:13.000000000 +1100
+@@ -2792,12 +2792,12 @@ construct_command_argv_internal (char *l
+ 
+     unsigned int shell_len = strlen (shell);
+     unsigned int line_len = strlen (line);
+-    unsigned int sflags_len = strlen (shellflags);
++    unsigned int sflags_len = shellflags ? strlen (shellflags) : 0;
+     char *command_ptr = NULL; /* used for batch_mode_shell mode */
+     char *new_line;
+ 
+ # ifdef __EMX__ /* is this necessary? */
+-    if (!unixy_shell)
++    if (!unixy_shell && shellflags)
+       shellflags[0] = '/'; /* "/c" */
+ # endif
+ 
+@@ -2859,19 +2859,28 @@ construct_command_argv_internal (char *l
+ 
+ 	new_argv = xmalloc (4 * sizeof (char *));
+ 	new_argv[0] = xstrdup(shell);
+-	new_argv[1] = xstrdup(shellflags);
++	new_argv[1] = xstrdup(shellflags ? shellflags : "");
+ 	new_argv[2] = line;
+ 	new_argv[3] = NULL;
+ 	return new_argv;
+       }
+ 
+-    new_line = alloca (shell_len + 1 + sflags_len + 1
+-                             + (line_len*2) + 1);
++    new_line = xmalloc ((shell_len*2) + 1 + sflags_len + 1
++                        + (line_len*2) + 1);
+     ap = new_line;
+-    memcpy (ap, shell, shell_len);
+-    ap += shell_len;
++    /* Copy SHELL, escaping any characters special to the shell.  If
++       we don't escape them, construct_command_argv_internal will
++       recursively call itself ad nauseam, or until stack overflow,
++       whichever happens first.  */
++    for (p = shell; *p != '\0'; ++p)
++      {
++	if (strchr (sh_chars, *p) != 0)
++	  *(ap++) = '\\';
++	*(ap++) = *p;
++      }
+     *(ap++) = ' ';
+-    memcpy (ap, shellflags, sflags_len);
++    if (shellflags)
++      memcpy (ap, shellflags, sflags_len);
+     ap += sflags_len;
+     *(ap++) = ' ';
+     command_ptr = ap;
+@@ -2924,8 +2933,11 @@ construct_command_argv_internal (char *l
+ 	*ap++ = *p;
+       }
+     if (ap == new_line + shell_len + sflags_len + 2)
+-      /* Line was empty.  */
+-      return 0;
++      {
++        /* Line was empty.  */
++        free (new_line);
++        return 0;
++      }
+     *ap = '\0';
+ 
+ #ifdef WINDOWS32
+@@ -3065,6 +3077,8 @@ construct_command_argv_internal (char *l
+       fatal (NILF, _("%s (line %d) Bad shell context (!unixy && !batch_mode_shell)\n"),
+             __FILE__, __LINE__);
+ #endif
++
++    free (new_line);
+   }
+ #endif	/* ! AMIGA */
+ 
+diff -pruN make-3.82/main.c make-3.82-r4/main.c
+--- make-3.82/main.c	2010-07-19 17:10:53.000000000 +1000
++++ make-3.82-r4/main.c	2014-03-15 17:54:13.000000000 +1100
+@@ -1138,7 +1138,7 @@ main (int argc, char **argv, char **envp
+      a macro and some compilers (MSVC) don't like conditionals in macros.  */
+   {
+     const char *features = "target-specific order-only second-expansion"
+-                           " else-if shortest-stem undefine"
++                           " else-if shortest-stem undefine oneshell"
+ #ifndef NO_ARCHIVES
+                            " archives"
+ #endif
+@@ -2088,12 +2088,17 @@ main (int argc, char **argv, char **envp
+ 
+           ++restarts;
+ 
++          /* If we're re-exec'ing the first make, put back the number of
++             job slots so define_makefiles() will get it right.  */
++          if (master_job_slots)
++            job_slots = master_job_slots;
++
+           /* Reset makeflags in case they were changed.  */
+           {
+             const char *pv = define_makeflags (1, 1);
+             char *p = alloca (sizeof ("MAKEFLAGS=") + strlen (pv) + 1);
+             sprintf (p, "MAKEFLAGS=%s", pv);
+-            putenv (p);
++            putenv (allocated_variable_expand (p));
+           }
+ 
+ 	  if (ISDB (DB_BASIC))
+@@ -2824,9 +2829,6 @@ define_makeflags (int all, int makefile)
+ 		       && (*(unsigned int *) cs->value_ptr ==
+ 			   *(unsigned int *) cs->noarg_value))
+ 		ADD_FLAG ("", 0); /* Optional value omitted; see below.  */
+-	      else if (cs->c == 'j')
+-		/* Special case for `-j'.  */
+-		ADD_FLAG ("1", 1);
+ 	      else
+ 		{
+ 		  char *buf = alloca (30);
+diff -pruN make-3.82/read.c make-3.82-r4/read.c
+--- make-3.82/read.c	2010-07-13 11:20:42.000000000 +1000
++++ make-3.82-r4/read.c	2014-03-15 17:54:13.000000000 +1100
+@@ -2904,6 +2904,7 @@ parse_file_seq (char **stringp, unsigned
+       const char *name;
+       const char **nlist = 0;
+       char *tildep = 0;
++      int globme = 1;
+ #ifndef NO_ARCHIVES
+       char *arname = 0;
+       char *memname = 0;
+@@ -3028,7 +3029,7 @@ parse_file_seq (char **stringp, unsigned
+             {
+               /* This looks like the first element in an open archive group.
+                  A valid group MUST have ')' as the last character.  */
+-              const char *e = p + nlen;
++              const char *e = p;
+               do
+                 {
+                   e = next_token (e);
+@@ -3084,19 +3085,19 @@ parse_file_seq (char **stringp, unsigned
+          Go to the next item in the string.  */
+       if (flags & PARSEFS_NOGLOB)
+         {
+-          NEWELT (concat (2, prefix, tp));
++          NEWELT (concat (2, prefix, tmpbuf));
+           continue;
+         }
+ 
+       /* If we get here we know we're doing glob expansion.
+          TP is a string in tmpbuf.  NLEN is no longer used.
+          We may need to do more work: after this NAME will be set.  */
+-      name = tp;
++      name = tmpbuf;
+ 
+       /* Expand tilde if applicable.  */
+-      if (tp[0] == '~')
++      if (tmpbuf[0] == '~')
+ 	{
+-	  tildep = tilde_expand (tp);
++	  tildep = tilde_expand (tmpbuf);
+ 	  if (tildep != 0)
+             name = tildep;
+ 	}
+@@ -3112,32 +3113,40 @@ parse_file_seq (char **stringp, unsigned
+ 	}
+ #endif /* !NO_ARCHIVES */
+ 
+-      switch (glob (name, GLOB_NOSORT|GLOB_ALTDIRFUNC, NULL, &gl))
+-	{
+-	case GLOB_NOSPACE:
+-	  fatal (NILF, _("virtual memory exhausted"));
+-
+-	case 0:
+-          /* Success.  */
+-          i = gl.gl_pathc;
+-          nlist = (const char **)gl.gl_pathv;
+-          break;
+-
+-        case GLOB_NOMATCH:
+-          /* If we want only existing items, skip this one.  */
+-          if (flags & PARSEFS_EXISTS)
+-            {
+-              i = 0;
+-              break;
+-            }
+-          /* FALLTHROUGH */
+-
+-	default:
+-          /* By default keep this name.  */
++      /* glob() is expensive: don't call it unless we need to.  */
++      if (!(flags & PARSEFS_EXISTS) && strpbrk (name, "?*[") == NULL)
++        {
++          globme = 0;
+           i = 1;
+           nlist = &name;
+-          break;
+-	}
++        }
++      else
++        switch (glob (name, GLOB_NOSORT|GLOB_ALTDIRFUNC, NULL, &gl))
++          {
++          case GLOB_NOSPACE:
++            fatal (NILF, _("virtual memory exhausted"));
++
++          case 0:
++            /* Success.  */
++            i = gl.gl_pathc;
++            nlist = (const char **)gl.gl_pathv;
++            break;
++
++          case GLOB_NOMATCH:
++            /* If we want only existing items, skip this one.  */
++            if (flags & PARSEFS_EXISTS)
++              {
++                i = 0;
++                break;
++              }
++            /* FALLTHROUGH */
++
++          default:
++            /* By default keep this name.  */
++            i = 1;
++            nlist = &name;
++            break;
++          }
+ 
+       /* For each matched element, add it to the list.  */
+       while (i-- > 0)
+@@ -3152,7 +3161,10 @@ parse_file_seq (char **stringp, unsigned
+             else
+               {
+                 /* We got a chain of items.  Attach them.  */
+-                (*newp)->next = found;
++                if (*newp)
++                  (*newp)->next = found;
++                else
++                  *newp = found;
+ 
+                 /* Find and set the new end.  Massage names if necessary.  */
+                 while (1)
+@@ -3174,7 +3186,8 @@ parse_file_seq (char **stringp, unsigned
+ #endif /* !NO_ARCHIVES */
+           NEWELT (concat (2, prefix, nlist[i]));
+ 
+-      globfree (&gl);
++      if (globme)
++        globfree (&gl);
+ 
+ #ifndef NO_ARCHIVES
+       if (arname)
+diff -pruN make-3.82/remake.c make-3.82-r4/remake.c
+--- make-3.82/remake.c	2010-07-13 11:20:42.000000000 +1000
++++ make-3.82-r4/remake.c	2014-03-15 17:54:13.000000000 +1100
+@@ -614,6 +614,10 @@ update_file_1 (struct file *file, unsign
+                 d->file->dontcare = file->dontcare;
+               }
+ 
++            /* We may have already considered this file, when we didn't know
++               we'd need to update it.  Force update_file() to consider it and
++               not prune it.  */
++            d->file->considered = !considered;
+ 
+ 	    dep_status |= update_file (d->file, depth);
+ 
+diff -pruN make-3.82/tests/scripts/features/parallelism make-3.82-r4/tests/scripts/features/parallelism
+--- make-3.82/tests/scripts/features/parallelism	2010-07-06 04:32:03.000000000 +1000
++++ make-3.82-r4/tests/scripts/features/parallelism	2014-03-15 17:54:13.000000000 +1100
+@@ -194,6 +194,23 @@ rm main.x");
+     rmfiles(qw(foo.y foo.y.in main.bar));
+ }
+ 
++# Ensure intermediate/secondary files are not pruned incorrectly.
++# See Savannah bug #30653
++
++utouch(-15, 'file2');
++utouch(-10, 'file4');
++utouch(-5,  'file1');
++
++run_make_test(q!
++.INTERMEDIATE: file3
++file4: file3 ; @mv -f $< $@
++file3: file2 ; touch $@
++file2: file1 ; @touch $@
++!,
++              '--no-print-directory -j2', "touch file3");
++
++#rmfiles('file1', 'file2', 'file3', 'file4');
++
+ if ($all_tests) {
+     # Jobserver FD handling is messed up in some way.
+     # Savannah bug #28189
