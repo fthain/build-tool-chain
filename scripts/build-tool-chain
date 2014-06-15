@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Cross-tool-chain build script, for hosting on Mac OS X or Linux, targeting Linux.
-# Copyright (c) 2004-2011 Finn Thain
+# Scripts for building cross-toolchains targeting Linux, hosted on Linux or Mac OS X.
+# Copyright (c) 2004-2014 Finn Thain
 # fthain@telegraphics.com.au
 
 set -o pipefail 2>/dev/null
@@ -18,8 +18,8 @@ BTC_DIST=${HOME}/btc
 BTC_SOURCES=${HOME}/btc-sources
 
 # This is where the tool-chain will be installed
-#BTC_PRODUCE=/opt/btc-0.12
-BTC_PRODUCE=/Volumes/btc-0.12
+#BTC_PRODUCE=/opt/btc-13
+BTC_PRODUCE=/Volumes/btc-13
 
 # Missing host tools needed for the build are to be installed here
 HOST_TOOLS_PREFIX=${BTC_PRODUCE}/host_tools
@@ -97,7 +97,7 @@ export INFOPATH=${INFOPATH:-}${INFOPATH:+:}${TC_PREFIX}/share/info:${HOST_TOOLS_
 #
 # $METHOD controls how kernel headers and binaries are made, also how gcc gets
 # patched & built, since NPTL => shared gcc => early build of glibc crt
-# objects. Current glibc seems to require gcc method 3, even for linuxthreads.
+# objects. Some versions of glibc need the NPTL method even for linuxthreads.
 # Also, older tools don't support sysroot, so they need the old method.
 
 case ${METHOD} in
@@ -178,22 +178,42 @@ if [ $(${PATH_TO_AM}/config.sub $TARGET) = ${BUILD} ] ; then
     BUILD=${BUILD}x
 fi
 
+unset CC CPP CXX CXXCPP CFLAGS CXXFLAGS LDFLAGS
+
+HOST_CC=gcc
+HOST_CXX=g++
+HOST_CFLAGS=
+HOST_CXXFLAGS=
+HOST_LDFLAGS=
+
 if [ ${BUILD} != ${BUILD%-apple-darwin*} ] ; then
-    # Build binaries backward compatible to tiger
-    export MACOSX_DEPLOYMENT_TARGET=10.4
     # Possibly useful for tar, rsync and the like
     export COPYFILE_DISABLE=true
     export COPY_EXTENDED_ATTRIBUTES_DISABLE=true
-    # Turn off Apple's pre-compiled headers
-    HOST_CFLAGS='-no-cpp-precomp'
-else
-    # This works for Linux hosts
-    HOST_CFLAGS=''
+
+    # Turn off Apple's pre-compiled headers (for Xcode 1 on Mac OS 10.3)
+    #HOST_CC='gcc -no-cpp-precomp'
+
+    # In theory setting CFLAGS should work but GCC passes those to xgcc!
+    # So CC is used instead
+
+    # Build backward compatible binaries
+    # This also avoids some build failures
+    export MACOSX_DEPLOYMENT_TARGET=10.4
+
+    # GCC 4.0 from Xcode 3.2 can cross-compile fat binaries ... in theory
+    # In practice, -E can't be used with multiple -arch flags
+    HOST_CC='gcc-4.0 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386'
+    HOST_CXX='g++-4.0 -isysroot /Developer/SDKs/MacOSX10.4u.sdk -arch i386'
+    HOST_LDFLAGS=-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk
 fi
 
+export CC="$HOST_CC"
+export CPP="$HOST_CC -E $HOST_CFLAGS"
+export CXX="$HOST_CXX"
+export CXXCPP="$HOST_CXX -E $HOST_CXXFLAGS"
+
 export LANGUAGE=C LANG=C LC_ALL=C
-export CPP="gcc -E $HOST_CFLAGS"
-export CC=gcc
 
 ##############################################
 #
@@ -204,7 +224,7 @@ case "${1:-}" in
     export -f fetch untar decompress prep_linux build_linux package_linux
     export BTC_PRODUCE HOST_TOOLS_PREFIX BTC_LOGS
     export BTC_BUILD BTC_SOURCES BTC_PATCHES BTC_CONFIGS BTC_MIRRORS
-    export BUILD TARGET LINUX_ARCH
+    export TC_PREFIX BUILD TARGET LINUX_ARCH
     cd $BTC_BUILD
     exec bash -c "$2"
     exit 1

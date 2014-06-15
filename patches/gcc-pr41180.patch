@@ -1,0 +1,24 @@
+Fix for gcc 4.3, 4.4.1:
+
+
+gcc   -O2 -no-cpp-precomp -DIN_GCC -DCROSS_DIRECTORY_STRUCTURE  -W -Wall -Wwrite-strings -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition -Wmissing-format-attribute -pedantic -Wno-long-long -Wno-variadic-macros                   -Wno-overlength-strings    -DHAVE_CONFIG_H  -o cc1plus-dummy \
+              cp/cp-lang.o stub-objc.o cp/call.o cp/decl.o cp/expr.o cp/pt.o cp/typeck2.o cp/class.o cp/decl2.o cp/error.o cp/lex.o cp/parser.o cp/ptree.o cp/rtti.o cp/typeck.o cp/cvt.o cp/except.o cp/friend.o cp/init.o cp/method.o cp/search.o cp/semantics.o cp/tree.o cp/repo.o cp/dump.o cp/optimize.o cp/mangle.o cp/cp-objcp-common.o cp/name-lookup.o cp/cxx-pretty-print.o cp/cp-gimplify.o tree-mudflap.o attribs.o c-common.o c-format.o c-pragma.o c-semantics.o c-lex.o c-dump.o  c-pretty-print.o c-opts.o c-pch.o c-incpath.o cppdefault.o c-ppoutput.o c-cppbuiltin.o prefix.o c-gimplify.o c-omp.o tree-inline.o dummy-checksum.o main.o  libbackend.a ../libcpp/libcpp.a ../libdecnumber/libdecnumber.a ../libcpp/libcpp.a ./../intl/libintl.a -liconv  ../libiberty/libiberty.a ../libdecnumber/libdecnumber.a -L/Volumes/btc-13/host_tools/lib -L/Volumes/btc-13/host_tools/lib -lmpfr -lgmp
+ld: duplicate symbol _init_inline_once in libbackend.a(tree-inline.o) and tree-inline.o
+collect2: ld returned 1 exit status
+make[2]: *** [cc1plus-dummy] Error 1
+make[2]: Leaving directory `/Volumes/btc-13/build/gcc-m68k-linux-gnu-3/gcc'
+
+
+--- a/gcc/cp/Make-lang.in
++++ b/gcc/cp/Make-lang.in
+@@ -72,8 +72,8 @@
+ # Shared with C front end:
+ CXX_C_OBJS = attribs.o c-common.o c-format.o c-pragma.o c-semantics.o c-lex.o \
+ 	c-dump.o $(CXX_TARGET_OBJS) c-pretty-print.o c-opts.o c-pch.o \
+-	c-incpath.o cppdefault.o c-ppoutput.o c-cppbuiltin.o prefix.o \
+-	c-gimplify.o c-omp.o tree-inline.o
++	c-incpath.o cppdefault.o c-ppoutput.o c-cppbuiltin.o prefix.o \
++	c-gimplify.o c-omp.o
+ 
+ # Language-specific object files for C++ and Objective C++.
+ CXX_AND_OBJCXX_OBJS = cp/call.o cp/decl.o cp/expr.o cp/pt.o cp/typeck2.o \

@@ -5,26 +5,27 @@ set -e -u
 pushd ~/btc
 
 t=`mktemp -d /tmp/btc.XXXXXX`
-mkdir ${t}/{ok,fail}
+mkdir "${t}"/{ok,fail}
 
 export BTC_LOGS=${t}/logs
 
 profiles=("$@")
 if [ ${#profiles[*]} = 0 ] ; then
-  profiles=(profiles/*-*)
+    profiles=(profiles/*-*)
 fi
 
 for p in "${profiles[@]}" ; do 
     profile=$(basename "$p")
     echo === clean ${profile}
-    scripts/build-tool-chain -p ${profile} -c 'rm -rf ${BTC_BUILD}'
+    scripts/build-tool-chain -p "${profile}" \
+                             -c 'rm -rf "$BTC_BUILD" "$BTC_LOGS"'
     echo === build ${profile}
-    if scripts/build-tool-chain -p ${profile} ; then
+    if scripts/build-tool-chain -p "${profile}" ; then
         echo ... OK
-        mv $BTC_LOGS ${t}/ok/${profile}
+        mv "$BTC_LOGS" "${t}/ok/${profile}"
     else
         echo !!! FAIL
-        mv $BTC_LOGS ${t}/fail/${profile}
+        mv "$BTC_LOGS" "${t}/fail/${profile}"
     fi
     echo
 done

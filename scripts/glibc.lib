@@ -229,7 +229,7 @@ function install_glibc_headers () {
         ;;
     esac
 
-    CC="gcc $arch_defines" CPP="gcc -E $arch_defines" CFLAGS="-O2 ${HOST_CFLAGS}" \
+    CC="$CC $arch_defines" CPP="$CPP $arch_defines" CFLAGS="-O2 ${HOST_CFLAGS}" \
     CXX=false \
     ../${GLIBC_DIST}/configure --prefix=${LIBC_PREFIX} \
     --host=${TARGET} --build=${BUILD} \
@@ -262,7 +262,7 @@ function make_glibc_runtime () {
 
     cp ${BTC_CONFIGS}/glibc-2.3.2-nptl-config.cache config.cache
 
-    BUILD_CC=gcc BUILD_CFLAGS=$HOST_CFLAGS \
+    BUILD_CC="$CC" BUILD_CFLAGS="$HOST_CFLAGS" \
     CC="${TARGET}-gcc $(get_target_cflags)" CFLAGS="-O2" \
     AR=${TARGET}-ar RANLIB=${TARGET}-ranlib \
     CXX=false \
@@ -291,7 +291,7 @@ function install_glibc () {
         cp ${BTC_CONFIGS}/glibc-2.3.2-nptl-config.cache config.cache
     fi
 
-    BUILD_CC=gcc BUILD_CFLAGS=$HOST_CFLAGS \
+    BUILD_CC="$CC" BUILD_CFLAGS="$HOST_CFLAGS" \
     CC="${TARGET}-gcc $(get_target_cflags)" CFLAGS="-O2" \
     AR=${TARGET}-ar RANLIB=${TARGET}-ranlib \
     CXX=false \

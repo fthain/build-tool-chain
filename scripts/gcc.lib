@@ -315,10 +315,15 @@ function prep_gcc () {
     ( gcc-4.0[.-]* )
         patch -p1 < ${BTC_PATCHES}/gcc-4.0.2-zecke-xgcc-cpp.patch
         ;;
-    ( gcc-4.[123][.-]* )
+    ( gcc-4.[12][.-]* )
         patch -p1 < ${BTC_PATCHES}/gcc-4.1.1-zecke-xgcc-cpp.patch
         ;;
-    ( gcc-4.[45][.-]* )
+    ( gcc-4.3[.-]* )
+        patch -p1 < ${BTC_PATCHES}/gcc-4.1.1-zecke-xgcc-cpp.patch
+        # Build failure with Xcode 3.2
+        patch -p1 < ${BTC_PATCHES}/gcc-pr41180.patch
+        ;;
+    ( gcc-4.4[.-]* )
         patch -p1 < ${BTC_PATCHES}/gcc-4.4.1-btc-use-target-cpp-for-lib-configure.patch
         # Build failure
         patch -p1 < ${BTC_PATCHES}/gcc-pr41818.patch
@@ -339,9 +344,10 @@ function prep_gcc () {
 function get_host_ldflags () {
     case ${BUILD} in
     ( *-apple-darwin* )
+        echo " $HOST_LDFLAGS"
         ;;
     ( * )
-        echo " -Wl,-rpath,${HOST_TOOLS_PREFIX}/lib"
+        echo " $HOST_LDFLAGS -Wl,-rpath,${HOST_TOOLS_PREFIX}/lib"
         ;;
     esac
 }

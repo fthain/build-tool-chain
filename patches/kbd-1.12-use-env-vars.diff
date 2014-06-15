@@ -1,0 +1,16 @@
+--- kbd-1.12/src/Makefile.in.orig	2014-06-09 15:47:54.000000000 +1000
++++ kbd-1.12/src/Makefile.in	2014-06-09 15:50:25.000000000 +1000
+@@ -54,10 +54,10 @@
+ 
+ WARN	= -Wall -Wmissing-prototypes -Wstrict-prototypes
+ DEFS	= -DDATADIR=\"$(DATA_DIR)\"
+-CFLAGS  = -O2
+-LDFLAGS = -s
++CFLAGS  ?= -O2
++LDFLAGS ?= -s
+ 
+-CC	= gcc
++CC	?= gcc
+ YACC	= bison -y
+ LEX	= flex -8
+ 

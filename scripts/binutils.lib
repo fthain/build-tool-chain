@@ -131,12 +131,12 @@ function install_binutils () {
     # See http://sources.redhat.com/bugzilla/show_bug.cgi?id=3004
     ln -nsf ${TARGET}-readelf ${TC_PREFIX}/bin/readelf
 
-    list_manifest install_binutils | grep '[.]la$' | xargs -r rm -v
+    rm -v $( list_manifest install_binutils | grep '[.]la$' ) || true
 
     # The elf2flt build uses these
     mkdir -p ${BTC_BUILD}/binutils-elf2flt
     cd ${BTC_BUILD}/binutils-elf2flt
-    list_manifest install_binutils | grep '[.]a$' | xargs -r sh -c 'mv "$@" .' sh
+    mv -v $( list_manifest install_binutils | grep '[.]a$' ) . || true
     cp ${BTC_BUILD}/${BINUTILS_DIST}/include/{filenames,libiberty}.h .
 
     # The link is sufficient for man AUTOPATH

@@ -54,10 +54,11 @@ function fetch () {
 
 function untar () {
     local dist
-    dist="${1%tar.bz2}"
+    local -a candidates
+    dist="${1}"
+    dist="${dist%tar.bz2}"
     dist="${dist%tar.gz}"
     dist="${dist%tar}"
-    local -a candidates
     if [ "$1" = "$dist" ] ; then
         candidates=( "$BTC_SOURCES/$1"* )
     else
