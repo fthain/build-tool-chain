@@ -166,8 +166,11 @@ function install_flex () {
     test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
 
     echo preparing $1
+    local fu
+    fu=${1/a/.a}
     pushd $BTC_BUILD >/dev/null
-    untar $1 http://prdownloads.sourceforge.net/flex/
+    untar $1 http://mirror.aarnet.edu.au/pub/gentoo/distfiles/${1}.tar.gz \
+             http://sourceforge.net/projects/flex/files/flex/${fu#*-}/${1}.tar.gz/download
 
     mv ${1%a} $1
     patch -d $1 -p1 < ${BTC_PATCHES}/flex-2.5.4a-r6.diff
@@ -193,14 +196,15 @@ function install_gmp () {
     local cflags
     cflags=
     case ${BUILD} in
-    ( powerpc-apple-darwin* )
-        cflags="-std=gnu89 -Wa,-force_cpusubtype_ALL"
-        opts="--with-pic"
-        ;;
+#    ( powerpc-apple-darwin* )
+#        cflags="-std=gnu89 -Wa,-force_cpusubtype_ALL"
+#        opts="--with-pic"
+#        ;;
     ( i386-apple-darwin* )
-        # Build failure on Mac OS 10.5
+        # Build failure: duplicate symbols due to extern inline issue
         cflags="-std=gnu89"
-        opts="--build=none-apple-darwin"
+#        # Build failure on Mac OS 10.5
+#        opts="--build=none-apple-darwin"
         ;;
     esac
     CFLAGS="-O2 $HOST_CFLAGS $cflags" CXXFLAGS="-O2 $HOST_CXXFLAGS $cflags" \
@@ -230,17 +234,21 @@ function install_mpfr () {
     untar $1 http://www.mpfr.org/$1/
 
     pushd $1 >/dev/null
-    patch -p1 < ${BTC_PATCHES}/mpfr-2.4.2-gentoo.patch
+    if test "${1#*-}" = 2.4.2 ; then
+      patch -p1 < ${BTC_PATCHES}/mpfr-2.4.2-gentoo.patch
+    elif test "${1#*-}" = 3.1.2 ; then
+      patch -p1 < ${BTC_PATCHES}/mpfr-3.1.2_p5-gentoo.diff
+    fi
 
     echo building $1
 
     local opts
     opts=
-    case ${BUILD} in
-    ( i386-apple-darwin* )
-        opts="--build=none-apple-darwin"
-        ;;
-    esac
+#    case ${BUILD} in
+#    ( i386-apple-darwin* )
+#        opts="--build=none-apple-darwin"
+#        ;;
+#    esac
 
     CFLAGS="-O2 $HOST_CFLAGS" \
     ./configure --prefix=${HOST_TOOLS_PREFIX} \
@@ -327,7 +335,7 @@ function install_mpc () {
 
     echo unpacking $1
     pushd $BTC_BUILD >/dev/null
-    untar $1 http://www.multiprecision.org/mpc/download/$1.tar.gz
+    untar $1 http://www.multiprecision.org/mpc/download/${1}.tar.gz
 
     pushd $1 >/dev/null
     echo building $1

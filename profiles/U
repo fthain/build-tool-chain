@@ -1,4 +1,4 @@
-# Testing & development
+# uClibc testing
 METHOD=U
 LINUX_DIST=linux-2.6.34
 UCLIBC_DIST=uClibc-0.9.30.1

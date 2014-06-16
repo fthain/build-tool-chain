@@ -1,4 +1,4 @@
 GCC_DIST=gcc-4.6.4
 TARGET=m68k-linux-gnu
 
-. ${BTC_PROFILES}/F
+. ${BTC_PROFILES}/E7

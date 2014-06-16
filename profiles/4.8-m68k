@@ -1,0 +1,6 @@
+GCC_DIST=gcc-4.8.3
+TARGET=m68k-linux-gnu
+
+. ${BTC_PROFILES}/E8
+
+GLIBC_DIST=glibc-2.18 # should be 2.19 but m68k is not there yet

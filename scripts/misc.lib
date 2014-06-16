@@ -27,9 +27,9 @@ function fetch () {
     urls=( "" )
     for u in "${dir_urls[@]}" ; do
         if [ -z "${u##*/}" ] ; then
-            urls=( "${urls[@]}" "$u/$dist.tar.bz2" "$u/$dist.tar.gz" )
+            urls=( "${urls[@]}" "${u}${dist}.tar.bz2" "${u}${dist}.tar.gz" )
         else
-            urls=( "${urls[@]}" "$u" )
+            urls=( "${urls[@]}" "${u}" )
         fi
     done
     (
@@ -123,7 +123,7 @@ function manifest () {
 }
 
 function list_manifest () {
-    bzip2 -dc ${BTC_LOGS}/$1.list.bz2
+    bzip2 -dc ${BTC_LOGS}/${1}.list.bz2
 }
 
 function log () {

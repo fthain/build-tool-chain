@@ -1,4 +1,4 @@
 GCC_DIST=gcc-4.4.5
 TARGET=x86_64-linux-gnu
 
-. ${BTC_PROFILES}/E
+. ${BTC_PROFILES}/E6
