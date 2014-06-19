@@ -20,53 +20,53 @@ function prep_gcc_core () {
         ( gcc-2.95.3 )
             decompress ${BTC_PATCHES}/gcc-core-2.95_2.95.4.ds15-27-debian-m68k.diff | patch -p1
             # Reverse unwanted Debian patch
-            patch -p1 -R < ${BTC_PATCHES}/gcc-core-295-install-names.patch
+            e patch -p1 -R -i ${BTC_PATCHES}/gcc-core-295-install-names.patch
             ;;
         ( gcc-3.3.6 )
             decompress ${BTC_PATCHES}/gcc-core-3.3_3.3.6ds1-15-debian-m68k.diff | patch -p1
             # Reverse unwanted Debian patch
-            patch -p0 -R < ${BTC_PATCHES}/gcc-core-336-rename-info-files.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/gcc-core-336-rename-info-files.dpatch
             ;;
         ( gcc-4.1.2 )
             decompress ${BTC_PATCHES}/gcc-core-4.1_4.1.2-25-debian-m68k.diff | patch -p1
             # Build failure
-            patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/multiarch-include.dpatch
             # Etch binutils doesn't do GNU hash
-            patch -p0 -R < ${BTC_PATCHES}/gcc-hash-style-both.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/gcc-hash-style-both.dpatch
             ;;
         ( gcc-4.3.2 )
             decompress ${BTC_PATCHES}/gcc-core-4.3_4.3.2-1.1-debian-m68k.diff | patch -p1
             # Reverse Debian inline-gnu99 hack
-            patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
             # Build failure
-            patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/multiarch-include.dpatch
             ;;
         ( gcc-4.3.5 )
             decompress ${BTC_PATCHES}/gcc-core-4.3_4.3.5-2-debian-m68k.diff | patch -p1
             # Reverse Debian inline-gnu99 hack
-            patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
             ;;
         ( gcc-4.4.5 )
             decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.5-8-debian-m68k.diff | patch -p1
             # Reverse Debian libgomp info rename
-            patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
+            e patch -p2 -R -i ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
             # Bug fixes
-            patch -p1 < ${BTC_PATCHES}/gcc-pr39531.patch
-            patch -p1 < ${BTC_PATCHES}/gcc-pr41302.patch
-            patch -p0 < ${BTC_PATCHES}/gcc-pr43804.diff
-            patch -p1 < ${BTC_PATCHES}/gcc-pr37053.patch
+            e patch -p1 -i ${BTC_PATCHES}/gcc-pr39531.patch
+            e patch -p1 -i ${BTC_PATCHES}/gcc-pr41302.patch
+            e patch -p0 -i ${BTC_PATCHES}/gcc-pr43804.diff
+            e patch -p1 -i ${BTC_PATCHES}/gcc-pr37053.patch
             ;;
         ( gcc-4.4.6 )
             decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.6-11-debian-m68k.diff | patch -p1
             # Reverse Debian libgomp info rename
-            patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
+            e patch -p2 -R -i ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
             # Reverse Debian -print-file-name munging
-            patch -p2 -R < ${BTC_PATCHES}/gcc-print-file-name.diff
+            e patch -p2 -R -i ${BTC_PATCHES}/gcc-print-file-name.diff
             ;;
         ( gcc-4.5[.-]* )
-            patch -p0 < ${BTC_PATCHES}/gcc-pr43804.diff
-            patch -p1 < ${BTC_PATCHES}/gcc-pr45638.patch
-            patch -p1 < ${BTC_PATCHES}/gcc-pr46179.diff
+            e patch -p0 -i ${BTC_PATCHES}/gcc-pr43804.diff
+            e patch -p1 -i ${BTC_PATCHES}/gcc-pr45638.patch
+            e patch -p1 -i ${BTC_PATCHES}/gcc-pr46179.diff
             ;;
         esac
         ;;
@@ -75,24 +75,24 @@ function prep_gcc_core () {
         ( gcc-2.95.3 )
             decompress ${BTC_PATCHES}/gcc-core-2.95_2.95.4.ds15-27-debian-powerpc.diff | patch -p1
             # Reverse unwanted Debian patch
-            patch -p1 -R < ${BTC_PATCHES}/gcc-core-295-install-names.patch
+            e patch -p1 -R -i ${BTC_PATCHES}/gcc-core-295-install-names.patch
             ;;
         ( gcc-3.3.6 )
             decompress ${BTC_PATCHES}/gcc-core-3.3_3.3.6ds1-15-debian-powerpc.diff | patch -p1
             # Reverse unwanted Debian patch
-            patch -p0 -R < ${BTC_PATCHES}/gcc-core-336-rename-info-files.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/gcc-core-336-rename-info-files.dpatch
             ;;
         ( gcc-4.1.2 )
             decompress ${BTC_PATCHES}/gcc-core-4.1_4.1.2-25-debian-powerpc.diff | patch -p1
             # Build failure
-            patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/multiarch-include.dpatch
             # Etch binutils doesn't do GNU hash
-            patch -p0 -R < ${BTC_PATCHES}/gcc-hash-style-both.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/gcc-hash-style-both.dpatch
             ;;
         ( gcc-4.3.2 )
             decompress ${BTC_PATCHES}/gcc-core-4.3_4.3.2-1.1-debian-powerpc.diff | patch -p1
             # Build failure
-            patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/multiarch-include.dpatch
             ;;
         ( gcc-4.3.5 )
             decompress ${BTC_PATCHES}/gcc-core-4.3_4.3.5-2-debian-powerpc.diff | patch -p1
@@ -100,7 +100,7 @@ function prep_gcc_core () {
         ( gcc-4.4.5 )
             decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.5-8-debian-powerpc.diff | patch -p1
             # Reverse Debian libgomp info rename
-            patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
+            e patch -p2 -R -i ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
             ;;
         esac
         ;;
@@ -109,7 +109,7 @@ function prep_gcc_core () {
         ( gcc-4.4.5 )
             decompress ${BTC_PATCHES}/gcc-core-4.4_4.4.5-8-debian-amd64.diff | patch -p1
             # Reverse Debian libgomp info rename
-            patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
+            e patch -p2 -R -i ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
             ;;
         esac
         ;;
@@ -117,7 +117,7 @@ function prep_gcc_core () {
         case ${1} in
         ( gcc-3.3[.-]* )
             # For binutils > 2.15
-            patch -p0 < ${BTC_PATCHES}/gcc-3.3-mips-embedded-pic.patch
+            e patch -p0 -i ${BTC_PATCHES}/gcc-3.3-mips-embedded-pic.patch
             ;;
         esac
         ;;
@@ -126,43 +126,43 @@ function prep_gcc_core () {
     case ${1} in
     ( gcc-2.95.* )
         # Crosstool patches
-        patch -p1 < ${BTC_PATCHES}/gcc-pr3106.patch
-        patch -p1 < ${BTC_PATCHES}/backport-config.gcc-1.4.patch
+        e patch -p1 -i ${BTC_PATCHES}/gcc-pr3106.patch
+        e patch -p1 -i ${BTC_PATCHES}/backport-config.gcc-1.4.patch
         # More autotools fixes
-        patch -p1 < ${BTC_PATCHES}/gcc-2.95.2-host-darwin.diff
+        e patch -p1 -i ${BTC_PATCHES}/gcc-2.95.2-host-darwin.diff
         # makeinfo crash
-        patch -p1 < ${BTC_PATCHES}/gcc-2.95.3-use-host-makeinfo.diff
+        e patch -p1 -i ${BTC_PATCHES}/gcc-2.95.3-use-host-makeinfo.diff
         # Fix names of cross gcov and cpp
-        patch -p1 < ${BTC_PATCHES}/gcc-2.95-AR_FOR_TARGET-RANLIB_FOR_TARGET-fix-target-name.patch
-        patch -p1 < ${BTC_PATCHES}/gcc-2.95-CPP_CROSS_NAME.patch
-        patch -p1 < ${BTC_PATCHES}/gcc-2.95-btc-GCOV_CROSS_NAME.diff
+        e patch -p1 -i ${BTC_PATCHES}/gcc-2.95-AR_FOR_TARGET-RANLIB_FOR_TARGET-fix-target-name.patch
+        e patch -p1 -i ${BTC_PATCHES}/gcc-2.95-CPP_CROSS_NAME.patch
+        e patch -p1 -i ${BTC_PATCHES}/gcc-2.95-btc-GCOV_CROSS_NAME.diff
         ;;
     ( gcc-3.[01][.-]* )
         ;;
     ( gcc-3.* )
         # We build gcc-core before libc is built
-        patch -p0 < ${BTC_PATCHES}/gcc-3.2-btc-shlib-sans-libc.patch
+        e patch -p0 -i ${BTC_PATCHES}/gcc-3.2-btc-shlib-sans-libc.patch
         ;;
     ( gcc-4.0[.-]* )
         # We build gcc-core before libc is built
-        patch -p1 < ${BTC_PATCHES}/gcc-4-no-libc-yet.diff
+        e patch -p1 -i ${BTC_PATCHES}/gcc-4-no-libc-yet.diff
         # Bug fix
-        #patch -p1 < ${BTC_PATCHES}/gcc-4.0-pr20583.patch
+        #e patch -p1 -i ${BTC_PATCHES}/gcc-4.0-pr20583.patch
         ;;
     ( gcc-4.[123][.-]* | gcc-4.4.[012] )
         # We build gcc-core before libc is built
-        patch -p1 < ${BTC_PATCHES}/gcc-4-no-libc-yet.diff
+        e patch -p1 -i ${BTC_PATCHES}/gcc-4-no-libc-yet.diff
         ;;
     ( gcc-4.* )
         # We build gcc-core before libc is built
-        patch -p1 < ${BTC_PATCHES}/gcc-4.4.3-no-libc-yet.diff
+        e patch -p1 -i ${BTC_PATCHES}/gcc-4.4.3-no-libc-yet.diff
         ;;
     esac
 
     case ${1} in
     ( gcc-[23].* | gcc-4.0[.-]* )
         # build failure
-        patch -p1 < ${BTC_PATCHES}/gcc-3-creat-needs-open3.patch
+        e patch -p1 -i ${BTC_PATCHES}/gcc-3-creat-needs-open3.patch
         ;;
     esac
 }
@@ -181,54 +181,54 @@ function prep_gcc () {
         ( gcc-2.95.3 )
             decompress ${BTC_PATCHES}/gcc-2.95_2.95.4.ds15-27-debian-m68k.diff | patch -p1
             # Reverse unwanted Debian patch
-            patch -p1 -R < ${BTC_PATCHES}/gcc-295-install-names.patch
+            e patch -p1 -R -i ${BTC_PATCHES}/gcc-295-install-names.patch
             ;;
         ( gcc-3.3.6 )
             decompress ${BTC_PATCHES}/gcc-3.3_3.3.6ds1-15-debian-m68k.diff | patch -p1
             # Reverse unwanted Debian patch
-            patch -p0 -R < ${BTC_PATCHES}/gcc-336-rename-info-files.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/gcc-336-rename-info-files.dpatch
             ;;
         ( gcc-4.1.2 )
             decompress ${BTC_PATCHES}/gcc-4.1_4.1.2-25-debian-m68k.diff | patch -p1
             # Build failure
-            patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/multiarch-include.dpatch
             # Etch binutils doesn't do GNU hash
-            patch -p0 -R < ${BTC_PATCHES}/gcc-hash-style-both.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/gcc-hash-style-both.dpatch
             ;;
         ( gcc-4.3.2 )
             decompress ${BTC_PATCHES}/gcc-4.3_4.3.2-1.1-debian-m68k.diff | patch -p1
             # Reverse Debian inline-gnu99 hack
-            patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
             # Build failure
-            patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/multiarch-include.dpatch
             ;;
         ( gcc-4.3.5 )
             decompress ${BTC_PATCHES}/gcc-4.3_4.3.5-2-debian-m68k.diff | patch -p1
             # Reverse Debian inline-gnu99 hack
-            patch -p0 -R < ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/m68k-allow-gnu99.dpatch
             ;;
         ( gcc-4.4.5 )
             decompress ${BTC_PATCHES}/gcc-4.4_4.4.5-8-debian-m68k.diff | patch -p1
             # Reverse Debian libgomp info rename
-            patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
+            e patch -p2 -R -i ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
             # Bug fixes
-            patch -p1 < ${BTC_PATCHES}/gcc-pr39531.patch
-            patch -p1 < ${BTC_PATCHES}/gcc-pr41302.patch
-            patch -p0 < ${BTC_PATCHES}/gcc-pr43804.diff
-            patch -p1 < ${BTC_PATCHES}/gcc-pr37053.patch
-            patch -p1 < ${BTC_PATCHES}/gcc-pr46179.diff
+            e patch -p1 -i ${BTC_PATCHES}/gcc-pr39531.patch
+            e patch -p1 -i ${BTC_PATCHES}/gcc-pr41302.patch
+            e patch -p0 -i ${BTC_PATCHES}/gcc-pr43804.diff
+            e patch -p1 -i ${BTC_PATCHES}/gcc-pr37053.patch
+            e patch -p1 -i ${BTC_PATCHES}/gcc-pr46179.diff
             ;;
         ( gcc-4.4.6 )
             decompress ${BTC_PATCHES}/gcc-4.4_4.4.6-11-debian-m68k.diff | patch -p1
             # Reverse Debian libgomp info rename
-            patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
+            e patch -p2 -R -i ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
             # Reverse Debian -print-file-name munging
-            patch -p2 -R < ${BTC_PATCHES}/gcc-print-file-name.diff
+            e patch -p2 -R -i ${BTC_PATCHES}/gcc-print-file-name.diff
             ;;
         ( gcc-4.5[.-]* )
-            patch -p0 < ${BTC_PATCHES}/gcc-pr43804.diff
-            patch -p1 < ${BTC_PATCHES}/gcc-pr45638.patch
-            patch -p1 < ${BTC_PATCHES}/gcc-pr46179.diff
+            e patch -p0 -i ${BTC_PATCHES}/gcc-pr43804.diff
+            e patch -p1 -i ${BTC_PATCHES}/gcc-pr45638.patch
+            e patch -p1 -i ${BTC_PATCHES}/gcc-pr46179.diff
             ;;
         esac
         ;;
@@ -237,24 +237,24 @@ function prep_gcc () {
         ( gcc-2.95.3 )
             decompress ${BTC_PATCHES}/gcc-2.95_2.95.4.ds15-27-debian-powerpc.diff | patch -p1
             # Reverse unwanted Debian patch
-            patch -p1 -R < ${BTC_PATCHES}/gcc-295-install-names.patch
+            e patch -p1 -R -i ${BTC_PATCHES}/gcc-295-install-names.patch
             ;;
         ( gcc-3.3.6 )
             decompress ${BTC_PATCHES}/gcc-3.3_3.3.6ds1-15-debian-powerpc.diff | patch -p1
             # Reverse unwanted Debian patch
-            patch -p0 -R < ${BTC_PATCHES}/gcc-336-rename-info-files.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/gcc-336-rename-info-files.dpatch
             ;;
         ( gcc-4.1.2 )
             decompress ${BTC_PATCHES}/gcc-4.1_4.1.2-25-debian-powerpc.diff | patch -p1
             # Build failure
-            patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/multiarch-include.dpatch
             # Etch binutils doesn't do GNU hash
-            patch -p0 -R < ${BTC_PATCHES}/gcc-hash-style-both.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/gcc-hash-style-both.dpatch
             ;;
         ( gcc-4.3.2 )
             decompress ${BTC_PATCHES}/gcc-4.3_4.3.2-1.1-debian-powerpc.diff | patch -p1
             # Build failure
-            patch -p0 -R < ${BTC_PATCHES}/multiarch-include.dpatch
+            e patch -p0 -R -i ${BTC_PATCHES}/multiarch-include.dpatch
             ;;
         ( gcc-4.3.5 )
             decompress ${BTC_PATCHES}/gcc-4.3_4.3.5-2-debian-powerpc.diff | patch -p1
@@ -262,7 +262,7 @@ function prep_gcc () {
         ( gcc-4.4.5 )
             decompress ${BTC_PATCHES}/gcc-4.4_4.4.5-8-debian-powerpc.diff | patch -p1
             # Reverse Debian libgomp info rename
-            patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
+            e patch -p2 -R -i ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
             ;;
         esac
         ;;
@@ -271,9 +271,9 @@ function prep_gcc () {
         ( gcc-4.4.5 )
             decompress ${BTC_PATCHES}/gcc-4.4_4.4.5-8-debian-amd64.diff | patch -p1
             # Reverse Debian libgomp info rename
-            patch -p2 -R < ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
+            e patch -p2 -R -i ${BTC_PATCHES}/gcc-4.4-rename-libgomp-info-file-debian.diff
             # Start files are installed in sysroot/lib64 not sysroot/lib
-            patch -p1 < ${BTC_PATCHES}/gcc-4.4-uniarch-x86-64-start-file-paths.diff
+            e patch -p1 -i ${BTC_PATCHES}/gcc-4.4-uniarch-x86-64-start-file-paths.diff
             ;;
         esac
         ;;
@@ -281,7 +281,7 @@ function prep_gcc () {
         case ${1} in
         ( gcc-3.3[.-]* )
             # For binutils > 2.15
-            patch -p0 < ${BTC_PATCHES}/gcc-3.3-mips-embedded-pic.patch
+            e patch -p0 -i ${BTC_PATCHES}/gcc-3.3-mips-embedded-pic.patch
             ;;
         esac
         ;;
@@ -290,53 +290,53 @@ function prep_gcc () {
     case ${1} in
     ( gcc-2.95.* )
         # Crosstool patches
-        patch -p1 < ${BTC_PATCHES}/gcc-pr3106.patch
-        patch -p1 < ${BTC_PATCHES}/backport-config.gcc-1.4.patch
+        e patch -p1 -i ${BTC_PATCHES}/gcc-pr3106.patch
+        e patch -p1 -i ${BTC_PATCHES}/backport-config.gcc-1.4.patch
         # More autotools fixes
-        patch -p1 < ${BTC_PATCHES}/gcc-2.95.2-host-darwin.diff
+        e patch -p1 -i ${BTC_PATCHES}/gcc-2.95.2-host-darwin.diff
         # makeinfo crash
-        patch -p1 < ${BTC_PATCHES}/gcc-2.95.3-use-host-makeinfo.diff
+        e patch -p1 -i ${BTC_PATCHES}/gcc-2.95.3-use-host-makeinfo.diff
         # Fix names of cross gcov and cpp
-        patch -p1 < ${BTC_PATCHES}/gcc-2.95-AR_FOR_TARGET-RANLIB_FOR_TARGET-fix-target-name.patch
-        patch -p1 < ${BTC_PATCHES}/gcc-2.95-CPP_CROSS_NAME.patch
-        patch -p1 < ${BTC_PATCHES}/gcc-2.95-btc-GCOV_CROSS_NAME.diff
+        e patch -p1 -i ${BTC_PATCHES}/gcc-2.95-AR_FOR_TARGET-RANLIB_FOR_TARGET-fix-target-name.patch
+        e patch -p1 -i ${BTC_PATCHES}/gcc-2.95-CPP_CROSS_NAME.patch
+        e patch -p1 -i ${BTC_PATCHES}/gcc-2.95-btc-GCOV_CROSS_NAME.diff
         # f77 build failure
-        patch -p1 < ${BTC_PATCHES}/gcc-pr26709.diff
+        e patch -p1 -i ${BTC_PATCHES}/gcc-pr26709.diff
         ;;
     ( gcc-3.3[.-]* )
-        patch -p1 < ${BTC_PATCHES}/gcc-3.3.4-zecke-xgcc-cpp.patch
+        e patch -p1 -i ${BTC_PATCHES}/gcc-3.3.4-zecke-xgcc-cpp.patch
         # f77 build failure
-        patch -p1 < ${BTC_PATCHES}/gcc-3.3-pr26709.diff
+        e patch -p1 -i ${BTC_PATCHES}/gcc-3.3-pr26709.diff
         ;;
     ( gcc-3.4[.-]* )
-        patch -p1 < ${BTC_PATCHES}/gcc-3.4.1-btc-use-target-cpp-for-lib-configure.patch
-        #patch -p1 < ${BTC_PATCHES}/gcc-3.4.4-zecke-xgcc-cpp.patch
+        e patch -p1 -i ${BTC_PATCHES}/gcc-3.4.1-btc-use-target-cpp-for-lib-configure.patch
+        #e patch -p1 -i ${BTC_PATCHES}/gcc-3.4.4-zecke-xgcc-cpp.patch
         ;;
     ( gcc-4.0[.-]* )
-        patch -p1 < ${BTC_PATCHES}/gcc-4.0.2-zecke-xgcc-cpp.patch
+        e patch -p1 -i ${BTC_PATCHES}/gcc-4.0.2-zecke-xgcc-cpp.patch
         ;;
     ( gcc-4.[12][.-]* )
-        patch -p1 < ${BTC_PATCHES}/gcc-4.1.1-zecke-xgcc-cpp.patch
+        e patch -p1 -i ${BTC_PATCHES}/gcc-4.1.1-zecke-xgcc-cpp.patch
         ;;
     ( gcc-4.3[.-]* )
-        patch -p1 < ${BTC_PATCHES}/gcc-4.1.1-zecke-xgcc-cpp.patch
+        e patch -p1 -i ${BTC_PATCHES}/gcc-4.1.1-zecke-xgcc-cpp.patch
         # Build failure with Xcode 3.2
-        patch -p1 < ${BTC_PATCHES}/gcc-pr41180.patch
+        e patch -p1 -i ${BTC_PATCHES}/gcc-pr41180.patch
         ;;
     ( gcc-4.4[.-]* )
-        patch -p1 < ${BTC_PATCHES}/gcc-4.4.1-btc-use-target-cpp-for-lib-configure.patch
+        e patch -p1 -i ${BTC_PATCHES}/gcc-4.4.1-btc-use-target-cpp-for-lib-configure.patch
         # Build failure
-        patch -p1 < ${BTC_PATCHES}/gcc-pr41818.patch
+        e patch -p1 -i ${BTC_PATCHES}/gcc-pr41818.patch
         ;;
     ( gcc-4.* )
-        patch -p1 < ${BTC_PATCHES}/gcc-4.4.1-btc-use-target-cpp-for-lib-configure.patch
+        e patch -p1 -i ${BTC_PATCHES}/gcc-4.4.1-btc-use-target-cpp-for-lib-configure.patch
         ;;
     esac
 
     case ${1} in
     ( gcc-[23].* | gcc-4.0[.-]* )
         # Build failure
-        patch -p1 < ${BTC_PATCHES}/gcc-3-creat-needs-open3.patch
+        e patch -p1 -i ${BTC_PATCHES}/gcc-3-creat-needs-open3.patch
         ;;
     esac
 }

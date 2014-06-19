@@ -15,84 +15,84 @@ function prep_binutils () {
         # Debian source package
         decompress ${BTC_PATCHES}/binutils_2.12.90.0.1-4-debian-all.diff | patch -p1
         # Fix for recent gcc
-        patch -p1 < ${BTC_PATCHES}/binutils-2.12.90.0.1-4-btc-gcc4.diff
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.12.90.0.1-4-btc-gcc4.diff
         # Fix for recent glibc
-        patch -p0 < ${BTC_PATCHES}/binutils-2.12-_bfd_ar_spacepad.patch
+        e patch -p0 -i ${BTC_PATCHES}/binutils-2.12-_bfd_ar_spacepad.patch
         # Move lib, include and ldscripts directories
-        patch -p1 < ${BTC_PATCHES}/binutils-2.12-lib-include-dirs.diff
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.12-lib-include-dirs.diff
         ;;
     ( binutils-2.15 | binutils-2.15.* )
         # Debian source package
         decompress ${BTC_PATCHES}/binutils_2.15-6-debian-all.diff | patch -p1
         # Fix to support April '04 glibc asm (m68k/arm/cris)
-        patch -p1 < ${BTC_PATCHES}/binutils-2.15-NO_APP-mode-line-comment.patch
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.15-NO_APP-mode-line-comment.patch
         ;;
     ( binutils-2.16 | binutils-2.16.* )
         # Fix to support April '04 glibc asm (m68k/arm/cris)
-        patch -p1 < ${BTC_PATCHES}/binutils-2.15-NO_APP-mode-line-comment.patch
-        patch -p1 < ${BTC_PATCHES}/702-binutils-skip-comments.patch
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.15-NO_APP-mode-line-comment.patch
+        e patch -p1 -i ${BTC_PATCHES}/702-binutils-skip-comments.patch
         ;;
     ( binutils-2.17 )
         # Debian source package
         decompress ${BTC_PATCHES}/binutils_2.17-3+etch1-debian-all.diff | patch -p1
         # Build failure
-        patch -p1 < ${BTC_PATCHES}/binutils-2.17-configure-makeinfo-version-test.diff
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.17-configure-makeinfo-version-test.diff
         # Avoid fatal compiler warnings
-        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         ;;
     ( binutils-2.17.50.0.2 )
         # Avoid fatal compiler warnings
-        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
-        patch -p1 < ${BTC_PATCHES}/702-binutils-skip-comments.patch
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        e patch -p1 -i ${BTC_PATCHES}/702-binutils-skip-comments.patch
         ;;
     ( binutils-2.17.50.0.18 )
         # Avoid fatal compiler warnings
-        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
-        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.18-fix-warning.diff
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.18-fix-warning.diff
         ;;
     ( binutils-2.18 )
         # Debian source package
         decompress ${BTC_PATCHES}/binutils_2.18.1~cvs20080103-7-debian-all.diff | patch -p1
         # Avoid fatal compiler warnings
-        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         # Darwin link problems
-        patch -p1 < ${BTC_PATCHES}/binutils-2.18-darwin-libbfd-link.diff
-        patch -p1 < ${BTC_PATCHES}/binutils-2.18-darwin-libopcodes-link.diff
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.18-darwin-libbfd-link.diff
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.18-darwin-libopcodes-link.diff
         ;;
     ( binutils-2.19.51 )
         # Avoid fatal compiler warnings
-        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         # Move ldscripts directory
-        patch -p1 < ${BTC_PATCHES}/binutils-2.19.51-scriptdir.diff
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.19.51-scriptdir.diff
         ;;
     ( binutils-2.20.1 )
         # Debian source package
         decompress ${BTC_PATCHES}/binutils_2.20.1-16-debian-all.diff | patch -p1
         # Avoid fatal compiler warnings
-        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         # Darwin link problem
-        patch -p1 < ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
         ;;
     ( binutils-2.21.52 )
         # Debian source package
         decompress ${BTC_PATCHES}/binutils_2.21.52.20110606-2-debian-all.diff | patch -p1
         # Avoid fatal compiler warnings
-        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         # Darwin link problem
-        patch -p1 < ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
         ;;
     ( binutils-2.21.90 )
         # Debian source package
         decompress ${BTC_PATCHES}/binutils_2.21.90.20111025-1-debian-all.diff | patch -p1
         # Avoid fatal compiler warnings
-        patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         # Darwin link problem
-        patch -p1 < ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
         ;;
     esac
 ## Apply HJL patches according to patches/README, e.g.
-##    patch -p1 < patches/libtool-dso.patch
-#    patch -p1 < ${BTC_PATCHES}/binutils-2.17.50.0.2-README-script-portability.diff
+##    e patch -p1 -i patches/libtool-dso.patch
+#    e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-README-script-portability.diff
 #    sh patches/README
 }
 

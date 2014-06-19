@@ -9,12 +9,12 @@ function prep_elf2flt () {
     mv ${1%-*} $1
     cd $1
 
-    patch -p1 < ${BTC_PATCHES}/elf2flt-darwin-build.diff
+    e patch -p1 -i ${BTC_PATCHES}/elf2flt-darwin-build.diff
 
-    sed -i -e 's,$(target_libdir)/$(LDFILE),$(target_libdir)/ldscripts/$(LDFILE),' Makefile.in 
-    sed -i -e '/tooldir, "...lib"/s,lib,lib/ldscripts,' ld-elf2flt.c
-    sed -i -e '/"${TOOLDIR}....lib"/s,lib,lib/ldscripts,' ld-elf2flt.in  
-    mv LICENSE.TXT COPYING
+    e sed -i -e 's,$(target_libdir)/$(LDFILE),$(target_libdir)/ldscripts/$(LDFILE),' Makefile.in 
+    e sed -i -e '/tooldir, "...lib"/s,lib,lib/ldscripts,' ld-elf2flt.c
+    e sed -i -e '/"${TOOLDIR}....lib"/s,lib,lib/ldscripts,' ld-elf2flt.in  
+    e mv LICENSE.TXT COPYING
 }
 
 function install_elf2flt () {

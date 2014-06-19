@@ -26,151 +26,151 @@ function prep_glibc () {
         # Debian sources
         decompress ${BTC_PATCHES}/glibc_2.2.5-11.8-debian.diff | patch -p1
         # Create the 2.2.5-11.8 symlink that patch can't
-        ln -s . db/db1
+        e ln -s . db/db1
         # Fix for glibc-2.2 with recent kernel headers (m68k)
-        patch -p1 < ${BTC_PATCHES}/glibc-2.2.5-pread64_pwrite64.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.2.5-pread64_pwrite64.diff
         # Permit install headers with gcc 4
-        patch -p1 < ${BTC_PATCHES}/glibc-2.2.5-btc-gcc4.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.2.5-btc-gcc4.diff
         ;;
     ( glibc-2.3.2 )
         ## Some patches for vanila 2.3.2
-        #patch -p0 < ${BTC_PATCHES}/glibc-2.3.2-debian-alpha-pic.patch
-        #patch -p1 < ${BTC_PATCHES}/glibc-2.3.2-gentoo-alpha-crti.patch
-        #patch -p1 < ${BTC_PATCHES}/glibc-2.3.2-lfs-sscanf-1.patch
+        #e patch -p0 -i ${BTC_PATCHES}/glibc-2.3.2-debian-alpha-pic.patch
+        #e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.2-gentoo-alpha-crti.patch
+        #e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.2-lfs-sscanf-1.patch
 
         # Debian sources
         decompress ${BTC_PATCHES}/glibc_2.3.2.ds1-22sarge6-debian.diff | patch -p1
         # Permit install headers with gcc 4
-        patch -p1 < ${BTC_PATCHES}/glibc-2.3.3-btc-gcc4.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.3-btc-gcc4.diff
         # Fix for systems on which sh is not bash
-        patch -p1 < ${BTC_PATCHES}/glibc-2.3.3-portable-sh.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.3-portable-sh.diff
         # Make install headers work without a mips compiler
-        patch -p1 < ${BTC_PATCHES}/glibc-2.3.2-btc-allow-wrong-cc.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.2-btc-allow-wrong-cc.diff
         # alpha build failures
-        patch -p1 < ${BTC_PATCHES}/glibc-2.3.3-lfs-fix_pread_pwrite_syscalls_in_alpha.patch
-        patch -p0 < ${BTC_PATCHES}/glibc-2.3-alpha-cfi-instructions.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.3-lfs-fix_pread_pwrite_syscalls_in_alpha.patch
+        e patch -p0 -i ${BTC_PATCHES}/glibc-2.3-alpha-cfi-instructions.diff
         # powerpc build failure
-        patch -p0 < ${BTC_PATCHES}/glibc-2.3.2-debian-bug-343571.diff
+        e patch -p0 -i ${BTC_PATCHES}/glibc-2.3.2-debian-bug-343571.diff
         # intel binutils 2.18
-        patch -p0 < ${BTC_PATCHES}/glibc-2.3-fnstsw-operand.patch
+        e patch -p0 -i ${BTC_PATCHES}/glibc-2.3-fnstsw-operand.patch
         # binutils approx. 2.19
-        patch -p1 < ${BTC_PATCHES}/glibc-insert-_begin.patch
+        e patch -p1 -i ${BTC_PATCHES}/glibc-insert-_begin.patch
         ;;
     ( glibc-2.3.3 )
         # CVS snapshot
         decompress ${BTC_PATCHES}/glibc-2.3.3-20040728.diff | patch -p1
-        patch -p0 < ${BTC_PATCHES}/glibc-2.3.3-new-syscall-tests.patch
+        e patch -p0 -i ${BTC_PATCHES}/glibc-2.3.3-new-syscall-tests.patch
         # Permit install headers with gcc 4
-        patch -p1 < ${BTC_PATCHES}/glibc-2.3.3-btc-gcc4.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.3-btc-gcc4.diff
         # Fix for systems on which sh is not bash
-        patch -p1 < ${BTC_PATCHES}/glibc-2.3.3-portable-sh.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.3-portable-sh.diff
         # Build failures
-        patch -p0 < ${BTC_PATCHES}/glibc-2.3.3-debian-bug-339415.diff
-        patch -p0 < ${BTC_PATCHES}/glibc-2.3.5-debian-bug-343571.diff
+        e patch -p0 -i ${BTC_PATCHES}/glibc-2.3.3-debian-bug-339415.diff
+        e patch -p0 -i ${BTC_PATCHES}/glibc-2.3.5-debian-bug-343571.diff
         # intel binutils 2.18
-        patch -p0 < ${BTC_PATCHES}/glibc-2.3-fnstsw-operand.patch
+        e patch -p0 -i ${BTC_PATCHES}/glibc-2.3-fnstsw-operand.patch
         ;;
     ( glibc-2.3.6 )
         ## Some patches for vanila 2.3.6
-        #patch -p1 < ${BTC_PATCHES}/glibc-2.3.6-allow-gcc-4.1-powerpc32-initfini.s.patch
+        #e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.6-allow-gcc-4.1-powerpc32-initfini.s.patch
 
         # Debian sources
         decompress ${BTC_PATCHES}/glibc_2.3.6.ds1-13etch10-debian.diff | patch -p1
         # Make install headers work without a mips compiler
-        patch -p1 < ${BTC_PATCHES}/glibc-2.3.2-btc-allow-wrong-cc.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.2-btc-allow-wrong-cc.diff
         # alpha build failures
-        patch -p0 < ${BTC_PATCHES}/glibc-2.3-alpha-cfi-instructions.diff
+        e patch -p0 -i ${BTC_PATCHES}/glibc-2.3-alpha-cfi-instructions.diff
         # gcc-4.3 fixes
-        patch -p1 < ${BTC_PATCHES}/glibc-2.3.6-gcc-4.3-fixed-includes.diff
-        patch -p1 < ${BTC_PATCHES}/glibc-2.3.6-gcc-4.3-visibility-fix.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.6-gcc-4.3-fixed-includes.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.6-gcc-4.3-visibility-fix.diff
         # intel binutils 2.18
-        patch -p0 < ${BTC_PATCHES}/glibc-2.3-fnstsw-operand.patch
+        e patch -p0 -i ${BTC_PATCHES}/glibc-2.3-fnstsw-operand.patch
         # binutils approx. 2.19
-        patch -p1 < ${BTC_PATCHES}/glibc-insert-_begin.patch
+        e patch -p1 -i ${BTC_PATCHES}/glibc-insert-_begin.patch
         ;;
     ( glibc-2.5 )
         # Debian sources
         decompress ${BTC_PATCHES}/glibc_2.5-11-debian.diff | patch -p1
         # Reverse problematic Debian patch
-        patch -p1 -R < ${BTC_PATCHES}/local-linuxthreads-semaphore_h.diff
+        e patch -p1 -R -i ${BTC_PATCHES}/local-linuxthreads-semaphore_h.diff
         # Remove linuxthreads insanity check
-        patch -p1 < ${BTC_PATCHES}/glibc-2.5-insane-ok.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.5-insane-ok.diff
         # gcc-4.3 fixes
-        patch -p1 < ${BTC_PATCHES}/glibc-2.3.6-gcc-4.3-fixed-includes.diff
-        patch -p1 < ${BTC_PATCHES}/glibc-2.3.6-gcc-4.3-visibility-fix.diff
-        patch -p1 < ${BTC_PATCHES}/glibc-2.5-fgnu89-inline.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.6-gcc-4.3-fixed-includes.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.6-gcc-4.3-visibility-fix.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.5-fgnu89-inline.diff
         # build failure
-        patch -p1 < ${BTC_PATCHES}/glibc-2.5-m68k-fchownat.patch
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.5-m68k-fchownat.patch
         # binutils approx. 2.19
-        patch -p1 < ${BTC_PATCHES}/glibc-insert-_begin.patch
+        e patch -p1 -i ${BTC_PATCHES}/glibc-insert-_begin.patch
         # Remove bogus linuxthreads semaphore.h
-        patch -p1 < ${BTC_PATCHES}/glibc-2.5-linuxthreads-punt-semaphore-header.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.5-linuxthreads-punt-semaphore-header.diff
         # Build failure
-        patch -p1 < ${BTC_PATCHES}/glibc-2.5-update-m68k-sysdeps-files.patch
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.5-update-m68k-sysdeps-files.patch
         ;;
     ( glibc-2.7 )
         # Debian sources
         decompress ${BTC_PATCHES}/glibc_2.7-18lenny4-debian.diff | patch -p1
         # build failure
-        patch -p1 < ${BTC_PATCHES}/glibc-2.7-powerpc-private-futex.patch
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.7-powerpc-private-futex.patch
         ;;
     ( glibc-2.10.1 )
         # Debian sources
         decompress ${BTC_PATCHES}/eglibc-source_2.10.2-8_all-debian.diff | patch -p1
 
-        patch -p1 < ${BTC_PATCHES}/glibc-2.10-fix-fallocate64-on-32-bit-arches.patch
-        patch -p1 < ${BTC_PATCHES}/glibc-2.10-arm-mips-m68k-fallocate64-exports.patch
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.10-fix-fallocate64-on-32-bit-arches.patch
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.10-arm-mips-m68k-fallocate64-exports.patch
 
         # m68k TLS/NPTL
-        patch -p1 -d ports < ${BTC_PATCHES}/glibc-ports-40111cb9e17a911c8913f00d9b913a71ceb6e609.patch
-        patch -p1 -d ports < ${BTC_PATCHES}/glibc-ports-42ae1878f326c413dd026373ebdb6bf6cd20e75d.patch
-        patch -p1          < ${BTC_PATCHES}/glibc-bbabf1f73f611b9101b42c3390a9ddd53e6dd7d4.patch
-        patch -p1 -d ports < ${BTC_PATCHES}/glibc-ports-d8e90a15fedd2660d02f5d8e4e7da17e01916d30.patch
-        patch -p1          < ${BTC_PATCHES}/glibc-0079dd2382eba185d22410a1d3088dc7146bc00a.patch
+        e patch -d ports -p1 -i ${BTC_PATCHES}/glibc-ports-40111cb9e17a911c8913f00d9b913a71ceb6e609.patch
+        e patch -d ports -p1 -i ${BTC_PATCHES}/glibc-ports-42ae1878f326c413dd026373ebdb6bf6cd20e75d.patch
+        e patch -p1          -i ${BTC_PATCHES}/glibc-bbabf1f73f611b9101b42c3390a9ddd53e6dd7d4.patch
+        e patch -d ports -p1 -i ${BTC_PATCHES}/glibc-ports-d8e90a15fedd2660d02f5d8e4e7da17e01916d30.patch
+        e patch -p1          -i ${BTC_PATCHES}/glibc-0079dd2382eba185d22410a1d3088dc7146bc00a.patch
 
         # bug fix
-        patch -p1 -d ports < ${BTC_PATCHES}/glibc-ports-1789cafb5705e51f83cdc2befa74fc9932e77f3c.patch
+        e patch -d ports -p1 -i ${BTC_PATCHES}/glibc-ports-1789cafb5705e51f83cdc2befa74fc9932e77f3c.patch
         # more backporting
-        patch -p1 -d ports < ${BTC_PATCHES}/glibc-ports-dbd0094b3f71213bc178cd1946496defbedb1d62.patch
+        e patch -d ports -p1 -i ${BTC_PATCHES}/glibc-ports-dbd0094b3f71213bc178cd1946496defbedb1d62.patch
         # build failure
-        patch -p1 < ${BTC_PATCHES}/glibc-2.5-m68k-fchownat.patch
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.5-m68k-fchownat.patch
         # darwin portability
-        patch -p1 < ${BTC_PATCHES}/glibc-2.10-non-gnu-portability-hacks.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.10-non-gnu-portability-hacks.diff
         # hack for installing headers
-        patch -p1 < ${BTC_PATCHES}/glibc-2.10-old-gcc.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.10-old-gcc.diff
         ;;
     ( glibc-2.11 )
         # Debian sources
         decompress ${BTC_PATCHES}/eglibc-source_2.11.2-10_all-debian.diff | patch -p1
         # build failure
-        patch -p1 < ${BTC_PATCHES}/glibc-2.5-m68k-fchownat.patch
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.5-m68k-fchownat.patch
         # darwin portability
-        patch -p1 < ${BTC_PATCHES}/glibc-2.10-non-gnu-portability-hacks.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.10-non-gnu-portability-hacks.diff
         # hack for installing headers
-        patch -p1 < ${BTC_PATCHES}/glibc-2.10-old-gcc.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.10-old-gcc.diff
         ;;
     ( glibc-2.12 )
         # build failure
-        patch -p0 -d ports < ${BTC_PATCHES}/glibc-ports-3ef58249ea2450639bb135d6978009d26aba634f.patch
+        e patch -d ports -p0 -i ${BTC_PATCHES}/glibc-ports-3ef58249ea2450639bb135d6978009d26aba634f.patch
         # darwin portability
-        patch -p1 < ${BTC_PATCHES}/glibc-2.10-non-gnu-portability-hacks.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.10-non-gnu-portability-hacks.diff
         # hack for installing headers
-        patch -p1 < ${BTC_PATCHES}/glibc-2.10-old-gcc.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.10-old-gcc.diff
         ;;
     ( glibc-2.13 )
         # Debian sources
         decompress ${BTC_PATCHES}/eglibc-source_2.13-21_all-debian.diff | patch -p1
         # darwin portability
-        patch -p1 < ${BTC_PATCHES}/glibc-2.10-non-gnu-portability-hacks.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.10-non-gnu-portability-hacks.diff
         # hack for installing headers
-        patch -p1 < ${BTC_PATCHES}/glibc-2.10-old-gcc.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.10-old-gcc.diff
         ;;
     esac
 
     case ${1} in
     ( glibc-2.3.* )
         # m68k doesn't have fcntl64 prior to linux-2.6.10
-        patch -p1 < ${BTC_PATCHES}/glibc-2.3.2-btc-m68k_fix_fcntl.diff
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.2-btc-m68k_fix_fcntl.diff
         ;;
     esac
 }

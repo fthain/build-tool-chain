@@ -32,7 +32,9 @@ sub check_digest {
   my $fn = shift;
   return unless defined $digest{$fn};
   my $d = shift;
-  $d eq $digest{$fn} or die "bad digest: $fn\n";
+  if ($d ne $digest{$fn}) {
+    warn "$fn: bad digest: expected $d but got $digest{$fn}\n";
+  }
   $checked{$fn} = 1;
 }
 
@@ -46,18 +48,23 @@ END {
   } keys %digest;
 }
 
-check_digest 'binutils-2.21.90.tar.bz2', 'd0dc6e73e0cce50ea71187df9f1a4e99';
+check_digest 'binutils-2.12.90.0.1.tar.gz', '302abed213b75722ee8c3dca3cfe35b6';
 check_digest 'binutils-2.12.90.0.1.tar.bz2', '426c30debcb338cb2dcad2f7ec7e61e7';
 check_digest 'binutils-2.15.tar.bz2', '624e6b74983ac6b2960edaf2d522ca58';
+# check_digest 'binutils-2.17.tar.bz2', 'e26e2e06b6e4bf3acf1dc8688a94c0d1';
 check_digest 'binutils-2.17.tar.bz2', '1d81edd0569de4d84091526fd578dd7b';
-check_digest 'binutils-2.18.tar.bz2', '9d22ee4dafa3a194457caf4706f9cf01';
+# check_digest 'binutils-2.18.tar.bz2', '9d22ee4dafa3a194457caf4706f9cf01';
+check_digest 'binutils-2.18.tar.bz2', 'ccd264a5fa9ed992a21427c69cba91d3';
 check_digest 'binutils-2.18.50.0.9.tar.bz2', '68e3510d9c790b134450c0a243c251cd';
 check_digest 'binutils-2.19.51.tar.bz2', 'fd59f36022f6ea802d1c844a2576e616';
 check_digest 'binutils-2.20.1.tar.bz2', '9cdfb9d6ec0578c166d3beae5e15c4e5';
 check_digest 'binutils-2.21.52.tar.bz2', '4113470994fd6ef0a1eabf1c35930e03';
+check_digest 'binutils-2.21.90.tar.bz2', 'd0dc6e73e0cce50ea71187df9f1a4e99';
+check_digest 'binutils-2.22.tar.bz2', 'ee0f10756c84979622b992a4a61ea3f5';
 check_digest 'bison-1.28.tar.gz', '4afb3989f2270043c47c3daa1fa7ffab';
 check_digest 'cloog-ppl-0.15.7.tar.gz', '6455e7875daac5bd885545c71c3f2001';
 check_digest 'cloog-ppl-0.15.9.tar.gz', '806e001d1b1a6b130069ff6274900af5';
+check_digest 'cloog-ppl-0.15.11.tar.gz', '060ae4df6fb8176e021b4d033a6c0b9e';
 check_digest 'coreutils-7.6.tar.gz', '3d82f979229365f880da750642e67cf3';
 check_digest 'coreutils-8.5.tar.gz', 'c1ffe586d001e87d66cd80c4536ee823';
 check_digest 'depmod.pl-1_15_stable.bz2', '5eb1864c8dc13dcd628b6a54d73ec294';
@@ -95,6 +102,7 @@ check_digest 'gcc-core-4.4.1.tar.bz2', 'd19693308aa6b2052e14c071111df59f';
 check_digest 'gcc-core-4.4.4.tar.bz2', 'eb68755f64b9a4e37751992abb41c4fc';
 check_digest 'gcc-core-4.4.5.tar.bz2', '91dca20de8d312e02e2269bee24db0e2';
 check_digest 'gcc-core-4.4.6.tar.bz2', 'c618dde07a74e0d28ba3acd487bb0f3b';
+check_digest 'gcc-core-4.4.7.tar.bz2', '3bda0831d654964ee152c46fa8d29e46';
 check_digest 'gcc-core-4.5.1.tar.bz2', 'dc8959e31b01a65ce10d269614815054';
 check_digest 'gcc-core-4.5.2.tar.bz2', 'aa9e36bec080452372bfba793428ee82';
 check_digest 'gcc-core-4.6.4.tar.bz2', 'ffb7878e23d915358c820d0392e22750';
@@ -124,7 +132,8 @@ check_digest 'gmp-4.3.2.tar.bz2', 'dd60683d7057917e34630b4a787932e8';
 check_digest 'kbd-1.12.tar.gz', '7892c7010512a9bc6697a295c921da25';
 check_digest 'libelf-0.8.13.tar.gz', '4136d7b4c04df68b686570afa26988ac';
 check_digest 'linux-2.2.26.tar.bz2', '4fa42c5112ddd2cc20dedfbd61d588a1';
-check_digest 'linux-2.4.36.tar.bz2', '230caed7f3caf23a96ded604ba0ad6ae';
+# check_digest 'linux-2.4.36.tar.bz2', '230caed7f3caf23a96ded604ba0ad6ae';
+check_digest 'linux-2.4.36.tar.bz2', '7aec606544161a350e7f5e1c3b8ba8a0';
 check_digest 'linux-2.6.9.tar.bz2', 'e921200f074ca97184e150ef5a4af825';
 check_digest 'linux-2.6.18.tar.bz2', '296a6d150d260144639c3664d127d174';
 check_digest 'linux-2.6.19.tar.bz2', '443c265b57e87eadc0c677c3acc37e20';
@@ -141,15 +150,20 @@ check_digest 'linux-2.6.37.tar.bz2', 'c8ee37b4fdccdb651e0603d35350b434';
 check_digest 'linux-2.6.38.tar.bz2', '7d471477bfa67546f902da62227fa976';
 check_digest 'linux-2.6.39.tar.bz2', '1aab7a741abe08d42e8eccf20de61e05';
 check_digest 'linux-3.0.tar.bz2', '398e95866794def22b12dfbc15ce89c0';
+check_digest 'linux-3.2.57.tar.gz', '9aa417e0b77dc3164477fa8b942ca0e1';
 check_digest 'linux-3.3.tar.bz2', '98a6cdd7d082b7ea72df9c89842bac74';
 check_digest 'linux-3.6.tar.bz2', '575c735175532201f1bbd6ec99712b55';
 check_digest 'm4-1.4.13.tar.bz2', '28f9ccd3ac4da45409251008b911d677';
 check_digest 'make-3.81.tar.bz2', '354853e0b2da90c527e35aabb8d6f1e6';
+check_digest 'make-3.82.tar.bz2', '1a11100f3c63fcf5753818e59d63088f';
 check_digest 'mpc-0.8.2.tar.gz', 'e98267ebd5648a39f881d66797122fb6';
+check_digest 'mpc-1.0.2.tar.gz', '68fadff3358fb3e7976c7a398a0af4c3';
 check_digest 'mpfr-2.4.1.tar.bz2', 'c5ee0a8ce82ad55fe29ac57edd35d09e';
 check_digest 'mpfr-2.4.2.tar.bz2', '89e59fe665e2b3ad44a6789f40b059a0';
 check_digest 'mpfr-3.1.2.tar.bz2', 'ee2c3ac63bf0c2359bf08fc3ee094c19';
 check_digest 'ppl-0.10.2.tar.bz2', '5667111f53150618b0fa522ffc53fc3e';
+check_digest 'ppl-0.11.tar.bz2', 'c414abd2ecaf1f1f48949c78d383ee1a';
+check_digest 'ppl-0.11.2.tar.bz2', 'c24429e6c3bc97d45976a63f40f489a1';
 check_digest 'ppl-0.12.1.tar.bz2', '8da3ab9de18e669b7af8c4707817d468';
 check_digest 'sed-4.1.4.tar.gz', '2a62ceadcb571d2dac006f81df5ddb48';
 check_digest 'sed-4.1.5.tar.gz', '7a1cbbbb3341287308e140bd4834c3ba';

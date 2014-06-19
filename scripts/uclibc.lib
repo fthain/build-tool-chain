@@ -13,9 +13,9 @@ function prep_uclibc () {
 
     case $1 in
     ( uClibc-0.9.30.1 )
-        patch -p1 < ${BTC_PATCHES}/uclibc-0.9.30-extra-scripts-getline.diff
-        patch -p1 < ${BTC_PATCHES}/uclibc-0.9.30.1-fix-building-on-systems-w-o-ldso-support.patch
-        patch -p1 < ${BTC_PATCHES}/uclibc-getopt-portability.diff
+        e patch -p1 -i ${BTC_PATCHES}/uclibc-0.9.30-extra-scripts-getline.diff
+        e patch -p1 -i ${BTC_PATCHES}/uclibc-0.9.30.1-fix-building-on-systems-w-o-ldso-support.patch
+        e patch -p1 -i ${BTC_PATCHES}/uclibc-getopt-portability.diff
         ;;
     esac
 }

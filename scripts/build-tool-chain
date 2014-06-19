@@ -9,7 +9,7 @@ set -e -u
 
 ##############################################
 #
-# Definitions of what and where
+# Definitions for adjustment
 
 # This is to be set to the location of the unpacked tarball or work area
 BTC_DIST=${HOME}/btc
@@ -31,7 +31,7 @@ BTC_LOGS=${BTC_LOGS:-${BTC_PRODUCE}/logs}
 BTC_BUILD=${BTC_PRODUCE}/build
 
 # Options for make
-MAKE_OPTS=-j5
+MAKE_OPTS=-j2
 
 # Optional URL prefix for source tar file cache
 BTC_MIRRORS=
@@ -221,7 +221,7 @@ export LANGUAGE=C LANG=C LC_ALL=C
 
 case "${1:-}" in
 ( -c )
-    export -f fetch untar decompress prep_linux build_linux package_linux
+    export -f e fetch untar decompress prep_linux build_linux package_linux
     export BTC_PRODUCE HOST_TOOLS_PREFIX BTC_LOGS
     export BTC_BUILD BTC_SOURCES BTC_PATCHES BTC_CONFIGS BTC_MIRRORS
     export TC_PREFIX BUILD TARGET LINUX_ARCH

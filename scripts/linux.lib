@@ -11,67 +11,67 @@ function prep_linux () {
     if [ ${BUILD} != ${BUILD/%-apple-darwin*} ] ; then
         case ${1} in
         ( linux-2.6.[0-8] | linux-2.6.[0-8][.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6-btc-darwin-config.patch
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6-btc-darwin-config.patch
             ;;
         ( linux-2.6.9 | linux-2.6.9[.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.9-btc-darwin-config.patch
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.9-btc-darwin-config.patch
             ;;
         esac
         case ${1} in
         ( linux-2.6.[0-3] | linux-2.6.[0-3]-* )
             # This patch hasn't been tested on these old versions
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.4-btc-darwin-kbuild.patch
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.4-btc-darwin-kbuild.patch
             ;;
         ( linux-2.6.4 | linux-2.6.4-* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.4-btc-darwin-kbuild.patch
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.4-btc-darwin-kbuild.patch
             ;;
         ( linux-2.6.[56] | linux-2.6.[56]-* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.5-btc-darwin-kbuild.patch
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.5-btc-darwin-kbuild.patch
             ;;
         ( linux-2.6.7 | linux-2.6.7-* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.7-btc-darwin-kbuild.patch
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.7-btc-darwin-kbuild.patch
             ;;
         ( linux-2.6.[89] | linux-2.6.[89][.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.8-btc-darwin-kbuild.patch
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.8-btc-darwin-kbuild.patch
             ;;
         ( linux-2.6.1[0-4] | linux-2.6.1[0-4][.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.14-btc-kconfig.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.14-btc-kconfig.diff
             ;;
         esac
 
         case ${1} in
         ( linux-2.6.1[0-3] | linux-2.6.1[0-3][.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.10-btc-darwin.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.10-btc-darwin.diff
             ;;
         ( linux-2.6.1[4-6] | linux-2.6.1[4-6][.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.16-btc-darwin.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.16-btc-darwin.diff
             ;;
         ( linux-2.6.17 | linux-2.6.17[.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.17-btc-darwin.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.17-btc-darwin.diff
             ;;
         ( linux-2.6.1[8-9] | linux-2.6.1[8-9][.-]* | \
           linux-2.6.2[0-2] | linux-2.6.2[0-2][.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.18-btc-darwin.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.18-btc-darwin.diff
             ;;
         ( linux-2.6.2[3-4] | linux-2.6.2[3-4][.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.24-btc-darwin.diff
-            patch -p0 < ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.24-btc-darwin.diff
+            e patch -p0 -i ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
             ;;
         ( linux-2.6.2[5-9] | linux-2.6.2[5-9][.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.25-btc-darwin.diff
-            patch -p0 < ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.25-btc-darwin.diff
+            e patch -p0 -i ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
             ;;
         ( linux-2.6.3[0-1] | linux-2.6.3[0-1][.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.30-btc-darwin.diff
-            patch -p0 < ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.30-btc-darwin.diff
+            e patch -p0 -i ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
             ;;
         ( linux-2.6.3[2-7] | linux-2.6.3[2-7][.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.32-btc-darwin.diff
-            patch -p0 < ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.32-btc-darwin.diff
+            e patch -p0 -i ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
             ;;
         ( linux-2.6.* | linux-3.2.* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.38-btc-darwin.diff
-            patch -p0 < ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.38-btc-darwin.diff
+            e patch -p0 -i ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
             ;;
         esac
         case ${1} in
@@ -87,7 +87,7 @@ function prep_linux () {
 
     case ${1} in
     ( linux-2.2.26 )
-        patch -p0 < ${BTC_PATCHES}/linux-2.2.25-btc-Makefile.patch
+        e patch -p0 -i ${BTC_PATCHES}/linux-2.2.25-btc-Makefile.patch
         case ${LINUX_ARCH} in
         ( m68k )
             # Linux-mac68k CVS snapshot
@@ -96,16 +96,16 @@ function prep_linux () {
         ;;
 
     ( linux-2.4.* )
-        patch -p1 < ${BTC_PATCHES}/linux-2.4-btc-Makefile.patch
+        e patch -p1 -i ${BTC_PATCHES}/linux-2.4-btc-Makefile.patch
         case ${LINUX_ARCH} in
         ( m68k )
             # Linux-m68k CVS snapshot
             decompress ${BTC_PATCHES}/linux-2.4.35-m68k.diff | patch -p1
             # Avoid traditional CPP for gcc-3.3
-            patch -p1 < ${BTC_PATCHES}/linux-2.4.28-m68k-use-standard-cpp.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.4.28-m68k-use-standard-cpp.diff
             ;;
         ( i386 )
-            patch -p1 < ${BTC_PATCHES}/linux-2.4-btc-darwin-bzImage-build.patch
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.4-btc-darwin-bzImage-build.patch
             ;;
         esac
         ;;
@@ -113,41 +113,41 @@ function prep_linux () {
     ( linux-2.6.* | linux-3.* )
         case ${1} in
         ( linux-2.6.[0-7] | linux-2.6.[0-7][.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6-btc-Makefile.patch
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6-btc-Makefile.patch
             ;;
         ( linux-2.6.[8-9] | linux-2.6.[8-9][.-]* | \
           linux-2.6.10 | linux-2.6.10[.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6-btc-Makefile.patch
-            patch -p1 < ${BTC_PATCHES}/linux-2.6-kbuild.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6-btc-Makefile.patch
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6-kbuild.diff
             ;;
         ( linux-2.6.1[1-3] | linux-2.6.1[1-3][.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.12-depmod.pl-instead.diff
-            patch -p1 < ${BTC_PATCHES}/linux-2.6-kbuild.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.12-depmod.pl-instead.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6-kbuild.diff
             ;;
         ( linux-2.6.1[4-6] | linux-2.6.1[4-6][.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.16-depmod.pl-instead.diff
-            patch -p1 < ${BTC_PATCHES}/linux-2.6-kbuild.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.16-depmod.pl-instead.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6-kbuild.diff
             ;;
         ( linux-2.6.1[7-9] | linux-2.6.1[7-9][.-]* | \
           linux-2.6.2[0-1] | linux-2.6.2[0-1][.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.17-depmod.pl-instead.diff
-            patch -p1 < ${BTC_PATCHES}/linux-2.6-kbuild.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.17-depmod.pl-instead.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6-kbuild.diff
             ;;
         ( linux-2.6.22 | linux-2.6.22[.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.17-depmod.pl-instead.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.17-depmod.pl-instead.diff
             ;;
         ( linux-2.6.2[3-8] | linux-2.6.2[3-8][.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.24-depmod.pl-instead.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.24-depmod.pl-instead.diff
             ;;
         ( linux-2.6.29    | linux-2.6.29[.-]* | \
           linux-2.6.3[01] | linux-2.6.3[01][.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.29-depmod.pl-instead.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.29-depmod.pl-instead.diff
             ;;
         ( linux-2.6.3[2-9] | linux-2.6.3[2-9][.-]* )
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.32-depmod.pl-instead.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.32-depmod.pl-instead.diff
             ;;
         ( * )
-            patch -p0 < ${BTC_PATCHES}/linux-3-depmod.pl-instead.diff
+            e patch -p0 -i ${BTC_PATCHES}/linux-3-depmod.pl-instead.diff
             ;;
         esac
 
@@ -159,14 +159,14 @@ function prep_linux () {
                 ;;
             ( linux-2.6.1[6-9] | linux-2.6.1[6-9][.-]* | \
               linux-2.6.2[0-3] | linux-2.6.2[0-3][.-]* )
-                patch -p1 < ${BTC_PATCHES}/linux-2.6.16-use_pmac32_defconfig.diff
+                e patch -p1 -i ${BTC_PATCHES}/linux-2.6.16-use_pmac32_defconfig.diff
                 ;;
             ( linux-2.6.2[67] | linux-2.6.2[67][.-]* )
-                patch -p1 < ${BTC_PATCHES}/linux-2.6.27-use_pmac32_defconfig.diff
-                patch -p1 < ${BTC_PATCHES}/linux-2.6-powerpc-fix-mktree-build-error-on-mac-os-x-host.patch
+                e patch -p1 -i ${BTC_PATCHES}/linux-2.6.27-use_pmac32_defconfig.diff
+                e patch -p1 -i ${BTC_PATCHES}/linux-2.6-powerpc-fix-mktree-build-error-on-mac-os-x-host.patch
                 ;;
             ( * )
-                patch -p1 < ${BTC_PATCHES}/linux-2.6.27-use_pmac32_defconfig.diff
+                e patch -p1 -i ${BTC_PATCHES}/linux-2.6.27-use_pmac32_defconfig.diff
                 ;;
             esac
             ;;
@@ -198,25 +198,25 @@ function prep_linux () {
                 decompress ${BTC_PATCHES}/linux-2.6.29-m68k-20090520.diff | patch -p1
                 ;;
             ( linux-2.6.32 | linux-2.6.32[.-]* )
-#                patch -p1 < ${BTC_PATCHES}/linux-2.6.git-5da3a65d2d1ba333d61999640ef241f150c69c6b.patch
-#                patch -p1 < ${BTC_PATCHES}/linux-2.6.git-9674cdc74d63f346870943ef966a034f8c71ee57.patch
+#                e patch -p1 -i ${BTC_PATCHES}/linux-2.6.git-5da3a65d2d1ba333d61999640ef241f150c69c6b.patch
+#                e patch -p1 -i ${BTC_PATCHES}/linux-2.6.git-9674cdc74d63f346870943ef966a034f8c71ee57.patch
                  decompress ${BTC_PATCHES}/linux-2.6_2.6.32-38-debian-m68k.diff | patch -p1
                 ;;
             esac
             case ${1} in
             ( linux-2.6.1[89] | linux-2.6.1[89][.-]* | \
               linux-2.6.2[02] | linux-2.6.2[02][.-]* )
-                patch -p1 < ${BTC_PATCHES}/linux-2.6.17-m68k-20060622-Os-strcpy.diff
+                e patch -p1 -i ${BTC_PATCHES}/linux-2.6.17-m68k-20060622-Os-strcpy.diff
                 ;;
             ( linux-2.6.2[34] | linux-2.6.2[34][.-]* )
-                patch -p1 < ${BTC_PATCHES}/linux-2.6.23-Os-strcpy.diff
+                e patch -p1 -i ${BTC_PATCHES}/linux-2.6.23-Os-strcpy.diff
                 ;;
             ( linux-2.6.26 | linux-2.6.26[.-]* )
-                patch -p1 < ${BTC_PATCHES}/linux-2.6.26-m68k-disable-build-id.patch
+                e patch -p1 -i ${BTC_PATCHES}/linux-2.6.26-m68k-disable-build-id.patch
                 ;;
             esac
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.15-viro-m68k-math-emu-macro-names.diff
-            patch -p1 < ${BTC_PATCHES}/linux-2.6.15-viro-m68k-math-emu-macro-args.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.15-viro-m68k-math-emu-macro-names.diff
+            e patch -p1 -i ${BTC_PATCHES}/linux-2.6.15-viro-m68k-math-emu-macro-args.diff
             ;;
         esac
         ;;

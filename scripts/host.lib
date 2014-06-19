@@ -61,7 +61,7 @@ function install_make () {
     pushd $BTC_BUILD >/dev/null
     untar $1 ftp://ftp.gnu.org/gnu/make/
     if test "${1#*-}" = 3.82 ; then
-      patch -d ${1} -p1 < ${BTC_PATCHES}/make-3.82-r4-gentoo.diff
+      e patch -d ${1} -p1 -i ${BTC_PATCHES}/make-3.82-r4-gentoo.diff
     fi
     popd >/dev/null
 
@@ -112,9 +112,9 @@ function install_loadkeys () {
     untar $1 ftp://ftp.kernel.org/pub/linux/utils/kbd/
 
     pushd $1 >/dev/null
-    patch -p1 < ${BTC_PATCHES}/kbd-1.12-gentoo.diff
-    patch -p1 < ${BTC_PATCHES}/kbd-1.12-btc-darwin.diff
-    patch -p1 < ${BTC_PATCHES}/kbd-1.12-use-env-vars.diff
+    e patch -p1 -i ${BTC_PATCHES}/kbd-1.12-gentoo.diff
+    e patch -p1 -i ${BTC_PATCHES}/kbd-1.12-btc-darwin.diff
+    e patch -p1 -i ${BTC_PATCHES}/kbd-1.12-use-env-vars.diff
 
     echo building $1
 
@@ -173,7 +173,7 @@ function install_flex () {
              http://sourceforge.net/projects/flex/files/flex/${fu#*-}/${1}.tar.gz/download
 
     mv ${1%a} $1
-    patch -d $1 -p1 < ${BTC_PATCHES}/flex-2.5.4a-r6.diff
+    e patch -d $1 -p1 -i ${BTC_PATCHES}/flex-2.5.4a-r6.diff
     popd >/dev/null
 
     host_tool_install $1
@@ -235,9 +235,9 @@ function install_mpfr () {
 
     pushd $1 >/dev/null
     if test "${1#*-}" = 2.4.2 ; then
-      patch -p1 < ${BTC_PATCHES}/mpfr-2.4.2-gentoo.patch
+      e patch -p1 -i ${BTC_PATCHES}/mpfr-2.4.2-gentoo.patch
     elif test "${1#*-}" = 3.1.2 ; then
-      patch -p1 < ${BTC_PATCHES}/mpfr-3.1.2_p5-gentoo.diff
+      e patch -p1 -i ${BTC_PATCHES}/mpfr-3.1.2_p5-gentoo.diff
     fi
 
     echo building $1

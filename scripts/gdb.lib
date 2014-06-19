@@ -11,10 +11,10 @@ function prep_gdb () {
 
     case $1 in
     ( gdb-6.6 )
-        patch -p1 < ${BTC_PATCHES}/gdb-6.6-sim-ppc-libintl-link.diff
+        e patch -p1 -i ${BTC_PATCHES}/gdb-6.6-sim-ppc-libintl-link.diff
         ;;
     ( gdb-6.8 | gdb-6.8.* | gdb-7.* )
-        patch -p1 < ${BTC_PATCHES}/gdb-6.8-sim-ppc-no-lz-target.diff
+        e patch -p1 -i ${BTC_PATCHES}/gdb-6.8-sim-ppc-no-lz-target.diff
         ;;
     esac
 }

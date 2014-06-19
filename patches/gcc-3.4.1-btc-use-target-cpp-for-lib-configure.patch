@@ -12,7 +12,7 @@ Yuck.
 
 --- gcc-3.4.1/Makefile.in-orig	Thu Jan 15 07:09:37 2004
 +++ gcc-3.4.1/Makefile.in	Fri Aug  6 01:27:13 2004
-@@ -21964,6 +21964,7 @@
+@@ -21964,10 +21964,12 @@
  	CC="$(CC_FOR_TARGET)"; export CC; \
  	CFLAGS="$(CFLAGS_FOR_TARGET)"; export CFLAGS; \
  	CONFIG_SHELL="$(SHELL)"; export CONFIG_SHELL; \
@@ -20,7 +20,12 @@ Yuck.
  	CPPFLAGS="$(CFLAGS_FOR_TARGET)"; export CPPFLAGS; \
  	CXX_FOR_TARGET="$(RAW_CXX_FOR_TARGET)"; export CXX_FOR_TARGET; \
  	CXX="$(RAW_CXX_FOR_TARGET)"; export CXX; \
-@@ -22539,7 +22540,8 @@
+ 	CXXFLAGS="$(CXXFLAGS_FOR_TARGET)"; export CXXFLAGS; \
++	CXXCPP="$(CXX_FOR_TARGET) -E"; export CXXCPP; \
+ 	GCJ="$(GCJ_FOR_TARGET)"; export GCJ; \
+ 	DLLTOOL="$(DLLTOOL_FOR_TARGET)"; export DLLTOOL; \
+ 	LD="$(LD_FOR_TARGET)"; export LD; \
+@@ -22539,7 +22541,8 @@
  	CC="$(CC_FOR_TARGET)"; export CC; \
  	CFLAGS="$(CFLAGS_FOR_TARGET)"; export CFLAGS; \
  	CONFIG_SHELL="$(SHELL)"; export CONFIG_SHELL; \

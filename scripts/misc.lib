@@ -2,13 +2,19 @@
 #
 # Common functions
 
+function e () {
+    echo + $@ 1>&2
+    "$@"
+    return
+}
+
 function fetch_stdout () {
     (
         umask 0333
         if type -t wget >/dev/null 2>&1 ; then
-            wget -nv -O - "$1"
+            e wget -nv -O - "$1"
         elif type -t curl >/dev/null 2>&1 ; then
-            curl -fSs "$1"
+            e curl -fSs "$1"
         fi
     )
 }
@@ -37,17 +43,16 @@ function fetch () {
         umask 0333
         for u in "${urls[@]}" ; do
             test -z "$u" && continue
-            echo fetch: trying $u 1>&2
             if type -t wget >/dev/null 2>&1 ; then
-                wget -nv "$u" && return
+                e wget -nv "$u" && return
                 continue
             elif type -t curl >/dev/null 2>&1 ; then
-                curl -fSsO "$u" && return
+                e curl -fSsO "$u" && return
                 rm -f "$dist"
                 continue
             fi
         done
-        echo fetch: failed to download $dist 1>&2
+        echo fetch failed: $dist 1>&2
         return 1
     )
 }
@@ -68,23 +73,20 @@ function untar () {
     for globbed in "${candidates[@]}" ; do
         case $globbed in
         ( $BTC_SOURCES/$1.tar.bz2 )
-            echo untar $globbed 1>&2
-            tar -xjf $globbed
+            e tar -xjf $globbed
             ;;
         ( $BTC_SOURCES/$1.tar.gz )
-            echo untar $globbed 1>&2
-            tar -xzf $globbed
+            e tar -xzf $globbed
             ;;
         ( $BTC_SOURCES/$1.tar )
-            echo untar $globbed 1>&2
-            tar -xf $globbed
+            e tar -xf $globbed
             ;;
         ( * )
             if [ "$#" != 1 ] ; then
                 fetch "$@"
                 untar $1
             else
-                echo "$1: no file and no download were found" >&2
+                echo "$1: no file or download was found" 1>&2
                 return 1
             fi
             ;;
@@ -93,19 +95,18 @@ function untar () {
 }
 
 function decompress () {
-    echo decompress $1 1>&2
     local globbed
     for globbed in $1*; do
         case $globbed in
         ( $1.bz2 )
-            bzip2 -dc $globbed && return
+            e bzip2 -dc $globbed && return
             ;;
         ( $1.gz )
-            gzip -dc $globbed && return
+            e gzip -dc $globbed && return
             ;;
         esac
     done
-    echo decompress: failed: $1 1>&2
+    echo decompress failed: $1 1>&2
     # set -o pipefail isn't always available, so send garbage to patch on failure.
     echo garbage
     return 1
