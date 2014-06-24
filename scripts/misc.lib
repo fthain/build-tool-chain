@@ -3,7 +3,7 @@
 # Common functions
 
 function e () {
-    echo + $@ 1>&2
+    echo "*" "$@" 1>&2
     "$@"
     return
 }
@@ -96,12 +96,12 @@ function untar () {
 
 function decompress () {
     local globbed
-    for globbed in $1*; do
+    for globbed in ${1}*; do
         case $globbed in
-        ( $1.bz2 )
+        ( ${1}.bz2 )
             e bzip2 -dc $globbed && return
             ;;
-        ( $1.gz )
+        ( ${1}.gz )
             e gzip -dc $globbed && return
             ;;
         esac
@@ -116,11 +116,10 @@ function manifest () {
     local tag
     tag=$1
     shift
-    find ${TC_PREFIX} | sort > ${BTC_LOGS}/_a
+    touch ${BTC_LOGS}/stamp
     "$@"
-    find ${TC_PREFIX} | sort > ${BTC_LOGS}/_b
-    comm -13 ${BTC_LOGS}/_{a,b} | bzip2 > ${BTC_LOGS}/${tag}.list.bz2
-    rm ${BTC_LOGS}/_{a,b}
+    find ${TC_PREFIX} -type f -newer ${BTC_LOGS}/stamp | sort | bzip2 > ${BTC_LOGS}/${tag}.list.bz2
+    rm ${BTC_LOGS}/stamp
 }
 
 function list_manifest () {

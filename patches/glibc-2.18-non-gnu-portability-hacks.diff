@@ -1,0 +1,115 @@
+diff -ruN glibc-2.18.orig/sunrpc/rpc/types.h glibc-2.18/sunrpc/rpc/types.h
+--- glibc-2.18.orig/sunrpc/rpc/types.h	2013-08-11 08:52:55.000000000 +1000
++++ glibc-2.18/sunrpc/rpc/types.h	2014-06-22 14:46:42.000000000 +1000
+@@ -69,6 +69,7 @@
+ #include <sys/types.h>
+ #endif
+ 
++#if 0
+ #ifndef __u_char_defined
+ typedef __u_char u_char;
+ typedef __u_short u_short;
+@@ -84,6 +85,7 @@
+ typedef __caddr_t caddr_t;
+ # define __daddr_t_defined
+ #endif
++#endif
+ 
+ #include <sys/time.h>
+ #include <sys/param.h>
+diff -ruN glibc-2.18.orig/sunrpc/rpc_main.c glibc-2.18/sunrpc/rpc_main.c
+--- glibc-2.18.orig/sunrpc/rpc_main.c	2013-08-11 08:52:55.000000000 +1000
++++ glibc-2.18/sunrpc/rpc_main.c	2014-06-22 14:47:02.000000000 +1000
+@@ -38,7 +38,9 @@
+ #include <stdio.h>
+ #include <string.h>
+ #include <unistd.h>
+-#include <libintl.h>
++#define gettext(a) (a)
++#define _(a) (a) 
++#define textdomain(a) ((void) 0)
+ #include <locale.h>
+ #include <ctype.h>
+ #include <sys/types.h>
+@@ -326,9 +328,9 @@
+ static void
+ find_cpp (void)
+ {
+-  struct stat64 buf;
++  struct stat buf;
+ 
+-  if (stat64 (CPP, &buf) == 0)
++  if (stat (CPP, &buf) == 0)
+     return;
+ 
+   if (cppDefined) /* user specified cpp but it does not exist */
+@@ -958,9 +960,13 @@
+ 	abort ();
+       temp = rindex (cmd->infile, '.');
+       cp = stpcpy (mkfilename, "Makefile.");
+-      if (temp != NULL)
+-	*((char *) stpncpy (cp, cmd->infile, temp - cmd->infile)) = '\0';
+-      else
++      if (temp != NULL) {
++	char *dest = cp;
++	int len = temp - cmd->infile;
++	strncpy (dest, cmd->infile, len);
++	dest += len;
++	*dest = '\0';
++      } else
+ 	stpcpy (cp, cmd->infile);
+ 
+     }
+@@ -1114,17 +1120,17 @@
+ static void
+ checkfiles (const char *infile, const char *outfile)
+ {
+-  struct stat64 buf;
++  struct stat buf;
+ 
+   if (infile)			/* infile ! = NULL */
+-    if (stat64 (infile, &buf) < 0)
++    if (stat (infile, &buf) < 0)
+       {
+ 	perror (infile);
+ 	crash ();
+       }
+   if (outfile)
+     {
+-      if (stat64 (outfile, &buf) < 0)
++      if (stat (outfile, &buf) < 0)
+ 	return;			/* file does not exist */
+       else
+ 	{
+diff -ruN glibc-2.18.orig/sunrpc/rpc_scan.c glibc-2.18/sunrpc/rpc_scan.c
+--- glibc-2.18.orig/sunrpc/rpc_scan.c	2013-08-11 08:52:55.000000000 +1000
++++ glibc-2.18/sunrpc/rpc_scan.c	2014-06-22 14:46:42.000000000 +1000
+@@ -37,7 +37,8 @@
+ #include <stdio.h>
+ #include <ctype.h>
+ #include <string.h>
+-#include <libintl.h>
++#define gettext(a) (a)
++#define _(a) (a)
+ #include "rpc_scan.h"
+ #include "rpc_parse.h"
+ #include "rpc_util.h"
+diff -ruN glibc-2.18.orig/timezone/Makefile glibc-2.18/timezone/Makefile
+--- glibc-2.18.orig/timezone/Makefile	2013-08-11 08:52:55.000000000 +1000
++++ glibc-2.18/timezone/Makefile	2014-06-22 14:46:42.000000000 +1000
+@@ -66,11 +66,10 @@
+ 	    -DTZDEFRULES='"$(posixrules-file)"' \
+ 	    -DTM_GMTOFF=tm_gmtoff -DTM_ZONE=tm_zone
+ 
+-CFLAGS-zdump.c = -fwrapv -Wno-strict-prototypes -DNOID $(tz-cflags) \
+-		 -DHAVE_GETTEXT
+-CFLAGS-zic.c = -Wno-strict-prototypes -DNOID $(tz-cflags) -DHAVE_GETTEXT
+-CFLAGS-ialloc.c = -Wno-strict-prototypes -DNOID -DHAVE_GETTEXT
+-CFLAGS-scheck.c = -Wno-strict-prototypes -DNOID -DHAVE_GETTEXT
++CFLAGS-zdump.c = -fwrapv -Wno-strict-prototypes -DNOID $(tz-cflags)
++CFLAGS-zic.c = -Wno-strict-prototypes -DNOID $(tz-cflags)
++CFLAGS-ialloc.c = -Wno-strict-prototypes -DNOID
++CFLAGS-scheck.c = -Wno-strict-prototypes -DNOID
+ 
+ # We have to make sure the data for testing the tz functions is available.
+ # Don't add leapseconds here since test-tz made checks that work only without

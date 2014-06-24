@@ -1,0 +1,94 @@
+
+Some of the gnu ld feature test autoconf macros have changed and they now
+ignore cached results. This patch is a kludge to workaround for that regression.
+
+--- glibc-2.18/configure.orig	2013-08-11 08:52:55.000000000 +1000
++++ glibc-2.18/configure	2014-06-20 23:26:56.000000000 +1000
+@@ -6036,6 +6036,12 @@
+ 
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for linker that supports -z nodelete" >&5
+ $as_echo_n "checking for linker that supports -z nodelete... " >&6; }
++
++if test "${libc_cv_z_nodelete+set}" = set; then :
++  $as_echo_n "(cached) " >&6
++  libc_linker_feature=${libc_cv_z_nodelete}
++else
++
+ libc_linker_feature=no
+ if test x"$gnu_ld" = x"yes"; then
+   libc_linker_check=`$LD -v --help 2>/dev/null | grep "\-z nodelete"`
+@@ -6058,6 +6064,8 @@
+     rm -f conftest*
+   fi
+ fi
++
++fi
+ if test $libc_linker_feature = yes; then
+   libc_cv_z_nodelete=yes
+ else
+@@ -6068,6 +6076,12 @@
+ 
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for linker that supports -z nodlopen" >&5
+ $as_echo_n "checking for linker that supports -z nodlopen... " >&6; }
++
++if test "${libc_cv_z_nodlopen+set}" = set; then :
++  $as_echo_n "(cached) " >&6
++  libc_linker_feature=${libc_cv_z_nodlopen}
++else
++
+ libc_linker_feature=no
+ if test x"$gnu_ld" = x"yes"; then
+   libc_linker_check=`$LD -v --help 2>/dev/null | grep "\-z nodlopen"`
+@@ -6090,6 +6104,8 @@
+     rm -f conftest*
+   fi
+ fi
++
++fi
+ if test $libc_linker_feature = yes; then
+   libc_cv_z_nodlopen=yes
+ else
+@@ -6100,6 +6116,12 @@
+ 
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for linker that supports -z initfirst" >&5
+ $as_echo_n "checking for linker that supports -z initfirst... " >&6; }
++
++if test "${libc_cv_z_initfirst+set}" = set; then :
++  $as_echo_n "(cached) " >&6
++  libc_linker_feature=${libc_cv_z_initfirst}
++else
++
+ libc_linker_feature=no
+ if test x"$gnu_ld" = x"yes"; then
+   libc_linker_check=`$LD -v --help 2>/dev/null | grep "\-z initfirst"`
+@@ -6122,6 +6144,8 @@
+     rm -f conftest*
+   fi
+ fi
++
++fi
+ if test $libc_linker_feature = yes; then
+   libc_cv_z_initfirst=yes
+ else
+@@ -6327,6 +6351,12 @@
+ 
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for linker that supports -z execstack" >&5
+ $as_echo_n "checking for linker that supports -z execstack... " >&6; }
++
++if test "${libc_cv_z_execstack+set}" = set; then :
++  $as_echo_n "(cached) " >&6
++  libc_linker_feature=${libc_cv_z_execstack}
++else
++
+ libc_linker_feature=no
+ if test x"$gnu_ld" = x"yes"; then
+   libc_linker_check=`$LD -v --help 2>/dev/null | grep "\-z execstack"`
+@@ -6349,6 +6379,8 @@
+     rm -f conftest*
+   fi
+ fi
++
++fi
+ if test $libc_linker_feature = yes; then
+   libc_cv_z_execstack=yes
+ else

@@ -1,4 +1,4 @@
-GCC_DIST=gcc-4.5.2
+GCC_DIST=gcc-4.5.4
 TARGET=m68k-uclinux
 # DEFAULT_CPU=5407
 LINUX_ARCH=m68knommu

@@ -65,7 +65,7 @@ function prep_linux () {
             e patch -p1 -i ${BTC_PATCHES}/linux-2.6.30-btc-darwin.diff
             e patch -p0 -i ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
             ;;
-        ( linux-2.6.3[2-7] | linux-2.6.3[2-7][.-]* )
+        ( linux-2.6.3[2-9] | linux-2.6.3[2-9][.-]* )
             e patch -p1 -i ${BTC_PATCHES}/linux-2.6.32-btc-darwin.diff
             e patch -p0 -i ${BTC_PATCHES}/linux-2.6.26-btc-no-findutils.diff
             ;;
@@ -152,6 +152,13 @@ function prep_linux () {
         esac
 
         case ${LINUX_ARCH} in
+        ( arm )
+            case ${1} in
+            ( linux-3.2[.-]* )
+                e patch -p1 -i ${BTC_PATCHES}/linux-3.2-arm-CROSS_COMPILE-size.patch
+                ;;
+            esac
+            ;;
         ( powerpc | ppc )
             case ${1} in
             ( linux-2.6.[0-9] | linux-2.6.[0-9][.-]* | \
@@ -266,21 +273,22 @@ function build_linux () {
     test -e $BTC_BUILD/$1/.compiled && echo kernel already compiled && return
     pushd $BTC_BUILD/$1 >/dev/null
 
+    e make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- clean
+
     local config
     config=${BTC_CONFIGS}/${DOTCONFIG:-${1}-${LINUX_ARCH}-dot-config}
     if [ -f $config ] ; then
-        make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- clean
-        cp ${config} .config
+        e cp ${config} .config
     else
-        make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- defconfig || true
+        e make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- defconfig || true
     fi
-    (yes "" || true) | make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- CONFIG_SHELL=/bin/bash oldconfig
+    (yes "" || true) | e make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- CONFIG_SHELL=/bin/bash oldconfig
 
     case ${1} in
     ( linux-2.[24].* )
-        make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- dep
-        make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- vmlinux
-        make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- modules
+        e make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- dep
+        e make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- vmlinux
+        e make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- modules
         ;;
     ( linux-2.6.* | linux-3.* )
         ## this hack is for non-ELF platforms, like Darwin
@@ -289,7 +297,7 @@ function build_linux () {
         #    ( * )                                   out=scripts/mod/elf.h ;;
         #esac
         #sed 's/^#include <features.h>$//' < ${LIBC_HEADERS}/elf.h > $out
-        make ${MAKE_OPTS} ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}-
+        e make ${MAKE_OPTS} ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}-
         ;;
     esac
     touch .compiled

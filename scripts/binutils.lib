@@ -89,6 +89,12 @@ function prep_binutils () {
         # Darwin link problem
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
         ;;
+    ( binutils-2.22 | binutils-2.24.51 )
+        # Avoid fatal compiler warnings
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
+        # Darwin link problem
+        e patch -p1 -i ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
+        ;;
     esac
 ## Apply HJL patches according to patches/README, e.g.
 ##    e patch -p1 -i patches/libtool-dso.patch
@@ -107,6 +113,8 @@ function build_binutils () {
     ${BINUTILS_CONFIG_OPTS} \
     --infodir=${TC_PREFIX}/share/info \
     --mandir=${TC_PREFIX}/share/man \
+    --with-bugurl= \
+    --with-pkgversion=btc \
     --enable-64-bit-bfd \
     --enable-shared \
     --disable-werror

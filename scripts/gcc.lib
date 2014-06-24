@@ -8,10 +8,18 @@ function prep_gcc_core () {
     c=${1/gcc/gcc-core}
     test -e $c && echo $c already exists && return
     test -e $1 && echo not overwriting $1 && return 1
-    untar $c ftp://sourceware.org/pub/gcc/releases/$1/ \
-             ftp://ftp.gnu.org/gnu/gcc/$1/
+
+    # gcc-core-* distributions ceased as of gcc-4.7 :-(
+    local dist
+    dist=$1
+    case ${1} in
+    ( gcc-[23].* | gcc-4.[0-6][.-]* ) dist=$c ;;
+    esac
+    untar $dist ftp://sourceware.org/pub/gcc/releases/$1/ \
+                ftp://ftp.gnu.org/gnu/gcc/$1/
     mv $1 $c
     cd $c
+    rm -rf {boehm-gc,gcc/{ada,cp,fortran,go,java,objc,objcp,testsuite},gnattools,libada,libffi,libgfortran,libgo,libjava,libobjc,libstdc++-v3}
 
     # Debian sources, etc
     case ${TARGET} in
@@ -153,9 +161,13 @@ function prep_gcc_core () {
         # We build gcc-core before libc is built
         e patch -p1 -i ${BTC_PATCHES}/gcc-4-no-libc-yet.diff
         ;;
-    ( gcc-4.* )
+    ( gcc-4.4.[3-7] | gcc-4.[56][.-]* )
         # We build gcc-core before libc is built
         e patch -p1 -i ${BTC_PATCHES}/gcc-4.4.3-no-libc-yet.diff
+        ;;
+    ( gcc-4.* )
+        # We build gcc-core before libc is built
+        e patch -p1 -i ${BTC_PATCHES}/gcc-4.7-no-libc-yet.diff
         ;;
     esac
 
@@ -471,6 +483,8 @@ function install_gcc () {
     $(get_gcc_cpu) \
     ${locale_opt} \
     ${multilib_opt} \
+    --with-bugurl= \
+    --with-pkgversion=btc \
     --with-gnu-ld \
     --with-gnu-as \
     --enable-threads=posix \

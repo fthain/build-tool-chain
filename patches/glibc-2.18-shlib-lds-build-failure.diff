@@ -1,0 +1,71 @@
+
+Attempt to fix an intermittent build failure (with make -j1) :
+
+m68k-linux-gnu-gcc    -shared -Wl,-O1 \
+                  -nostdlib -nostartfiles \
+                   -Wl,-dynamic-linker=/lib/ld.so.1 -Wl,-z,combreloc -Wl,-z,relro -Wl,--hash-style=both \
+                  -Wl,--verbose 2>&1 | \
+          sed > /Volumes/btc-13/build/glibc-m68k-linux-gnu-3/shlib.ldsT \
+              -e '/^=========/,/^=========/!d;/^=========/d' \
+               -e 's/^.*\.gnu\.hash[    ]*:.*$/  .note.ABI-tag : { *(.note.ABI-tag) } &/' -e '/^[       ]*\.hash[       ]*:.*$/{h;d;}' -e '/DATA_SEGMENT_ALIGN/{H;g}'  \
+              -e 's/^.*\*(\.dynbss).*$/& \
+                 PROVIDE(__start___libc_freeres_ptrs = .); \
+                 *(__libc_freeres_ptrs) \
+                 PROVIDE(__stop___libc_freeres_ptrs = .);/'\
+              -e 's@^.*\*(\.jcr).*$@& \
+                 PROVIDE(__start___libc_subfreeres = .);\
+                 __libc_subfreeres : {___libibc_subfreeres) }\
+                 PROVIDE(__stop___libc_subfreeres = .);\
+                 PROVIDE(__start___libc_atexit = .);\
+                 __libc_atexit : { *(__libc_atexit) }\
+                 PROVIDE(__stop___libc_atexit = .);\
+                 PROVIDE(__start___libc_thread_subfreeres = .);\
+                 __libc_thread_subfreeres : { *(__libc_thread_subfreeres) }\
+                 PROVIDE(__stop___libc_thread_subfreeres = .);\
+                 /DISCARD/ : { *(.gnu.glibc-stub.*) }@'
+test -s /Volumes/btc-13/build/glibc-m68k-linux-gnu-3/shlib.ldsT
+mv -f /Volumes/btc-13/build/glibc-m68k-linux-gnu-3/shlib.ldsT /Volumes/btc-13/build/glibc-m68k-linux-gnu-3/shlib.lds
+m68k-linux-gnu-gcc    -shared -static-libgcc -Wl,-O1  -Wl,-z,defs -Wl,-dynamic-linker=/lib/ld.so.1  -B/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/csu/  -Wl,--version-script=/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/libc.map -Wl,-soname=libc.so.6 -Wl,-z,combreloc -Wl,-z,relro -Wl,--hash-style=both -nostdlib -nostartfiles -e __libc_main -Wl,-z,now -L/Volumes/btc-13/build/glibc-m68k-linux-gnu-3 -L/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/math -L/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/elf -L/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/dlfcn -L/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/nss -L/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/nis -L/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/rt -L/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/resolv -L/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/crypt -L/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/nptl -Wl,-rpath-link=/Volumes/btc-13/build/glibc-m68k-linux-gnu-3:/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/math:/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/elf:/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/dlfcn:/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/nss:/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/nis:/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/rt:/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/resolv:/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/crypt:/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/nptl -o /Volumes/btc-13/build/glibc-m68k-linux-gnu-3/libc.so -T /Volumes/btc-13/build/glibc-m68k-linux-gnu-3/shlib.lds /Volumes/btc-13/build/glibc-m68k-linux-gnu-3/csu/abi-note.o /Volumes/btc-13/build/glibc-m68k-linux-gnu-3/elf/soinit.os /Volumes/btc-13/build/glibc-m68k-linux-gnu-3/libc_pic.os /Volumes/btc-13/build/glibc-m68k-linux-gnu-3/elf/sofini.os /Volumes/btc-13/build/glibc-m68k-linux-gnu-3/elf/interp.os /Volumes/btc-13/build/glibc-m68k-linux-gnu-3/elf/ld.so -lgcc
+/Volumes/btc-13/gcc-4.8/lib/gcc/m68k-linux-gnu/4.8.3/../../../../m68k-linux-gnu/bin/ld:/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/shlib.lds:125: syntax error
+collect2: error: ld returned 1 exit status
+make[2]: *** [/Volumes/btc-13/build/glibc-m68k-linux-gnu-3/libc.so] Error 1
+make[2]: Leaving directory `/Volumes/btc-13/build/glibc-2.18/elf'
+make[1]: *** [elf/subdir_lib] Error 2
+make[1]: Leaving directory `/Volumes/btc-13/build/glibc-2.18'
+make: *** [all] Error 2
+
+Failure is because shlib.lds ends up corrupted:
+
+123    .jcr            : { KEEP (*(.jcr)) } 
+124      PROVIDE(__start___libc_subfreeres = .);
+125      __libc_subfreE(__st { *(__libc_subfreeres) }
+126      PROVIDE(__stop___libc_subfreeres = .);
+127      PROVIDE(__start___libc_atexit = .);
+
+Rather than,
+
+123    .jcr            : { KEEP (*(.jcr)) } 
+124      PROVIDE(__start___libc_subfreeres = .);
+125      __libc_subfreeres : { *(__libc_subfreeres) }
+126      PROVIDE(__stop___libc_subfreeres = .);
+127      PROVIDE(__start___libc_atexit = .);
+
+It isn't just glibc-2.18 that needs a workaround; I've seen this
+issue before. And it has also been observed by others:
+http://www.sourceware.org/ml/crossgcc/2013-08/msg00021.html
+
+The bug is intermittent and hard to reproduce. So I don't know what
+the real cause is. This patch is just guesswork.
+
+
+--- glibc-2.18/Makerules.orig	2013-08-11 08:52:55.000000000 +1000
++++ glibc-2.18/Makerules	2014-06-24 14:06:52.000000000 +1000
+@@ -458,7 +458,7 @@
+ 	$(LINK.o) -shared -Wl,-O1 \
+ 		  -nostdlib -nostartfiles \
+ 		  $(sysdep-LDFLAGS) $(rtld-LDFLAGS) $(LDFLAGS.so) \
+-		  -Wl,--verbose 2>&1 | \
++		  -Wl,--verbose | \
+ 	  sed > $@T \
+ 	      -e '/^=========/,/^=========/!d;/^=========/d' \
+ 	      $(if $(filter yes,$(have-hash-style)), \

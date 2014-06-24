@@ -215,6 +215,9 @@ export CXXCPP="$HOST_CXX -E $HOST_CXXFLAGS"
 
 export LANGUAGE=C LANG=C LC_ALL=C
 
+# Mac OS X defaults to 256 max open files but more are needed to build glibc
+ulimit -n 1024
+
 ##############################################
 #
 # Execute shell command
@@ -263,24 +266,28 @@ case ${GCC_DIST#*-} in
     log install_mpfr      mpfr-3.1.2
     GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-gmp=${HOST_TOOLS_PREFIX} --with-mpfr=${HOST_TOOLS_PREFIX}"
     ;;
-( 4.[3456][.-]* )
+( 4.[3-8][.-]* )
     log install_gmp       gmp-4.3.2
     log install_mpfr      mpfr-3.1.2
     GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-gmp=${HOST_TOOLS_PREFIX} --with-mpfr=${HOST_TOOLS_PREFIX}"
     case ${GCC_DIST#*-} in
-    ( 4.[45][.-]* )
-        log install_m4        m4-1.4.13
+    ( 4.[4-7][.-]* )
+        # PPL/ISL and Cloog are needed for "graphite" loop optimization
+        # New m4 is required for ppl
+        #log install_m4        m4-1.4.13
         # ppl-0.11.2 breaks gcc 4.4: https://gcc.gnu.org/ml/gcc-patches/2011-01/msg01767.html
-        log install_ppl       ppl-0.10.2
-        log install_cloog_ppl cloog-ppl-0.15.11
-        GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-ppl=${HOST_TOOLS_PREFIX} --with-cloog=${HOST_TOOLS_PREFIX}"
+        #log install_ppl       ppl-0.10.2
+        #log install_cloog_ppl cloog-ppl-0.15.11
+        #GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-ppl=${HOST_TOOLS_PREFIX} --with-cloog=${HOST_TOOLS_PREFIX}"
         ;;
     esac
     case ${GCC_DIST#*-} in
-    ( 4.[56][.-]* )
+    ( 4.[5-8][.-]* )
         log install_mpc mpc-1.0.2
-        log install_libelf libelf-0.8.13
-        GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-mpc=${HOST_TOOLS_PREFIX} --with-libelf=${HOST_TOOLS_PREFIX}"
+        GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-mpc=${HOST_TOOLS_PREFIX}"
+        # libelf is needed only by gcc-4.5 for Link Time Optimization
+        #log install_libelf libelf-0.8.13
+        #GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-libelf=${HOST_TOOLS_PREFIX}"
         ;;
     esac
     ;;

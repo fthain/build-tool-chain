@@ -6,7 +6,7 @@ function prep_elf2flt () {
     cd ${BTC_BUILD}
     test -e $1 && echo $1 already exists && return
     untar $1
-    mv ${1%-*} $1
+    # mv ${1%-*} $1
     cd $1
 
     e patch -p1 -i ${BTC_PATCHES}/elf2flt-darwin-build.diff
@@ -23,7 +23,8 @@ function install_elf2flt () {
     mkdir $1
     cd $1
 
-    ../${ELF2FLT_DIST}/configure --target=${TARGET} --prefix=${TC_PREFIX} \
+    ../${ELF2FLT_DIST}/configure --host=${BUILD} --build=${BUILD} \
+    --target=${TARGET} --prefix=${TC_PREFIX} \
     --with-bfd-include-dir=${TC_PREFIX}/${BUILD}/${TARGET}/include \
     --with-binutils-include-dir=${BTC_BUILD}/binutils-elf2flt \
     --with-libbfd=${BTC_BUILD}/binutils-elf2flt/libbfd.a \

@@ -13,12 +13,13 @@ function prep_glibc () {
     local version
     version=${1#*-}
     local add_on
-    for add_on in ${GLIBC_ADD_ONS}; do
-        test ! -e "${add_on}"
+    for add_on in ${GLIBC_ADD_ONS} ; do
+      if ! test -e ${add_on} ; then
         untar glibc-${add_on}-${version} ${mirrors}
-        if test -d glibc-${add_on}-${version} ; then
+        if ! test -e ${add_on} ; then
             mv glibc-${add_on}-${version} ${add_on}
         fi
+      fi
     done
 
     case ${1} in
@@ -165,6 +166,16 @@ function prep_glibc () {
         # hack for installing headers
         e patch -p1 -i ${BTC_PATCHES}/glibc-2.10-old-gcc.diff
         ;;
+    ( glibc-2.18 )
+        # darwin portability
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.18-non-gnu-portability-hacks.diff
+        # hack for installing headers
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.18-old-gcc.diff
+        # hack for autoconf macro regression
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.18-autoconf-gnu-ld-cached-feature-tests.diff
+        # intermittent build failure
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.18-shlib-lds-build-failure.diff
+        ;;
     esac
 
     case ${1} in
@@ -202,8 +213,11 @@ function install_glibc_headers () {
     ( glibc-2.5 )
         cp ${BTC_CONFIGS}/glibc-2.5-config.cache config.cache
         ;;
-    ( * )
+    ( glibc-2.[6-9] | glibc-2.1[0-3] )
         cp ${BTC_CONFIGS}/glibc-2.7-config.cache config.cache
+        ;;
+    ( * )
+        cp ${BTC_CONFIGS}/glibc-2.18-config.cache config.cache
         ;;
     esac
 
@@ -298,6 +312,8 @@ function install_glibc () {
     ../${GLIBC_DIST}/configure --prefix=${LIBC_PREFIX} \
     --host=${TARGET} --build=${BUILD} \
     --cache-file=./config.cache \
+    --with-bugurl= \
+    --with-pkgversion=btc \
     $GLIBC_CONFIG_OPTS \
     --enable-kernel=${LINUX_DIST#*-} \
     --without-cvs --disable-profile --disable-debug --without-gd \
