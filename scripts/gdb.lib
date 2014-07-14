@@ -39,6 +39,7 @@ function install_gdb () {
     --disable-werror
 #    --with-system-readline
 
+    make -C readline readline
     make
     make install
 }

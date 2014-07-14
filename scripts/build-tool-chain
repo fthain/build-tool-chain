@@ -31,7 +31,7 @@ BTC_LOGS=${BTC_LOGS:-${BTC_PRODUCE}/logs}
 BTC_BUILD=${BTC_PRODUCE}/build
 
 # Options for make
-MAKE_OPTS=-j5
+MAKE_OPTS=-j2
 
 # Optional URL prefix for source tar file cache
 BTC_MIRRORS=
