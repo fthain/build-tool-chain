@@ -473,7 +473,7 @@ function install_gcc () {
 
     multilib_opt="--enable-multilib"
     case ${TARGET}- in
-    ( x86_64-* ) multilib_opt="--disable-multilib" ;;
+    ( x86_64-* | powerpc64-* ) multilib_opt="--disable-multilib" ;;
     esac
 
     CFLAGS="-O2 $HOST_CFLAGS" LDFLAGS="$(get_host_ldflags)" \

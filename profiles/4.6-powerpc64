@@ -1,0 +1,5 @@
+GCC_DIST=gcc-4.6.4
+TARGET=powerpc64-linux-gnu
+LINUX_ARCH=powerpc
+
+. ${BTC_PROFILES}/E7

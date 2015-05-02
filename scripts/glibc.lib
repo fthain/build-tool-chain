@@ -328,7 +328,17 @@ function install_glibc () {
     else
         make
     fi
+
     manifest install_glibc make install_root=${LIBC_INSTALL_ROOT} install
+
+    # Workaround for gcc bug; libgcc_s link fails to locate startfiles:
+    # powerpc64-linux-gnu/bin/ld: cannot find crti.o: No such file or directory
+    # Reason being that $SYSROOT/usr/lib/../lib64/crti.o does not exist
+    # unless $SYSROOT/usr/lib exists! Create an empty directory to avoid
+    # a kludge like SYSROOT_CFLAGS_FOR_TARGET = -B$SYSROOT/usr/lib64
+    if test -n "${SYSROOT}" -a -d "${SYSROOT}/usr/lib64" ; then
+        mkdir -p "${SYSROOT}/usr/lib"
+    fi
 
     copy_license ${GLIBC_DIST}
 }

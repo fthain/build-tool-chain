@@ -1,3 +1,6 @@
+This patch is apparently non-portable; for a better fix, please see
+  https://github.com/openrisc/or1k-src/commit/5168351a536fa43edb25ea8771370f3bf3aeb36e
+
 $ uname -rsv 
 Darwin 9.8.0 Darwin Kernel Version 9.8.0: Wed Jul 15 16:55:01 PDT 2009; root:xnu-1228.15.4~1/RELEASE_I386
 
