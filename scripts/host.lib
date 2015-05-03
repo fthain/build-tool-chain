@@ -139,7 +139,7 @@ function install_find_pl () {
     echo installing $pn
 
     if ! test -f ${BTC_SOURCES}/${pn}.bz2 ; then
-        fetch_stdout http://www.telegraphics.com.au/~fthain/sw/${pn} \
+        fetch_stdout https://raw.githubusercontent.com/fthain/command-line/master/${pn} \
             | bzip2 -c > ${BTC_SOURCES}/${pn}.bz2
     fi
     decompress ${BTC_SOURCES}/${pn} > ${HOST_TOOLS_PREFIX}/bin/${pn}
