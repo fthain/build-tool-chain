@@ -1,0 +1,26 @@
+Bash 4 sometimes complies with POSIX where earlier versions did not.
+See also,
+https://lists.gnu.org/archive/html/lilypond-devel/2009-07/msg00497.html
+https://bugs.archlinux.org/task/15606
+
+
+--- linux-2.2.26/scripts/Configure.orig	2001-03-26 02:37:42.000000000 +1000
++++ linux-2.2.26/scripts/Configure	2014-06-25 13:12:45.175772766 +1000
+@@ -545,7 +545,7 @@
+ 
+ DEFAULTS=arch/$ARCH/defconfig
+ if [ -f .config ]; then
+-  DEFAULTS=.config
++  DEFAULTS=./.config
+ fi
+ 
+ if [ -f $DEFAULTS ]; then
+@@ -554,7 +554,7 @@
+   echo "#"
+   . $DEFAULTS
+   sed -e 's/# \(CONFIG_[^ ]*\) is not.*/\1=n/' <$DEFAULTS >.config-is-not.$$
+-  . .config-is-not.$$
++  . ./.config-is-not.$$
+   rm .config-is-not.$$
+ else
+   echo "#"

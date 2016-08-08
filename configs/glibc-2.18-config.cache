@@ -28,3 +28,4 @@ libc_cv_ld_no_whole_archive=${libc_cv_ld_no_whole_archive=yes}
 libc_cv_predef_stack_protector=${libc_cv_predef_stack_protector=yes}
 libc_cv_asm_weak_directive=${libc_cv_asm_weak_directive=yes}
 libc_cv_asm_weakext_directive=${libc_cv_asm_weakext_directive=yes}
+libc_cv_ppc_rel16=${libc_cv_ppc_rel16=yes}

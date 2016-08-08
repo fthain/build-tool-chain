@@ -489,7 +489,6 @@ function install_gcc () {
     --with-gnu-as \
     --enable-threads=posix \
     --enable-languages=c,c++ \
-    --enable-lto \
     --enable-symvers=gnu \
     --enable-__cxa_atexit \
     --enable-shared \

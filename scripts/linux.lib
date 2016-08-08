@@ -93,6 +93,7 @@ function prep_linux () {
             # Linux-mac68k CVS snapshot
             decompress ${BTC_PATCHES}/linux-2.2.27-rc2-mac68k-20050408.diff | patch -p1 ;;
         esac
+        e patch -p1 -i ${BTC_PATCHES}/linux-2.2-posix-shell.diff
         ;;
 
     ( linux-2.4.* )
@@ -108,6 +109,7 @@ function prep_linux () {
             e patch -p1 -i ${BTC_PATCHES}/linux-2.4-btc-darwin-bzImage-build.patch
             ;;
         esac
+        e patch -p1 -i ${BTC_PATCHES}/linux-2.2-posix-shell.diff
         ;;
 
     ( linux-2.6.* | linux-3.* )

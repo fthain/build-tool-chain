@@ -267,70 +267,6 @@ function install_mpfr () {
     host_tool_license $1
 }
 
-function install_m4 () {
-    test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
-
-    host_tool_unpack_and_install $1 ftp://ftp.gnu.org/gnu/m4/
-    host_tool_merge bin share
-    host_tool_license $1
-}
-
-function install_ppl () {
-    test -e ${HOST_TOOLS_PREFIX}/include/ppl_c.h && return
-
-    echo unpacking $1
-    pushd $BTC_BUILD >/dev/null
-    untar $1 ftp://ftp.cs.unipr.it/pub/ppl/releases/${1#*-}/ \
-             ftp://gcc.gnu.org/pub/gcc/infrastructure/
-
-    pushd $1 >/dev/null
-    echo building $1
-
-    CFLAGS="-O2 $HOST_CFLAGS" \
-    ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
-                --disable-optimization --enable-interfaces=c,cxx \
-                --with-gmp=${HOST_TOOLS_PREFIX}
-    make ${MAKE_OPTS}
-
-    echo installing $1
-
-    rm -rf ${BTC_BUILD}/image
-    make DESTDIR=${BTC_BUILD}/image install
-    popd >/dev/null
-    popd >/dev/null
-
-    host_tool_merge include lib share/man/man3
-    host_tool_license $1
-}
-
-function install_cloog_ppl () {
-    test -e ${HOST_TOOLS_PREFIX}/include/cloog && return
-
-    echo unpacking $1
-    pushd $BTC_BUILD >/dev/null
-    untar $1 ftp://gcc.gnu.org/pub/gcc/infrastructure/
-
-    pushd $1 >/dev/null
-    echo building $1
-
-    CFLAGS="-O2 $HOST_CFLAGS" \
-    ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
-                --with-gmp=${HOST_TOOLS_PREFIX} \
-                --with-ppl=${HOST_TOOLS_PREFIX}
-    make ${MAKE_OPTS}
-
-    echo installing $1
-
-    rm -rf ${BTC_BUILD}/image
-    make DESTDIR=${BTC_BUILD}/image install
-    popd >/dev/null
-    popd >/dev/null
-
-    host_tool_merge include lib
-    mv ${BTC_BUILD}/$1/{LICENSE,COPYING}
-    host_tool_license $1
-}
-
 function install_mpc () {
     test -e ${HOST_TOOLS_PREFIX}/include/mpc.h && return
 
@@ -355,36 +291,6 @@ function install_mpc () {
     popd >/dev/null
 
     host_tool_merge include lib share/info
-    host_tool_license $1
-}
-
-function install_libelf () {
-    test -e ${HOST_TOOLS_PREFIX}/include/libelf && return
-
-    echo unpacking $1
-    pushd $BTC_BUILD >/dev/null
-    untar $1 http://www.mr511.de/software/$1.tar.gz
-
-    pushd $1 >/dev/null
-    echo building $1
-
-    CFLAGS="-O2 $HOST_CFLAGS" \
-    ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX} \
-                --enable-shared --enable-compat
-    make ${MAKE_OPTS}
-
-    echo installing $1
-
-    rm -rf ${BTC_BUILD}/image
-    make instroot=${BTC_BUILD}/image install
-    if test -e /usr/include/nlist.h && ! grep -q elfutils /usr/include/nlist.h
-    then
-      rm ${BTC_BUILD}/image/${HOST_TOOLS_PREFIX}/include/nlist.h
-    fi
-    popd >/dev/null
-    popd >/dev/null
-
-    host_tool_merge include lib
     host_tool_license $1
 }
 

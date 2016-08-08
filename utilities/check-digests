@@ -70,6 +70,7 @@ check_digest 'cloog-ppl-0.15.11.tar.gz', '060ae4df6fb8176e021b4d033a6c0b9e';
 check_digest 'coreutils-7.6.tar.gz', '3d82f979229365f880da750642e67cf3';
 check_digest 'coreutils-8.5.tar.gz', 'c1ffe586d001e87d66cd80c4536ee823';
 check_digest 'depmod.pl-1_15_stable.bz2', '5eb1864c8dc13dcd628b6a54d73ec294';
+check_digest 'depmod.pl-1_20_stable.bz2', '4c30cafe8ec19dab45cd9fb5f20d4aff';
 check_digest 'elf2flt-21c6a41.tar.bz2', 'c7387a95fc77173343ef4a43ce183323';
 check_digest 'find.pl.bz2', 'cabfa96a4530c4eac804c781f5311fa1';
 check_digest 'flex-2.5.4a.tar.gz', 'bd8753d0b22e1f4ec87a553a73021adf';

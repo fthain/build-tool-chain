@@ -31,7 +31,7 @@ BTC_LOGS=${BTC_LOGS:-${BTC_PRODUCE}/logs}
 BTC_BUILD=${BTC_PRODUCE}/build
 
 # Options for make
-MAKE_OPTS=-j2
+MAKE_OPTS=-j5
 
 # Optional URL prefix for source tar file cache
 BTC_MIRRORS=
@@ -258,36 +258,19 @@ log install_gawk      gawk-3.1.8
 log install_bison     bison-1.28
 log install_flex      flex-2.5.4a 
 case ${GCC_DIST#*-} in
-( 2.* | 3.* )
+( 2.* | 3.* | 4.[0-2][.-]* )
+    # Prior to gcc-4.3, only Fortran needs GMP and MPFR
     ;;
-( 4.[012][.-]* )
-    # Prior to gcc-4.3, only Fortran needs these.
-    log install_gmp       gmp-4.3.2
-    log install_mpfr      mpfr-3.1.2
-    GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-gmp=${HOST_TOOLS_PREFIX} --with-mpfr=${HOST_TOOLS_PREFIX}"
-    ;;
-( 4.[3-8][.-]* )
+( 4.* )
     log install_gmp       gmp-4.3.2
     log install_mpfr      mpfr-3.1.2
     GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-gmp=${HOST_TOOLS_PREFIX} --with-mpfr=${HOST_TOOLS_PREFIX}"
     case ${GCC_DIST#*-} in
-    ( 4.[4-7][.-]* )
-        # PPL/ISL and Cloog are needed for "graphite" loop optimization
-        # New m4 is required for ppl
-        #log install_m4        m4-1.4.13
-        # ppl-0.11.2 breaks gcc 4.4: https://gcc.gnu.org/ml/gcc-patches/2011-01/msg01767.html
-        #log install_ppl       ppl-0.10.2
-        #log install_cloog_ppl cloog-ppl-0.15.11
-        #GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-ppl=${HOST_TOOLS_PREFIX} --with-cloog=${HOST_TOOLS_PREFIX}"
+    ( 4.[3-4][.-]* )
         ;;
-    esac
-    case ${GCC_DIST#*-} in
-    ( 4.[5-8][.-]* )
+    ( 4.* )
         log install_mpc mpc-1.0.2
         GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-mpc=${HOST_TOOLS_PREFIX}"
-        # libelf is needed only by gcc-4.5 for Link Time Optimization
-        #log install_libelf libelf-0.8.13
-        #GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-libelf=${HOST_TOOLS_PREFIX}"
         ;;
     esac
     ;;
@@ -296,7 +279,7 @@ case ${GCC_DIST#*-} in
     exit 1
     ;;
 esac
-log install_depmod depmod.pl-1_15_stable
+log install_depmod depmod.pl-1_20_stable
 # log install_rsh_redone rsh-redone_85 # binaries must be suid root
 
 ##############################################

@@ -1,0 +1,4 @@
+GCC_DIST=gcc-4.8.3
+TARGET=arm-unknown-linux-gnueabi
+
+. ${BTC_PROFILES}/E8

@@ -165,6 +165,8 @@ function prep_glibc () {
         e patch -p1 -i ${BTC_PATCHES}/glibc-2.10-non-gnu-portability-hacks.diff
         # hack for installing headers
         e patch -p1 -i ${BTC_PATCHES}/glibc-2.10-old-gcc.diff
+        # intermittent build failure
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.13-shlib-lds-build-failure.diff
         ;;
     ( glibc-2.18 )
         # darwin portability
