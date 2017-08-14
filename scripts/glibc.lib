@@ -2,7 +2,7 @@
 #
 # Functions relating to glibc
 
-function prep_glibc () {
+prep_glibc () {
     local mirrors
     mirrors="ftp://ftp.gnu.org/gnu/glibc/ ftp://sources.redhat.com/pub/glibc/releases/"
     cd ${BTC_BUILD}
@@ -23,7 +23,7 @@ function prep_glibc () {
     done
 
     case ${1} in
-    ( glibc-2.2.5 )
+    glibc-2.2.5 )
         # Debian sources
         decompress ${BTC_PATCHES}/glibc_2.2.5-11.8-debian.diff | patch -p1
         # Create the 2.2.5-11.8 symlink that patch can't
@@ -33,7 +33,7 @@ function prep_glibc () {
         # Permit install headers with gcc 4
         e patch -p1 -i ${BTC_PATCHES}/glibc-2.2.5-btc-gcc4.diff
         ;;
-    ( glibc-2.3.2 )
+    glibc-2.3.2 )
         ## Some patches for vanila 2.3.2
         #e patch -p0 -i ${BTC_PATCHES}/glibc-2.3.2-debian-alpha-pic.patch
         #e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.2-gentoo-alpha-crti.patch
@@ -57,7 +57,7 @@ function prep_glibc () {
         # binutils approx. 2.19
         e patch -p1 -i ${BTC_PATCHES}/glibc-insert-_begin.patch
         ;;
-    ( glibc-2.3.3 )
+    glibc-2.3.3 )
         # CVS snapshot
         decompress ${BTC_PATCHES}/glibc-2.3.3-20040728.diff | patch -p1
         e patch -p0 -i ${BTC_PATCHES}/glibc-2.3.3-new-syscall-tests.patch
@@ -71,7 +71,7 @@ function prep_glibc () {
         # intel binutils 2.18
         e patch -p0 -i ${BTC_PATCHES}/glibc-2.3-fnstsw-operand.patch
         ;;
-    ( glibc-2.3.6 )
+    glibc-2.3.6 )
         ## Some patches for vanila 2.3.6
         #e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.6-allow-gcc-4.1-powerpc32-initfini.s.patch
 
@@ -89,7 +89,7 @@ function prep_glibc () {
         # binutils approx. 2.19
         e patch -p1 -i ${BTC_PATCHES}/glibc-insert-_begin.patch
         ;;
-    ( glibc-2.5 )
+    glibc-2.5 )
         # Debian sources
         decompress ${BTC_PATCHES}/glibc_2.5-11-debian.diff | patch -p1
         # Reverse problematic Debian patch
@@ -109,13 +109,13 @@ function prep_glibc () {
         # Build failure
         e patch -p1 -i ${BTC_PATCHES}/glibc-2.5-update-m68k-sysdeps-files.patch
         ;;
-    ( glibc-2.7 )
+    glibc-2.7 )
         # Debian sources
         decompress ${BTC_PATCHES}/glibc_2.7-18lenny4-debian.diff | patch -p1
         # build failure
         e patch -p1 -i ${BTC_PATCHES}/glibc-2.7-powerpc-private-futex.patch
         ;;
-    ( glibc-2.10.1 )
+    glibc-2.10.1 )
         # Debian sources
         decompress ${BTC_PATCHES}/eglibc-source_2.10.2-8_all-debian.diff | patch -p1
 
@@ -140,7 +140,7 @@ function prep_glibc () {
         # hack for installing headers
         e patch -p1 -i ${BTC_PATCHES}/glibc-2.10-old-gcc.diff
         ;;
-    ( glibc-2.11 )
+    glibc-2.11 )
         # Debian sources
         decompress ${BTC_PATCHES}/eglibc-source_2.11.2-10_all-debian.diff | patch -p1
         # build failure
@@ -150,7 +150,7 @@ function prep_glibc () {
         # hack for installing headers
         e patch -p1 -i ${BTC_PATCHES}/glibc-2.10-old-gcc.diff
         ;;
-    ( glibc-2.12 )
+    glibc-2.12 )
         # build failure
         e patch -d ports -p0 -i ${BTC_PATCHES}/glibc-ports-3ef58249ea2450639bb135d6978009d26aba634f.patch
         # darwin portability
@@ -158,7 +158,7 @@ function prep_glibc () {
         # hack for installing headers
         e patch -p1 -i ${BTC_PATCHES}/glibc-2.10-old-gcc.diff
         ;;
-    ( glibc-2.13 )
+    glibc-2.13 )
         # Debian sources
         decompress ${BTC_PATCHES}/eglibc-source_2.13-21_all-debian.diff | patch -p1
         # Make install headers work without a mips compiler
@@ -170,7 +170,7 @@ function prep_glibc () {
         # intermittent build failure
         e patch -p1 -i ${BTC_PATCHES}/glibc-2.13-shlib-lds-build-failure.diff
         ;;
-    ( glibc-2.18 )
+    glibc-2.18 )
         # darwin portability
         e patch -p1 -i ${BTC_PATCHES}/glibc-2.18-non-gnu-portability-hacks.diff
         # hack for installing headers
@@ -183,14 +183,14 @@ function prep_glibc () {
     esac
 
     case ${1} in
-    ( glibc-2.3.* )
+    glibc-2.3.* )
         # m68k doesn't have fcntl64 prior to linux-2.6.10
         e patch -p1 -i ${BTC_PATCHES}/glibc-2.3.2-btc-m68k_fix_fcntl.diff
         ;;
     esac
 }
 
-function install_glibc_headers () {
+install_glibc_headers () {
     cd ${BTC_BUILD}
     test -e $1 && echo $1 already exists && return
     mkdir $1
@@ -198,29 +198,29 @@ function install_glibc_headers () {
 
     # glibc wants to test the compiler, but it hasn't been built yet
     case $GLIBC_DIST in
-    ( glibc-2.2.* )
+    glibc-2.2.* )
         echo 'ac_cv_prog_cc_cross=${ac_cv_prog_cc_works=no}' >config.cache
         echo 'ac_cv_prog_cc_cross=${ac_cv_prog_cc_cross=yes}' >>config.cache
         echo 'libc_cv_asm_global_directive=${libc_cv_asm_global_directive=.globl}' >>config.cache
         ;;
-    ( glibc-2.3.* )
+    glibc-2.3.* )
         if [ x${GLIBC_NEEDS_SHARED_GCC} = xyes ]; then
             cp ${BTC_CONFIGS}/glibc-2.3.2-nptl-__thread-config.cache config.cache
         else
             echo 'libc_cv_ppc_machine=${libc_cv_ppc_machine=yes}' >config.cache
         fi
         ;;
-    ( glibc-2.4.* )
+    glibc-2.4.* )
         echo glibc config cache for glibc 2.4?
         exit 1
         ;;
-    ( glibc-2.5 )
+    glibc-2.5 )
         cp ${BTC_CONFIGS}/glibc-2.5-config.cache config.cache
         ;;
-    ( glibc-2.[6-9] | glibc-2.1[0-3] )
+    glibc-2.[6-9] | glibc-2.1[0-3] )
         cp ${BTC_CONFIGS}/glibc-2.7-config.cache config.cache
         ;;
-    ( * )
+    * )
         cp ${BTC_CONFIGS}/glibc-2.18-config.cache config.cache
         ;;
     esac
@@ -233,16 +233,16 @@ function install_glibc_headers () {
     fi
 
     case ${TARGET} in
-    ( alpha-* )
+    alpha-* )
         arch_defines="-D__WORDSIZE=64"
         ;;
-    ( arm-* )
+    arm-* )
         arch_defines="-D__ARM_EABI__"
         ;;
-    ( mipse[bl]-* )
+    mipse[bl]-* )
         arch_defines="-DABIO32=1 -D_MIPS_SIM=_ABIO32 -D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32 -D__WORDSIZE=32 -D_MIPS_FPSET=16 -D_MIPS_SZINT=32 -D_MIPS_ISA=2 -D__mips=2"
         ;;
-    ( * )
+    * )
         arch_defines=""
         ;;
     esac
@@ -272,7 +272,7 @@ function install_glibc_headers () {
     fi
 }
 
-function make_glibc_runtime () {
+make_glibc_runtime () {
     cd ${BTC_BUILD}
     test -e $1 && echo $1 already exists && return
     mkdir $1
@@ -299,7 +299,7 @@ function make_glibc_runtime () {
     cp csu/crt[1in].o ../c-runtime
 }
 
-function install_glibc () {
+install_glibc () {
     cd ${BTC_BUILD}
     test -e $1 && echo $1 already exists && return
     mkdir $1

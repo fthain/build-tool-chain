@@ -101,7 +101,7 @@ export INFOPATH=${INFOPATH:-}${INFOPATH:+:}${TC_PREFIX}/share/info:${HOST_TOOLS_
 # Also, older tools don't support sysroot, so they need the old method.
 
 case ${METHOD} in
-( A )
+A )
     SYSROOT=
     BINUTILS_CONFIG_OPTS=
     LIBC_PREFIX=${TC_PREFIX}/${TARGET}/libc
@@ -113,7 +113,7 @@ case ${METHOD} in
     GLIBC_NEEDS_SHARED_GCC=no
     ln -nsf libc/{lib,include} ${TC_PREFIX}/${TARGET}
     ;;
-( B )
+B )
     SYSROOT=${TC_PREFIX}/${TARGET}/sysroot
     BINUTILS_CONFIG_OPTS="--with-sysroot=${SYSROOT}"
     LIBC_PREFIX=/usr
@@ -124,21 +124,21 @@ case ${METHOD} in
     GCC_CONFIG_OPTS="--with-sysroot=${SYSROOT}"
     GLIBC_NEEDS_SHARED_GCC=no
     ;;
-( * )
+* )
     SYSROOT=${TC_PREFIX}/${TARGET}/sysroot
     BINUTILS_CONFIG_OPTS="--with-sysroot=${SYSROOT}"
     LIBC_PREFIX=/usr
     LIBC_INSTALL_ROOT=${SYSROOT}
     LIBC_HEADERS=${SYSROOT}/usr/include
     case ${METHOD}-${TARGET} in
-    ( C-m68k-* | C-mipsel-* )
+    C-m68k-* | C-mipsel-* )
         glibc_enable_add_ons=linuxthreads
         GLIBC_CONFIG_OPTS=
         GLIBC_NEEDS_SHARED_GCC=yes
         ;;
-    ( U-* )
+    U-* )
         ;;
-    ( * )
+    * )
         glibc_enable_add_ons=nptl
         GLIBC_CONFIG_OPTS="--with-tls --enable-bind-now --with-__thread"
         GLIBC_NEEDS_SHARED_GCC=yes
@@ -149,9 +149,9 @@ case ${METHOD} in
 esac
 
 case ${METHOD} in
-( U )
+U )
     ;;
-( * )
+* )
     for add_on in ${GLIBC_ADD_ONS}; do
         # GLIBC_ADD_ONS will be unpacked, but only --enabled-add-ons will be used.
         if [ $add_on != nptl -a $add_on != linuxthreads ] ; then
@@ -223,7 +223,7 @@ ulimit -n 1024
 # Execute shell command
 
 case "${1:-}" in
-( -c )
+-c )
     export -f e fetch untar decompress prep_linux build_linux
     export BTC_PRODUCE HOST_TOOLS_PREFIX BTC_LOGS
     export BTC_BUILD BTC_SOURCES BTC_PATCHES BTC_CONFIGS BTC_MIRRORS
@@ -232,15 +232,15 @@ case "${1:-}" in
     exec bash -c "$2"
     exit 1
     ;;
-( -x )
+-x )
     echo "export PATH=\$PATH:$TC_PREFIX/bin"
     echo "export TARGET=$TARGET"
     echo "export LINUX_ARCH=$LINUX_ARCH"
     exit 0
     ;;
-( '' )
+'' )
     ;;
-( * )
+* )
     echo usage: $0 '-p <profile> [ -c command ]'
     exit 1
     ;;
@@ -264,23 +264,23 @@ log install_gawk      gawk-3.1.8
 log install_bison     bison-1.28
 log install_flex      flex-2.5.4a 
 case ${GCC_DIST#*-} in
-( 2.* | 3.* | 4.[0-2][.-]* )
+2.* | 3.* | 4.[0-2][.-]* )
     # Prior to gcc-4.3, only Fortran needs GMP and MPFR
     ;;
-( 4.* )
+4.* )
     log install_gmp       gmp-4.3.2
     log install_mpfr      mpfr-3.1.2
     GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-gmp=${HOST_TOOLS_PREFIX} --with-mpfr=${HOST_TOOLS_PREFIX}"
     case ${GCC_DIST#*-} in
-    ( 4.[3-4][.-]* )
+    4.[3-4][.-]* )
         ;;
-    ( 4.* )
+    4.* )
         log install_mpc mpc-1.0.2
         GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-mpc=${HOST_TOOLS_PREFIX}"
         ;;
     esac
     ;;
-( * )
+* )
     echo unknown gcc release
     exit 1
     ;;
@@ -313,7 +313,7 @@ log install_binutils binutils-${TARGET}
 # elf2flt
 
 case ${TARGET}- in
-( *-uclinux-* )
+*-uclinux-* )
     log prep_elf2flt ${ELF2FLT_DIST}
     log install_elf2flt elf2flt-${TARGET}
     ;;
@@ -331,11 +331,11 @@ log install_linux_headers ${LINUX_DIST}
 # libc pass 1: install the headers
 
 case ${TARGET}- in
-( *-uclinux-* )
+*-uclinux-* )
     log prep_uclibc ${UCLIBC_DIST}
     log install_uclibc_headers ${UCLIBC_DIST}
     ;;
-( * )
+* )
     log prep_glibc ${GLIBC_DIST}
     log install_glibc_headers glibc-${TARGET}-1
     ;;
@@ -354,13 +354,13 @@ log install_gcc_core_static gcc-${TARGET}-1
 #
 
 case ${TARGET}- in
-( *-uclinux-* )
+*-uclinux-* )
     log make_uclibc_runtime ${UCLIBC_DIST}
     log install_gcc_core_shared gcc-${TARGET}-2
     log install_uclibc ${UCLIBC_DIST}
     ;;
 
-( * )
+* )
     # (omitted unless using NPTL in glibc pass 3)
     # glibc pass 2: csu/subdir_lib for crt[1in].o
     # gcc-core pass 2: first non-static compiler;

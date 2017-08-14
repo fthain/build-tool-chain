@@ -2,7 +2,7 @@
 #
 # Functions relating to gdb
 
-function prep_gdb () {
+prep_gdb () {
     cd ${BTC_BUILD}
     test -e $1 && echo $1 already exists && return
     untar $1 ftp://ftp.gnu.org/gnu/gdb/ \
@@ -10,16 +10,16 @@ function prep_gdb () {
     cd $1
 
     case $1 in
-    ( gdb-6.6 )
+    gdb-6.6 )
         e patch -p1 -i ${BTC_PATCHES}/gdb-6.6-sim-ppc-libintl-link.diff
         ;;
-    ( gdb-6.8 | gdb-6.8.* | gdb-7.* )
+    gdb-6.8 | gdb-6.8.* | gdb-7.* )
         e patch -p1 -i ${BTC_PATCHES}/gdb-6.8-sim-ppc-no-lz-target.diff
         ;;
     esac
 }
 
-function install_gdb () {
+install_gdb () {
     cd ${BTC_BUILD}
     test -e $1 && echo $1 already exists && return
     mkdir $1

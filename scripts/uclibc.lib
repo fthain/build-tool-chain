@@ -2,7 +2,7 @@
 #
 # Functions relating to uClibc
 
-function prep_uclibc () {
+prep_uclibc () {
     local mirrors
     cd ${BTC_BUILD}
     test -e $1 && echo $1 already exists && return
@@ -12,7 +12,7 @@ function prep_uclibc () {
     cd $1
 
     case $1 in
-    ( uClibc-0.9.30.1 )
+    uClibc-0.9.30.1 )
         e patch -p1 -i ${BTC_PATCHES}/uclibc-0.9.30-extra-scripts-getline.diff
         e patch -p1 -i ${BTC_PATCHES}/uclibc-0.9.30.1-fix-building-on-systems-w-o-ldso-support.patch
         e patch -p1 -i ${BTC_PATCHES}/uclibc-getopt-portability.diff
@@ -20,7 +20,7 @@ function prep_uclibc () {
     esac
 }
 
-function install_uclibc_headers () {
+install_uclibc_headers () {
     test -e ${LIBC_HEADERS}/stdlib.h && echo uclibc headers already installed && return
     cd ${BTC_BUILD}/$1
 
@@ -54,7 +54,7 @@ EOF
     manifest install_uclibc_headers make ARCH=${UCLIBC_ARCH} DESTDIR=${LIBC_INSTALL_ROOT} install_headers
 }
 
-function make_uclibc_runtime () {
+make_uclibc_runtime () {
     cd ${BTC_BUILD}
     test -e c-runtime && echo $1 already exists && return
     cd $1
@@ -65,7 +65,7 @@ function make_uclibc_runtime () {
     cp lib/crt[1in].o ../c-runtime
 }
 
-function install_uclibc () {
+install_uclibc () {
     test -e ${LIBC_INSTALL_ROOT}/usr/lib/libc.a && echo uclibc already installed && return
     cd ${BTC_BUILD}/$1
 

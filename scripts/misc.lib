@@ -2,13 +2,13 @@
 #
 # Common functions
 
-function e () {
+e () {
     echo "*" "$@" 1>&2
     "$@"
     return
 }
 
-function fetch_stdout () {
+fetch_stdout () {
     (
         umask 0333
         if type -t wget >/dev/null 2>&1 ; then
@@ -19,17 +19,17 @@ function fetch_stdout () {
     )
 }
 
-function fetch () {
+fetch () {
     local dist
     dist=$1
     shift
-    declare -a dir_urls
+    local -a dir_urls
     if test -z "${BTC_MIRRORS:-}" ; then
         dir_urls=("$@")
     else
         dir_urls=($BTC_MIRRORS "$@")
     fi
-    declare -a urls
+    local -a urls
     urls=( "" )
     for u in "${dir_urls[@]}" ; do
         if [ -z "${u##*/}" ] ; then
@@ -57,7 +57,7 @@ function fetch () {
     )
 }
 
-function untar () {
+untar () {
     local dist
     local -a candidates
     dist="${1}"
@@ -72,16 +72,16 @@ function untar () {
     local globbed
     for globbed in "${candidates[@]}" ; do
         case $globbed in
-        ( $BTC_SOURCES/$1.tar.bz2 )
+        $BTC_SOURCES/$1.tar.bz2 )
             e tar -xjf $globbed
             ;;
-        ( $BTC_SOURCES/$1.tar.gz )
+        $BTC_SOURCES/$1.tar.gz )
             e tar -xzf $globbed
             ;;
-        ( $BTC_SOURCES/$1.tar )
+        $BTC_SOURCES/$1.tar )
             e tar -xf $globbed
             ;;
-        ( * )
+        * )
             if [ "$#" != 1 ] ; then
                 fetch "$@"
                 untar $1
@@ -94,14 +94,14 @@ function untar () {
     done
 }
 
-function decompress () {
+decompress () {
     local globbed
     for globbed in ${1}*; do
         case $globbed in
-        ( ${1}.bz2 )
+        ${1}.bz2 )
             e bzip2 -dc $globbed && return
             ;;
-        ( ${1}.gz )
+        ${1}.gz )
             e gzip -dc $globbed && return
             ;;
         esac
@@ -112,7 +112,7 @@ function decompress () {
     return 1
 }
 
-function manifest () {
+manifest () {
     local tag
     tag=$1
     shift
@@ -122,18 +122,18 @@ function manifest () {
     rm ${BTC_LOGS}/stamp
 }
 
-function list_manifest () {
+list_manifest () {
     bzip2 -dc ${BTC_LOGS}/${1}.list.bz2
 }
 
-function log () {
+log () {
     mkdir -p ${BTC_LOGS}
     echo "$@"
     "$@" >> ${BTC_LOGS}/${1}.log 2>&1
     return
 }
 
-function copy_license () {
+copy_license () {
     mkdir -p ${TC_PREFIX}/share/doc
     cat ${BTC_BUILD}/$1/COPYING* > ${TC_PREFIX}/share/doc/${1%%-[0-9]*}-licenses
 }

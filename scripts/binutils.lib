@@ -2,7 +2,7 @@
 #
 # Functions relating to binutils
 
-function prep_binutils () {
+prep_binutils () {
     cd ${BTC_BUILD}
     test -e $1 && echo $1 already exists && return
     untar $1 ftp://ftp.gnu.org/gnu/binutils/ \
@@ -11,7 +11,7 @@ function prep_binutils () {
     cd $1
 
     case ${1} in
-    ( binutils-2.12.90.0.1 )
+    binutils-2.12.90.0.1 )
         # Debian source package
         decompress ${BTC_PATCHES}/binutils_2.12.90.0.1-4-debian-all.diff | patch -p1
         # Fix for recent gcc
@@ -21,18 +21,18 @@ function prep_binutils () {
         # Move lib, include and ldscripts directories
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.12-lib-include-dirs.diff
         ;;
-    ( binutils-2.15 | binutils-2.15.* )
+    binutils-2.15 | binutils-2.15.* )
         # Debian source package
         decompress ${BTC_PATCHES}/binutils_2.15-6-debian-all.diff | patch -p1
         # Fix to support April '04 glibc asm (m68k/arm/cris)
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.15-NO_APP-mode-line-comment.patch
         ;;
-    ( binutils-2.16 | binutils-2.16.* )
+    binutils-2.16 | binutils-2.16.* )
         # Fix to support April '04 glibc asm (m68k/arm/cris)
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.15-NO_APP-mode-line-comment.patch
         e patch -p1 -i ${BTC_PATCHES}/702-binutils-skip-comments.patch
         ;;
-    ( binutils-2.17 )
+    binutils-2.17 )
         # Debian source package
         decompress ${BTC_PATCHES}/binutils_2.17-3+etch1-debian-all.diff | patch -p1
         # Build failure
@@ -40,17 +40,17 @@ function prep_binutils () {
         # Avoid fatal compiler warnings
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         ;;
-    ( binutils-2.17.50.0.2 )
+    binutils-2.17.50.0.2 )
         # Avoid fatal compiler warnings
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         e patch -p1 -i ${BTC_PATCHES}/702-binutils-skip-comments.patch
         ;;
-    ( binutils-2.17.50.0.18 )
+    binutils-2.17.50.0.18 )
         # Avoid fatal compiler warnings
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.18-fix-warning.diff
         ;;
-    ( binutils-2.18 )
+    binutils-2.18 )
         # Debian source package
         decompress ${BTC_PATCHES}/binutils_2.18.1~cvs20080103-7-debian-all.diff | patch -p1
         # Avoid fatal compiler warnings
@@ -59,13 +59,13 @@ function prep_binutils () {
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.18-darwin-libbfd-link.diff
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.18-darwin-libopcodes-link.diff
         ;;
-    ( binutils-2.19.51 )
+    binutils-2.19.51 )
         # Avoid fatal compiler warnings
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         # Move ldscripts directory
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.19.51-scriptdir.diff
         ;;
-    ( binutils-2.20.1 )
+    binutils-2.20.1 )
         # Debian source package
         decompress ${BTC_PATCHES}/binutils_2.20.1-16-debian-all.diff | patch -p1
         # Avoid fatal compiler warnings
@@ -73,7 +73,7 @@ function prep_binutils () {
         # Darwin link problem
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
         ;;
-    ( binutils-2.21.52 )
+    binutils-2.21.52 )
         # Debian source package
         decompress ${BTC_PATCHES}/binutils_2.21.52.20110606-2-debian-all.diff | patch -p1
         # Avoid fatal compiler warnings
@@ -81,7 +81,7 @@ function prep_binutils () {
         # Darwin link problem
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
         ;;
-    ( binutils-2.21.90 )
+    binutils-2.21.90 )
         # Debian source package
         decompress ${BTC_PATCHES}/binutils_2.21.90.20111025-1-debian-all.diff | patch -p1
         # Avoid fatal compiler warnings
@@ -89,7 +89,7 @@ function prep_binutils () {
         # Darwin link problem
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
         ;;
-    ( binutils-2.22 | binutils-2.24.51 )
+    binutils-2.22 | binutils-2.24.51 )
         # Avoid fatal compiler warnings
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         # Darwin link problem
@@ -102,7 +102,7 @@ function prep_binutils () {
 #    sh patches/README
 }
 
-function build_binutils () {
+build_binutils () {
     cd ${BTC_BUILD}
     test -e $1 && echo $1 already exists && return
     mkdir $1
@@ -120,16 +120,16 @@ function build_binutils () {
     --disable-werror
 
     case ${BINUTILS_DIST} in
-    ( binutils-2.?.* | binutils-2.1[012].* )
+    binutils-2.?.* | binutils-2.1[012].* )
         ;;
-    ( * )
+    * )
         make configure-bfd ;;
     esac
     make headers -C bfd
     make ${MAKE_OPTS} all
 }
 
-function install_binutils () {
+install_binutils () {
     test -e ${TC_PREFIX}/bin/${TARGET}-as && echo binutils already installed && return
     cd ${BTC_BUILD}/${1}
 

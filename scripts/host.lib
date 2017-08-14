@@ -2,14 +2,14 @@
 #
 # Functions relating to host-native tools
 
-function host_tool_license () {
+host_tool_license () {
     mkdir -p ${HOST_TOOLS_PREFIX}/share/doc
     local pn
     pn=${1%%-[0-9]*}
     cat ${BTC_BUILD}/${1}/COPYING* > ${HOST_TOOLS_PREFIX}/share/doc/${pn}-licenses
 }
 
-function host_tool_install () {
+host_tool_install () {
     echo building $1
     pushd $BTC_BUILD/$1 >/dev/null
 
@@ -25,7 +25,7 @@ function host_tool_install () {
     popd >/dev/null
 }
 
-function host_tool_unpack_and_install () {
+host_tool_unpack_and_install () {
     echo unpacking $1
     pushd $BTC_BUILD >/dev/null
     untar "$@"
@@ -33,7 +33,7 @@ function host_tool_unpack_and_install () {
     host_tool_install $1
 }
 
-function host_tool_merge () {
+host_tool_merge () {
     pushd ${BTC_BUILD}/image/${HOST_TOOLS_PREFIX} >/dev/null
     test -d share/man && ln -nsf share/man ${BTC_BUILD}/image/man
     rm -f share/info/dir
@@ -46,7 +46,7 @@ function host_tool_merge () {
     rm -rf ${BTC_BUILD}/image
 }
 
-function install_sed () {
+install_sed () {
     test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
 
     host_tool_unpack_and_install $1 ftp://ftp.gnu.org/gnu/sed/
@@ -55,7 +55,7 @@ function install_sed () {
     host_tool_license $1
 }
 
-function install_make () {
+install_make () {
     test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
 
     echo preparing $1
@@ -72,7 +72,7 @@ function install_make () {
     host_tool_license $1
 }
 
-function install_gettext () {
+install_gettext () {
     test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
 
     host_tool_unpack_and_install $1 ftp://ftp.gnu.org/gnu/gettext/
@@ -80,7 +80,7 @@ function install_gettext () {
     host_tool_license $1
 }
 
-function install_coreutils () {
+install_coreutils () {
     test -e ${HOST_TOOLS_PREFIX}/bin/readlink && return
 
     echo unpacking $1
@@ -105,7 +105,7 @@ function install_coreutils () {
     host_tool_license $1
 }
 
-function install_loadkeys () {
+install_loadkeys () {
     test -e ${HOST_TOOLS_PREFIX}/bin/loadkeys && return
     
     echo preparing $1
@@ -131,7 +131,7 @@ function install_loadkeys () {
     host_tool_license $1
 }
 
-function install_find_pl () {
+install_find_pl () {
     local pn
     pn=find.pl
     test -e ${HOST_TOOLS_PREFIX}/bin/${pn} && return
@@ -146,7 +146,7 @@ function install_find_pl () {
     chmod 755 ${HOST_TOOLS_PREFIX}/bin/${pn}
 }
 
-function install_gawk () {
+install_gawk () {
     test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
 
     host_tool_unpack_and_install $1 ftp://ftp.gnu.org/gnu/gawk/
@@ -155,7 +155,7 @@ function install_gawk () {
     host_tool_license $1
 }
 
-function install_bison () {
+install_bison () {
     test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
 
     host_tool_unpack_and_install $1 ftp://ftp.gnu.org/gnu/bison/
@@ -163,7 +163,7 @@ function install_bison () {
     host_tool_license $1
 }
 
-function install_flex () {
+install_flex () {
     test -e ${HOST_TOOLS_PREFIX}/bin/${1%%-*} && return
 
     echo preparing $1
@@ -182,7 +182,7 @@ function install_flex () {
     host_tool_license $1
 }
 
-function install_gmp () {
+install_gmp () {
     test -e ${HOST_TOOLS_PREFIX}/include/gmp.h && return
 
     echo unpacking $1
@@ -197,11 +197,11 @@ function install_gmp () {
     local cflags
     cflags=
     case ${BUILD} in
-#    ( powerpc-apple-darwin* )
+#    powerpc-apple-darwin* )
 #        cflags="-std=gnu89 -Wa,-force_cpusubtype_ALL"
 #        opts="--with-pic"
 #        ;;
-    ( i386-apple-darwin* )
+    i386-apple-darwin* )
         # Build failure: duplicate symbols due to extern inline issue
         cflags="-std=gnu89"
 #        # Build failure on Mac OS 10.5
@@ -227,7 +227,7 @@ function install_gmp () {
     host_tool_license $1
 }
 
-function install_mpfr () {
+install_mpfr () {
     test -e ${HOST_TOOLS_PREFIX}/include/mpfr.h && return
 
     echo preparing $1
@@ -267,7 +267,7 @@ function install_mpfr () {
     host_tool_license $1
 }
 
-function install_mpc () {
+install_mpc () {
     test -e ${HOST_TOOLS_PREFIX}/include/mpc.h && return
 
     echo unpacking $1
@@ -294,7 +294,7 @@ function install_mpc () {
     host_tool_license $1
 }
 
-function install_depmod () {
+install_depmod () {
     local pn
     pn=${1%%-*}
     test -e ${HOST_TOOLS_PREFIX}/bin/${pn} && return
@@ -310,7 +310,7 @@ function install_depmod () {
     chmod 755 ${HOST_TOOLS_PREFIX}/bin/${pn}
 }
 
-function install_rsh_redone () {
+install_rsh_redone () {
     echo unpacking $1
     pushd $BTC_BUILD >/dev/null
     untar $1.orig ftp://ftp.debian.org/debian/pool/main/r/rsh-redone/
