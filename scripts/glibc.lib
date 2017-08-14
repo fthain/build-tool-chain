@@ -161,6 +161,8 @@ function prep_glibc () {
     ( glibc-2.13 )
         # Debian sources
         decompress ${BTC_PATCHES}/eglibc-source_2.13-21_all-debian.diff | patch -p1
+        # Make install headers work without a mips compiler
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.13-btc-allow-wrong-cc.diff
         # darwin portability
         e patch -p1 -i ${BTC_PATCHES}/glibc-2.10-non-gnu-portability-hacks.diff
         # hack for installing headers

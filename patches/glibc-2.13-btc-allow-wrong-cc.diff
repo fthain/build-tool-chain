@@ -1,0 +1,11 @@
+--- glibc-2.13/ports/sysdeps/mips/mips32/Makefile.orig	2017-08-13 16:55:32.000000000 +1000
++++ glibc-2.13/ports/sysdeps/mips/mips32/Makefile	2017-08-13 16:55:41.000000000 +1000
+@@ -1,6 +1,8 @@
++ifneq ($(btc_wrong_cc),yes)
+ ifeq ($(filter -mabi=32,$(CC)),)
+ CC += -mabi=32
+ endif
++endif
+ 
+ ifeq ($(subdir),csu)
+ ifeq (yes,$(build-shared))

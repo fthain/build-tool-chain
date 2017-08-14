@@ -161,13 +161,21 @@ function prep_gcc_core () {
         # We build gcc-core before libc is built
         e patch -p1 -i ${BTC_PATCHES}/gcc-4-no-libc-yet.diff
         ;;
-    ( gcc-4.4.[3-7] | gcc-4.[56][.-]* )
+    ( gcc-4.4.[3-7] | gcc-4.5[.-]* )
         # We build gcc-core before libc is built
         e patch -p1 -i ${BTC_PATCHES}/gcc-4.4.3-no-libc-yet.diff
+        ;;
+    ( gcc-4.6[.-]* )
+        # We build gcc-core before libc is built
+        e patch -p1 -i ${BTC_PATCHES}/gcc-4.4.3-no-libc-yet.diff
+        # Fix build with new texinfo package
+        e patch -p1 -i ${BTC_PATCHES}/gcc-4.6-gcc-texi.diff
         ;;
     ( gcc-4.* )
         # We build gcc-core before libc is built
         e patch -p1 -i ${BTC_PATCHES}/gcc-4.7-no-libc-yet.diff
+        # Fix build with new texinfo package
+        e patch -p1 -i ${BTC_PATCHES}/gcc-4.6-gcc-texi.diff
         ;;
     esac
 
@@ -342,6 +350,8 @@ function prep_gcc () {
         ;;
     ( gcc-4.* )
         e patch -p1 -i ${BTC_PATCHES}/gcc-4.4.1-btc-use-target-cpp-for-lib-configure.patch
+        # Fix build with new texinfo package
+        e patch -p1 -i ${BTC_PATCHES}/gcc-4.6-gcc-texi.diff
         ;;
     esac
 

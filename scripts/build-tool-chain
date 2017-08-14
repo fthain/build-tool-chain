@@ -61,8 +61,8 @@ else
 fi
 
 # Profile must set these
-echo TARGET: ${TARGET}
-echo METHOD: ${METHOD}
+TARGET=${TARGET}
+METHOD=${METHOD}
 
 # Profile may set these
 DEFAULT_CPU=${DEFAULT_CPU:-}
@@ -224,13 +224,19 @@ ulimit -n 1024
 
 case "${1:-}" in
 ( -c )
-    export -f e fetch untar decompress prep_linux build_linux package_linux
+    export -f e fetch untar decompress prep_linux build_linux
     export BTC_PRODUCE HOST_TOOLS_PREFIX BTC_LOGS
     export BTC_BUILD BTC_SOURCES BTC_PATCHES BTC_CONFIGS BTC_MIRRORS
     export TC_PREFIX BUILD TARGET LINUX_ARCH
     cd $BTC_BUILD
     exec bash -c "$2"
     exit 1
+    ;;
+( -x )
+    echo "export PATH=\$PATH:$TC_PREFIX/bin"
+    echo "export TARGET=$TARGET"
+    echo "export LINUX_ARCH=$LINUX_ARCH"
+    exit 0
     ;;
 ( '' )
     ;;

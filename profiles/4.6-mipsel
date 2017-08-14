@@ -1,0 +1,5 @@
+GCC_DIST=gcc-4.6.4
+TARGET=mipsel-linux-gnu
+LINUX_ARCH=mips
+
+. ${BTC_PROFILES}/E7

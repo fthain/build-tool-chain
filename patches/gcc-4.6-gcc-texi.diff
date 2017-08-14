@@ -1,0 +1,29 @@
+if [ xinfo = xinfo ]; then \
+                makeinfo --split-size=5000000 --no-split -I . -I ../../gcc-core-4.6.4/gcc/doc \
+                        -I ../../gcc-core-4.6.4/gcc/doc/include -o doc/gcc.info ../../gcc-core-4.6.4/gcc/doc/gcc.texi; \
+        fi
+../../gcc-core-4.6.4/gcc/doc/gcc.texi:89: warning: @tex should only appear at the beginning of a line
+../../gcc-core-4.6.4/gcc/doc/gcc.texi:209: no matching `@end tex'
+../../gcc-core-4.6.4/gcc/doc/gcc.texi:209: no matching `@end multitable'
+../../gcc-core-4.6.4/gcc/doc/gcc.texi:209: no matching `@end titlepage'
+
+This patch comes from
+https://github.com/macports/macports-ports/blob/master/lang/gcc48/files/patch-gcc-texi.diff
+
+--- a/gcc/doc/gcc.texi    (revision 203015)
++++ b/gcc/doc/gcc.texi    (working copy)
+@@ -83,11 +83,11 @@
+ Published by:
+ @multitable @columnfractions 0.5 0.5
+ @item GNU Press
+-@tab Website: www.gnupress.org
++@tab Website: @uref{http://www.gnupress.org}
+ @item a division of the
+-@tab General: @tex press@@gnu.org @end tex
++@tab General: @email{press@@gnu.org}
+ @item Free Software Foundation
+-@tab Orders:  @tex sales@@gnu.org @end tex
++@tab Orders:  @email{sales@@gnu.org}
+ @item 51 Franklin Street, Fifth Floor
+ @tab Tel 617-542-5942
+ @item Boston, MA 02110-1301 USA

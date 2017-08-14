@@ -1,6 +1,6 @@
 Build Tool Chain
 https://github.com/fthain/build-tool-chain
-(c) 2004-2014 Finn Thain
+(c) 2004-2017 Finn Thain
 
 
 PURPOSE
@@ -21,8 +21,8 @@ filesystem.
 
 An alternative to btc for building a tool-chain is crosstool (or its
 successors). Or if you need to cross-build an entire glibc-based system, you
-may want to check out Cross Linux From Scratch (CLFS). Also see bitbake and
-Yocto.
+may want to check out Cross Linux From Scratch (CLFS). Also see bitbake,
+Buildroot and OpenEmbedded.
 
 
 NOTA BENE
@@ -41,10 +41,6 @@ your chances of getting correct results.
 The same applies to glibc. According to the glibc documentation, you should
 build glibc under the latest glibc (!) Eglibc, on the other hand, is
 intended to permit cross-compilation.
-
-If you are building certain Linux kernels, do not enable symbol versioning
-(CONFIG_MODVERSIONS) or you may end up with modules that cannot be loaded,
-since genksyms for the target is not generally available at build time.
 
 
 INSTRUCTIONS (not a good substitute for reading the scripts)
@@ -93,12 +89,16 @@ INSTRUCTIONS (not a good substitute for reading the scripts)
   are required by gcc-4.4 and later. These tools in turn require a recent m4.
   MPC and libelf are used by gcc-4.5 or later.
 
-  The old bison is needed to build gcc-2.95. flex is for binutils-2.12. loadkeys
-  (from kbd) is used for generating linux-2.2 keymaps.
+  The old bison is needed to build gcc-2.95. flex is for binutils-2.12.
+  loadkeys (from kbd) is used for generating linux-2.2 keymaps.
 
 - If you provide a Linux configuration in the $BTC_CONFIGS directory it will be
   used in preference to the default config. Name it something like
   linux-2.4.27-powerpc-dot-config
+
+  Do not enable symbol versioning (CONFIG_MODVERSIONS) or you may end up
+  with modules that cannot be loaded. genksyms for the target is not
+  available at build time and may be required for some kernel releases.
 
 - Run build-tool-chain, as an unprivileged user, as follows. Substitute
   your choice of PROFILE, e.g. 'profiles/4.4-m68k'.
@@ -139,6 +139,6 @@ btc was inspired by Philippe Trottier's Xcompiler V0.93. Ryan Oliver provided
 encouragement and crucial assistance with the build method, as well as patches
 for glibc. Some ideas come from Dan Kegel's crosstool and other scripts
 elsewhere on the 'Net. Martin Schaffner contributed some changes to the Linux
-make commands. My gratitude goes to the Gentoo, LFS and Debian projects and
-the many mailing list denizens who have provided patches to make this stuff
+make commands. I am grateful to the Gentoo, LFS and Debian projects and
+many mailing list denizens who have published patches to make this stuff
 actually work.
