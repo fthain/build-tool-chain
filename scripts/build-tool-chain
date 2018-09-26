@@ -131,7 +131,7 @@ B )
     LIBC_INSTALL_ROOT=${SYSROOT}
     LIBC_HEADERS=${SYSROOT}/usr/include
     case ${METHOD}-${TARGET} in
-    C-m68k-* | C-mipsel-* )
+    C-m68k-* | C-mipsel-* | C-mips-* )
         glibc_enable_add_ons=linuxthreads
         GLIBC_CONFIG_OPTS=
         GLIBC_NEEDS_SHARED_GCC=yes

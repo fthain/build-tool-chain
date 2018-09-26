@@ -347,11 +347,15 @@ prep_gcc () {
         e patch -p1 -i ${BTC_PATCHES}/gcc-4.4.1-btc-use-target-cpp-for-lib-configure.patch
         # Build failure
         e patch -p1 -i ${BTC_PATCHES}/gcc-pr41818.patch
+        # Fix build with new compiler
+        e patch -p1 -i ${BTC_PATCHES}/gcc-cfns-fix-mismatch-in-gnu_inline-attributes.patch
         ;;
     gcc-4.* )
         e patch -p1 -i ${BTC_PATCHES}/gcc-4.4.1-btc-use-target-cpp-for-lib-configure.patch
         # Fix build with new texinfo package
         e patch -p1 -i ${BTC_PATCHES}/gcc-4.6-gcc-texi.diff
+        # Fix build with new compiler
+        e patch -p1 -i ${BTC_PATCHES}/gcc-cfns-fix-mismatch-in-gnu_inline-attributes.patch
         ;;
     esac
 
@@ -520,8 +524,8 @@ get_gcc_arch_defs () {
     arm-* )
         echo " -D__ARM_EABI__"
         ;;
-    mipsel-* )  # and mips, mipseb?
-        echo " -DABIO32=1 -D_MIPS_SIM=_ABIO32 -D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32 -D__WORDSIZE=32 -D_MIPS_FPSET=16 -D_MIPS_SZINT=32 -D_MIPS_ISA=2 -D__mips=2"
+    mips-* | mipsel-* )
+        echo " -D_ABIO32=1 -D_MIPS_SIM=_ABIO32 -D_MIPS_FPSET=16 -D_MIPS_ISA=1 -D_MIPS_SZINT=32 -D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32 -D__WORDSIZE=32 -D__mips=1"
         ;;
     esac
 }

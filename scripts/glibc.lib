@@ -232,22 +232,7 @@ install_glibc_headers () {
         touch stddef.h
     fi
 
-    case ${TARGET} in
-    alpha-* )
-        arch_defines="-D__WORDSIZE=64"
-        ;;
-    arm-* )
-        arch_defines="-D__ARM_EABI__"
-        ;;
-    mipse[bl]-* )
-        arch_defines="-DABIO32=1 -D_MIPS_SIM=_ABIO32 -D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32 -D__WORDSIZE=32 -D_MIPS_FPSET=16 -D_MIPS_SZINT=32 -D_MIPS_ISA=2 -D__mips=2"
-        ;;
-    * )
-        arch_defines=""
-        ;;
-    esac
-
-    CC="$CC $arch_defines" CPP="$CPP $arch_defines" CFLAGS="-O2 ${HOST_CFLAGS}" \
+    CC="$CC $(get_gcc_arch_defs)" CPP="$CPP $(get_gcc_arch_defs)" CFLAGS="-O2 ${HOST_CFLAGS}" \
     CXX=false \
     ../${GLIBC_DIST}/configure --prefix=${LIBC_PREFIX} \
     --host=${TARGET} --build=${BUILD} \
