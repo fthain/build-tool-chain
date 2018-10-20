@@ -65,36 +65,32 @@ prep_binutils () {
         # Move ldscripts directory
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.19.51-scriptdir.diff
         ;;
-    binutils-2.20.1 )
+    binutils-2.2[0-5] | binutils-2.2[0-5].* )
         # Debian source package
-        decompress ${BTC_PATCHES}/binutils_2.20.1-16-debian-all.diff | patch -p1
+        case $1 in
+        binutils-2.20.1 )
+            decompress ${BTC_PATCHES}/binutils_2.20.1-16-debian-all.diff | patch -p1
+            ;;
+        binutils-2.21.52 )
+            decompress ${BTC_PATCHES}/binutils_2.21.52.20110606-2-debian-all.diff | patch -p1
+            ;;
+        binutils-2.21.90 )
+            decompress ${BTC_PATCHES}/binutils_2.21.90.20111025-1-debian-all.diff | patch -p1
+            ;;
+        binutils-2.25 )
+            decompress ${BTC_PATCHES}/binutils_2.25-5+deb8u1-debian.diff | patch -p1
+            ;;
+        esac
         # Avoid fatal compiler warnings
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
         # Darwin link problem
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
         ;;
-    binutils-2.21.52 )
+    binutils-2.28 | binutils-2.28.* )
         # Debian source package
-        decompress ${BTC_PATCHES}/binutils_2.21.52.20110606-2-debian-all.diff | patch -p1
+        decompress ${BTC_PATCHES}/binutils_2.28-5-debian.diff | patch -p1
         # Avoid fatal compiler warnings
         e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
-        # Darwin link problem
-        e patch -p1 -i ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
-        ;;
-    binutils-2.21.90 )
-        # Debian source package
-        decompress ${BTC_PATCHES}/binutils_2.21.90.20111025-1-debian-all.diff | patch -p1
-        # Avoid fatal compiler warnings
-        e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
-        # Darwin link problem
-        e patch -p1 -i ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
-        ;;
-    binutils-2.22 | binutils-2.24.51 )
-        # Avoid fatal compiler warnings
-        e patch -p1 -i ${BTC_PATCHES}/binutils-2.17.50.0.2-Werror.diff
-        # Darwin link problem
-        e patch -p1 -i ${BTC_PATCHES}/binutils-2.20.1-darwin-libbfd-link.diff
-        ;;
     esac
 ## Apply HJL patches according to patches/README, e.g.
 ##    e patch -p1 -i patches/libtool-dso.patch

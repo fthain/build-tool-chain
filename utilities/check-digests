@@ -64,6 +64,7 @@ check_digest 'binutils-2.21.90.tar.bz2', 'd0dc6e73e0cce50ea71187df9f1a4e99';
 check_digest 'binutils-2.22.tar.bz2', 'ee0f10756c84979622b992a4a61ea3f5';
 # check_digest 'binutils-2.24.51.tar.bz2', 'a87c649b13385950d3cab53954f11865';
 check_digest 'binutils-2.24.51.tar.bz2', '8c34f30c65170d9d9ffd775de576a35b';
+check_digest 'binutils-2.28.tar.bz2', '9e8340c96626b469a603c15c9d843727';
 check_digest 'bison-1.28.tar.gz', '4afb3989f2270043c47c3daa1fa7ffab';
 check_digest 'cloog-ppl-0.15.7.tar.gz', '6455e7875daac5bd885545c71c3f2001';
 check_digest 'cloog-ppl-0.15.9.tar.gz', '806e001d1b1a6b130069ff6274900af5';

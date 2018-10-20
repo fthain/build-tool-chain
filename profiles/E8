@@ -5,4 +5,4 @@ METHOD=E
 LINUX_DIST=linux-3.2.57 # should be 3.14
 GLIBC_DIST=glibc-2.19
 GLIBC_ADD_ONS=ports
-BINUTILS_DIST=binutils-2.24.51
+BINUTILS_DIST=binutils-2.25
