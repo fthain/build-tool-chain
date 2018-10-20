@@ -1,0 +1,21 @@
+--- Makefile.orig	2018-09-28 11:35:49.656703174 +1000
++++ Makefile	2018-09-28 11:40:19.757099328 +1000
+@@ -356,7 +356,7 @@
+ AWK		= awk
+ GENKSYMS	= scripts/genksyms/genksyms
+ INSTALLKERNEL  := installkernel
+-DEPMOD		= /sbin/depmod
++DEPMOD		= depmod.pl
+ PERL		= perl
+ PYTHON		= python
+ CHECK		= sparse
+@@ -1675,8 +1675,7 @@
+ 
+ # Run depmod only if we have System.map and depmod is executable
+ quiet_cmd_depmod = DEPMOD  $(KERNELRELEASE)
+-      cmd_depmod = $(CONFIG_SHELL) $(srctree)/scripts/depmod.sh $(DEPMOD) \
+-                   $(KERNELRELEASE) "$(patsubst y,_,$(CONFIG_HAVE_UNDERSCORE_SYMBOL_PREFIX))"
++      cmd_depmod = test -r System.map && NM=$(CROSS_COMPILE)nm $(DEPMOD) -a -F System.map -b $(MODLIB)
+ 
+ # Create temporary dir for module support files
+ # clean it up only when building all modules

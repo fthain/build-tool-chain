@@ -5,7 +5,7 @@
 prep_linux () {
     cd ${BTC_BUILD}
     test -e $1 && echo $1 already exists && return
-    untar $1 ftp://ftp.kernel.org/pub/linux/kernel/v{3.x,2.6,2.4,2.2}/
+    untar $1 http://www.kernel.org/pub/linux/kernel/v{4.x,3.x,2.6,2.4,2.2}/
     cd $1
 
     if [ ${BUILD} != ${BUILD/%-apple-darwin*} ] ; then
@@ -109,7 +109,7 @@ prep_linux () {
         e patch -p1 -i ${BTC_PATCHES}/linux-2.2-posix-shell.diff
         ;;
 
-    linux-2.6.* | linux-3.* )
+    linux-2.6.* | linux-[3-9].* )
         case ${1} in
         linux-2.6.[0-7] | linux-2.6.[0-7][.-]* )
             e patch -p1 -i ${BTC_PATCHES}/linux-2.6-btc-Makefile.patch
@@ -142,8 +142,11 @@ prep_linux () {
         linux-2.6.3[2-9] | linux-2.6.3[2-9][.-]* )
             e patch -p1 -i ${BTC_PATCHES}/linux-2.6.32-depmod.pl-instead.diff
             ;;
-        * )
+        linux-3.* )
             e patch -p0 -i ${BTC_PATCHES}/linux-3-depmod.pl-instead.diff
+            ;;
+        * )
+            e patch -p0 -i ${BTC_PATCHES}/linux-4-depmod.pl-instead.diff
             ;;
         esac
 
@@ -257,7 +260,7 @@ install_linux_headers () {
         make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- include/asm include/linux/version.h
         manifest install_linux_headers copy_linux_headers
         ;;
-    linux-2.6.* | linux-3.* )
+    linux-2.6.* | linux-[3-9].* )
         make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- defconfig
         manifest install_linux_headers make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- INSTALL_HDR_PATH=${LIBC_HEADERS%/include} headers_install
         ;;
@@ -287,7 +290,7 @@ build_linux () {
         e make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- vmlinux
         e make ARCH=${LINUX_ARCH} CROSS_COMPILE=${TARGET}- modules
         ;;
-    linux-2.6.* | linux-3.* )
+    linux-2.6.* | linux-[3-9].* )
         ## this hack is for non-ELF platforms, like Darwin
         #case ${1} in
         #    ( linux-2.6.[0-7] | linux-2.6.[0-7]-* ) out=scripts/elf.h ;;
