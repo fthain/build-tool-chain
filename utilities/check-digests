@@ -130,6 +130,7 @@ check_digest 'glibc-2.11.tar.bz2', '2c990f97e9ff9fb1c3c85fe826e991b9';
 check_digest 'glibc-2.13.tar.bz2', '38808215a7c40aa0bb47a5e6d3d12475';
 check_digest 'glibc-2.18.tar.bz2', 'e67f791383077c5f6a6e91fabc7579a5';
 check_digest 'glibc-2.19.tar.bz2', '3ca28f5099257aade61b1adedb7e3401';
+check_digest 'glibc-2.24.tar.bz2', '3177c254b15eee0d0a81bfe480ea7e80';
 check_digest 'glibc-linuxthreads-2.2.5.tar.bz2', '56be931455850e073a56df454ae99818';
 check_digest 'glibc-linuxthreads-2.2.5.tar.gz', 'c766a79a51668d7fa33f175a249655b4';
 check_digest 'glibc-linuxthreads-2.3.2.tar.bz2', '894b8969cfbdf787c73e139782167607';

@@ -1,0 +1,67 @@
+Avoid compile tests before we have a cross-compiler in the sysroot:
+
+configure:9: checking installed Linux kernel header files
+configure:28: gcc  -B/Volumes/btc-13/gcc-6.3/m68k-linux-gnu/bin/ -c -O2   -nostdinc -isystem /usr/lib/gcc/i686-pc-linux-gnu/5.4.0/include -isystem /usr/lib/gcc/i686-pc-linux-gnu/5.4.0/include-fixed -isystem /Volumes/btc-13/gcc-6.3/m68k-linux-gnu/sysroot/usr/include conftest.c >&5
+/Volumes/btc-13/gcc-6.3/m68k-linux-gnu/bin/as: unrecognized option '--32'
+configure:28: $? = 1
+configure: failed program was:
+[...]
+configure:35: result: missing or too old!
+
+diff -ruN glibc-2.24.orig/sysdeps/unix/sysv/linux/configure glibc-2.24/sysdeps/unix/sysv/linux/configure
+--- glibc-2.24.orig/sysdeps/unix/sysv/linux/configure	2016-08-02 12:01:36.000000000 +1000
++++ glibc-2.24/sysdeps/unix/sysv/linux/configure	2018-09-28 13:44:51.008057340 +1000
+@@ -35,7 +35,7 @@
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $libc_cv_linux320" >&5
+ $as_echo "$libc_cv_linux320" >&6; }
+ if test "$libc_cv_linux320" != '3.2.0 or later'; then
+-  as_fn_error $? "GNU libc requires kernel header files from
++  as_fn_warn $? "GNU libc requires kernel header files from
+ Linux 3.2.0 or later to be installed before configuring.
+ The kernel header files are found usually in /usr/include/asm and
+ /usr/include/linux; make sure these directories use files from
+@@ -92,7 +92,6 @@
+ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $libc_minimum_kernel" >&5
+ $as_echo "$libc_minimum_kernel" >&6; }
+-if test "$libc_minimum_kernel" = ok; then
+   cat >>confdefs.h <<_ACEOF
+ #define __LINUX_KERNEL_VERSION $decnum
+ _ACEOF
+@@ -101,8 +100,8 @@
+ #define __ABI_TAG_VERSION $abinum
+ _ACEOF
+ 
+-else
+-  as_fn_error $? "*** The available kernel headers are older than the requested
++if test "$libc_minimum_kernel" != ok; then
++  as_fn_warn $? "*** The available kernel headers are older than the requested
+ *** compatible kernel version" "$LINENO" 5
+ fi
+ 
+diff -ruN glibc-2.24.orig/sysdeps/unix/sysv/linux/configure.ac glibc-2.24/sysdeps/unix/sysv/linux/configure.ac
+--- glibc-2.24.orig/sysdeps/unix/sysv/linux/configure.ac	2016-08-02 12:01:36.000000000 +1000
++++ glibc-2.24/sysdeps/unix/sysv/linux/configure.ac	2018-09-28 13:46:23.178192525 +1000
+@@ -17,7 +17,7 @@
+ 	       [libc_cv_linuxVER='LIBC_LINUX_VERSION or later'],
+ 	       [libc_cv_linuxVER='missing or too old!'])])
+ if test "$libc_cv_linuxVER" != 'LIBC_LINUX_VERSION or later'; then
+-  AC_MSG_ERROR([GNU libc requires kernel header files from
++  AC_MSG_WARN([GNU libc requires kernel header files from
+ Linux LIBC_LINUX_VERSION or later to be installed before configuring.
+ The kernel header files are found usually in /usr/include/asm and
+ /usr/include/linux; make sure these directories use files from
+@@ -57,11 +57,10 @@
+ # error kernel headers too old
+ #endif], [], [libc_minimum_kernel=ok], [libc_minimum_kernel='too old!'])
+ AC_MSG_RESULT($libc_minimum_kernel)
+-if test "$libc_minimum_kernel" = ok; then
+   AC_DEFINE_UNQUOTED(__LINUX_KERNEL_VERSION, $decnum)
+   AC_DEFINE_UNQUOTED(__ABI_TAG_VERSION, $abinum)
+-else
+-  AC_MSG_ERROR([*** The available kernel headers are older than the requested
++if test "$libc_minimum_kernel" != ok; then
++  AC_MSG_WARN([*** The available kernel headers are older than the requested
+ *** compatible kernel version])
+ fi
+ 

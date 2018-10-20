@@ -180,6 +180,32 @@ prep_glibc () {
         # intermittent build failure
         e patch -p1 -i ${BTC_PATCHES}/glibc-2.18-shlib-lds-build-failure.diff
         ;;
+    glibc-2.19 )
+        # Debian sources
+        decompress ${BTC_PATCHES}/glibc_2.19-18+deb8u10-debian.diff | patch -p1
+        # darwin portability
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.18-non-gnu-portability-hacks.diff
+        # hack for installing headers
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.18-old-gcc.diff
+        # hack for autoconf macro regression
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.18-autoconf-gnu-ld-cached-feature-tests.diff
+        # intermittent build failure
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.18-shlib-lds-build-failure.diff
+        ;;
+    glibc-2.24 )
+        # Debian sources
+        decompress ${BTC_PATCHES}/glibc_2.24-11+deb9u3-debian.diff | patch -p1
+        # darwin portability
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.24-non-gnu-portability-hacks.diff
+        # hack for installing headers
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.18-old-gcc.diff
+        # hack for autoconf macro regression
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.24-autoconf-gnu-ld-cached-feature-tests.diff
+        # intermittent build failure
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.18-shlib-lds-build-failure.diff
+        # build failures
+        e patch -p1 -i ${BTC_PATCHES}/glibc-2.24-non-fatal-ac_try_compile.diff
+        ;;
     esac
 
     case ${1} in
