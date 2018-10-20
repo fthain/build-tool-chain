@@ -1,4 +1,4 @@
-. ${PROFILES}/31
+. ${PROFILES}/404
 TARGET=mipsel-linux-gnu
 TARGET_CPU=mips
 

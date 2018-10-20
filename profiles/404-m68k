@@ -1,0 +1,3 @@
+. ${PROFILES}/404
+TARGET=m68k-linux-gnu
+TARGET_CPU=m68k

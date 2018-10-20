@@ -169,7 +169,7 @@ function build_kernel () {
         echo kernel already compiled
         return 0
     fi
-    cd ${BUILD_DIR}/${1}
+    pushd ${BUILD_DIR}/${1} >/dev/null
     local config
     config=${CONFIGS}/${DOTCONFIG:-${1}-${TARGET_CPU}-dot-config}
     if [ -f $config ] ; then
@@ -194,6 +194,7 @@ function build_kernel () {
         ;;
     esac
     touch .compiled
+    popd >/dev/null
 }
 
 function package_kernel () {
@@ -204,7 +205,7 @@ function package_kernel () {
     fi
     rm -fr ${KERNEL_IMAGE}
     mkdir -p ${KERNEL_IMAGE}/boot
-    cd ${BUILD_DIR}/${1}
+    pushd ${BUILD_DIR}/${1} >/dev/null
     make INSTALL_MOD_PATH=${KERNEL_IMAGE} ARCH=${TARGET_CPU} \
 CROSS_COMPILE=${TARGET}- modules_install
     cd ${KERNEL_IMAGE}/lib/modules
@@ -240,7 +241,8 @@ CROSS_COMPILE=${TARGET}- modules_install
     cd ${KERNEL_IMAGE}
     rm -f lib/modules/${ver}/{build,source}
     chmod -R g-w,o-w ${KERNEL_IMAGE}
-    sudo chown -R 0 ${KERNEL_IMAGE}
+    sudo chown -R 0:0 ${KERNEL_IMAGE}
     tar -czf ${BUILD_DIR}/${1}-${TARGET_CPU}-image.tar.gz .
     sudo rm -r ${KERNEL_IMAGE}
+    popd >/dev/null
 }

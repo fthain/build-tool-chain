@@ -1,3 +1,3 @@
-. ${PROFILES}/30
+. ${PROFILES}/411
 TARGET=m68k-linux-gnu
 TARGET_CPU=m68k

@@ -1,3 +1,3 @@
-. ${PROFILES}/31
+. ${PROFILES}/404
 TARGET=alpha-linux-gnu
 TARGET_CPU=alpha

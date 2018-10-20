@@ -95,7 +95,6 @@ function install_depmod () {
     echo installing $1
     cd ${HOST_TOOLS_PREFIX}/bin
     decompress ${SOURCES}/${1} > depmod.pl
-    patch < ${PATCHES}/depmod-pl-14592-btc-cross-compile.diff
     chmod 755 depmod.pl
 }
 
