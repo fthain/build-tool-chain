@@ -1,0 +1,7 @@
+# Method F base profile
+# Same as method E, but ports and nptl are no longer add-ons
+# Approximates Debian 9 (stretch)
+METHOD=F
+LINUX_DIST=linux-4.9
+GLIBC_DIST=glibc-2.24
+BINUTILS_DIST=binutils-2.28

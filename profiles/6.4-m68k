@@ -1,0 +1,4 @@
+GCC_DIST=gcc-6.4.0
+TARGET=m68k-linux-gnu
+
+. ${BTC_PROFILES}/F9

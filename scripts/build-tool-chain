@@ -138,8 +138,14 @@ B )
         ;;
     U-* )
         ;;
-    * )
+    [DE]-* )
         glibc_enable_add_ons=nptl
+        GLIBC_CONFIG_OPTS="--with-tls --enable-bind-now --with-__thread"
+        GLIBC_NEEDS_SHARED_GCC=yes
+        ;;
+    * )
+        # ports add-on got removed in 2.20 and nptl add-on became mandatory
+        glibc_enable_add_ons=no
         GLIBC_CONFIG_OPTS="--with-tls --enable-bind-now --with-__thread"
         GLIBC_NEEDS_SHARED_GCC=yes
         ;;
@@ -151,13 +157,16 @@ esac
 case ${METHOD} in
 U )
     ;;
-* )
+[ABCDE] )
     for add_on in ${GLIBC_ADD_ONS}; do
         # GLIBC_ADD_ONS will be unpacked, but only --enabled-add-ons will be used.
         if [ $add_on != nptl -a $add_on != linuxthreads ] ; then
             glibc_enable_add_ons="${add_on},${glibc_enable_add_ons}"
         fi
     done
+    GLIBC_CONFIG_OPTS="${GLIBC_CONFIG_OPTS} --enable-add-ons=${glibc_enable_add_ons}"
+    ;;
+* )
     GLIBC_CONFIG_OPTS="${GLIBC_CONFIG_OPTS} --enable-add-ons=${glibc_enable_add_ons}"
     ;;
 esac

@@ -13,7 +13,7 @@ prep_glibc () {
     local version
     version=${1#*-}
     local add_on
-    for add_on in ${GLIBC_ADD_ONS} ; do
+    for add_on in ${GLIBC_ADD_ONS:-} ; do
       if ! test -e ${add_on} ; then
         untar glibc-${add_on}-${version} ${mirrors}
         if ! test -e ${add_on} ; then
