@@ -267,7 +267,7 @@ case ${GCC_DIST#*-} in
 2.* | 3.* | 4.[0-2][.-]* )
     # Prior to gcc-4.3, only Fortran needs GMP and MPFR
     ;;
-4.* )
+4.* | 5.* | 6.* )
     log install_gmp       gmp-4.3.2
     log install_mpfr      mpfr-3.1.2
     GCC_CONFIG_OPTS="${GCC_CONFIG_OPTS} --with-gmp=${HOST_TOOLS_PREFIX} --with-mpfr=${HOST_TOOLS_PREFIX}"
