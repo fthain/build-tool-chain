@@ -1,5 +1,0 @@
-. ${PROFILES}/2
-
-# The target tuple
-TARGET=powerpc-unknown-linux-gnu
-TARGET_CPU=ppc

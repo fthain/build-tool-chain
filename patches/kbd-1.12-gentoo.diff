@@ -1,0 +1,150 @@
+diff -ruN kbd-1.12/configure kbd-1.12-gentoo/configure
+--- kbd-1.12/configure	2004-01-04 01:53:39.000000000 +1100
++++ kbd-1.12-gentoo/configure	2007-08-02 00:09:52.000000000 +1000
+@@ -8,6 +8,19 @@
+ #  New default: /usr/share/kbd
+ #
+ 
++# NLS nuisances.
++for as_var in \
++  LANG LANGUAGE LC_ADDRESS LC_ALL LC_COLLATE LC_CTYPE LC_IDENTIFICATION \
++  LC_MEASUREMENT LC_MESSAGES LC_MONETARY LC_NAME LC_NUMERIC LC_PAPER \
++  LC_TELEPHONE LC_TIME
++do
++  if (set +x; test -z "`(eval $as_var=C; export $as_var) 2>&1`"); then
++    eval $as_var=C; export $as_var
++  else
++    unset $as_var
++  fi
++done
++
+ prefix=
+ datadir=
+ mandir=
+diff -ruN kbd-1.12/src/findfile.c kbd-1.12-gentoo/src/findfile.c
+--- kbd-1.12/src/findfile.c	2004-01-17 06:45:31.000000000 +1100
++++ kbd-1.12-gentoo/src/findfile.c	2007-08-02 00:09:53.000000000 +1000
+@@ -70,6 +70,7 @@
+ 	FILE *fp = NULL;
+ 	DIR *d;
+ 	struct dirent *de;
++	struct stat statbuf;
+ 	char *ff, *fdir, *p, *q, **sp;
+ 	struct decompressor *dc;
+ 	int secondpass = 0;
+@@ -104,7 +105,6 @@
+ 	    okdir = (ff && strcmp(de->d_name, fdir) == 0);
+ 
+ 	    if ((secondpass && recdepth) || okdir) {
+-       		struct stat statbuf;
+ 		char *a;
+ 
+ 		a = xmalloc(strlen(dir) + strlen(de->d_name) + 2);
+@@ -137,6 +137,11 @@
+ 
+ 	    sprintf(pathname, "%s/%s", dir, de->d_name);
+ 
++	    /* Is this a regular file? */
++	    if (stat(pathname, &statbuf) != 0 ||
++		!S_ISREG(statbuf.st_mode))
++		continue;
++
+ 	    /* Does tail consist of a known suffix and possibly
+ 	       a compression suffix? */
+ 	    for(sp = suf; *sp; sp++) {
+diff -ruN kbd-1.12/src/getunimap.c kbd-1.12-gentoo/src/getunimap.c
+--- kbd-1.12/src/getunimap.c	2004-01-17 06:45:31.000000000 +1100
++++ kbd-1.12-gentoo/src/getunimap.c	2007-08-02 00:09:52.000000000 +1000
+@@ -62,7 +62,7 @@
+ 		}
+ 	}
+ 
+-	if (argc != 1)
++	if (optind < argc)
+ 		usage();
+ 
+ 	fd = getfd(console);
+diff -ruN kbd-1.12/src/kbdrate.c kbd-1.12-gentoo/src/kbdrate.c
+--- kbd-1.12/src/kbdrate.c	2004-01-17 06:45:31.000000000 +1100
++++ kbd-1.12-gentoo/src/kbdrate.c	2007-08-02 00:09:53.000000000 +1000
+@@ -112,7 +112,7 @@
+ 	kbdrep_s.period = -1;
+ 	kbdrep_s.delay = -1;
+ 	if (ioctl( 0, KDKBDREP, &kbdrep_s )) {
+-		if (errno == EINVAL)
++		if (errno == EINVAL || errno == ENOTTY)
+ 			return 0;
+ 		perror( "ioctl(KDKBDREP)" );
+ 		exit( 1 );
+diff -ruN kbd-1.12/src/ksyms.c kbd-1.12-gentoo/src/ksyms.c
+--- kbd-1.12/src/ksyms.c	2004-01-17 06:45:31.000000000 +1100
++++ kbd-1.12-gentoo/src/ksyms.c	2007-08-02 00:09:52.000000000 +1000
+@@ -1710,6 +1710,8 @@
+ 		keycode = ksymtocode(s+5);
+ 		if (KTYP(keycode) == KT_LATIN)
+ 			return K(KT_META, KVAL(keycode));
++		else if(prefer_unicode)
++		        return (0);
+ 		/* fall through to error printf */
+ 	}
+ 
+diff -ruN kbd-1.12/src/loadkeys.y kbd-1.12-gentoo/src/loadkeys.y
+--- kbd-1.12/src/loadkeys.y	2004-01-17 08:51:25.000000000 +1100
++++ kbd-1.12-gentoo/src/loadkeys.y	2007-08-02 00:09:52.000000000 +1000
+@@ -566,7 +566,7 @@
+ }
+ 
+ char *dirpath[] = { "", DATADIR "/" KEYMAPDIR "/**", KERNDIR "/", 0 };
+-char *suffixes[] = { "", ".map", 0 };
++char *suffixes[] = { "", ".kmap", ".map", 0 };
+ extern FILE *findfile(char *fnam, char **dirpath, char **suffixes);
+ 
+ #undef yywrap
+diff -ruN kbd-1.12/src/loadunimap.c kbd-1.12-gentoo/src/loadunimap.c
+--- kbd-1.12/src/loadunimap.c	2004-01-17 06:45:31.000000000 +1100
++++ kbd-1.12-gentoo/src/loadunimap.c	2007-08-02 00:09:52.000000000 +1000
+@@ -28,8 +28,8 @@
+ extern char *progname;
+ extern int force;
+ 
+-static char *unidirpath[] = { "", DATADIR "/" UNIMAPDIR "/", 0 };
+-static char *unisuffixes[] = { "", ".uni", 0 };
++static char *unidirpath[] = { "", DATADIR "/" TRANSDIR "/", 0 };
++static char *unisuffixes[] = { "", ".sfm", ".uni", 0 };
+ 
+ #ifdef MAIN
+ #include "version.h"
+@@ -73,18 +73,18 @@
+ 		}
+ 	}
+ 
+-	if (argc > 2 || (argc == 1 && !outfnam))
++	if (argc > optind+1 || (argc == optind && !outfnam))
+ 		usage();
+ 
+ 	fd = getfd(console);
+ 
+ 	if (outfnam) {
+ 		saveunicodemap(fd, outfnam);
+-		if (argc == 1)
++		if (argc == optind)
+ 			exit(0);
+ 	}
+ 
+-	if (argc == 2)
++	if (argc == optind+1)
+ 		infnam = argv[optind];
+ 	loadunicodemap(fd, infnam);
+ 	exit(0);
+diff -ruN kbd-1.12/src/showconsolefont.c kbd-1.12-gentoo/src/showconsolefont.c
+--- kbd-1.12/src/showconsolefont.c	2004-01-17 06:45:31.000000000 +1100
++++ kbd-1.12-gentoo/src/showconsolefont.c	2007-08-02 00:09:52.000000000 +1000
+@@ -135,7 +135,7 @@
+ 		}
+ 	}
+ 
+-	if (argc != 1)
++	if (optind < argc)
+ 		usage();
+ 
+ 	fd = getfd(console);

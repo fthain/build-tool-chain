@@ -1,0 +1,19 @@
+--- binutils-2.17.50.0.18/bfd/elf.c-orig	2007-08-02 12:00:46.000000000 +1000
++++ binutils-2.17.50.0.18/bfd/elf.c	2007-08-02 12:01:43.000000000 +1000
+@@ -3762,7 +3762,7 @@
+ 	      asection *s2;
+ 	      unsigned count = 1;
+ 	      amt = sizeof (struct elf_segment_map);
+-	      if (s->alignment_power == 2)
++	      if (s->alignment_power == 2) {
+ 		for (s2 = s; s2->next != NULL; s2 = s2->next)
+ 		  if (s2->next->alignment_power == 2
+ 		      && (s2->next->flags & SEC_LOAD) != 0
+@@ -3771,6 +3771,7 @@
+ 		    count++;
+ 		  else
+ 		    break;
++              }
+ 	      amt += (count - 1) * sizeof (asection *);
+ 	      m = bfd_zalloc (abfd, amt);
+ 	      if (m == NULL)

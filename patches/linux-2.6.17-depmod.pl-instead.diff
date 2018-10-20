@@ -1,0 +1,37 @@
+--- a/Makefile	2006-06-22 02:03:04.000000000 +1000
++++ b/Makefile	2006-06-22 02:09:55.000000000 +1000
+@@ -283,7 +283,7 @@
+ OBJDUMP		= $(CROSS_COMPILE)objdump
+ AWK		= awk
+ GENKSYMS	= scripts/genksyms/genksyms
+-DEPMOD		= /sbin/depmod
++DEPMOD		= depmod.pl
+ KALLSYMS	= scripts/kallsyms
+ PERL		= perl
+ CHECK		= sparse
+@@ -882,11 +882,6 @@
+ 
+ PHONY += _modinst_
+ _modinst_:
+-	@if [ -z "`$(DEPMOD) -V 2>/dev/null | grep module-init-tools`" ]; then \
+-		echo "Warning: you may need to install module-init-tools"; \
+-		echo "See http://www.codemonkey.org.uk/docs/post-halloween-2.6.txt";\
+-		sleep 1; \
+-	fi
+ 	@rm -rf $(MODLIB)/kernel
+ 	@rm -f $(MODLIB)/source
+ 	@mkdir -p $(MODLIB)/kernel
+@@ -905,11 +900,11 @@
+ ifeq "$(strip $(INSTALL_MOD_PATH))" ""
+ depmod_opts	:=
+ else
+-depmod_opts	:= -b $(INSTALL_MOD_PATH) -r
++depmod_opts	:= -b $(INSTALL_MOD_PATH)/lib/modules/$(KERNELRELEASE)
+ endif
+ PHONY += _modinst_post
+ _modinst_post: _modinst_
+-	if [ -r System.map -a -x $(DEPMOD) ]; then $(DEPMOD) -ae -F System.map $(depmod_opts) $(KERNELRELEASE); fi
++	if [ -r System.map ]; then $(DEPMOD) $(depmod_opts) -k vmlinux; fi
+ 
+ else # CONFIG_MODULES
+ 

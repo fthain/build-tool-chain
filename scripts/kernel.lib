@@ -1,0 +1,246 @@
+##############################################
+# Functions relating to linux
+
+function prep_kernel () {
+    cd ${BUILD_DIR}
+    if [ -e ${1} ]; then
+        echo ${1} already exists
+        return 0
+    fi
+    untar ${1}
+    cd ${1}
+
+    case ${1} in
+    ( linux-2.2.26 )
+        patch -p0 < ${PATCHES}/linux-2.2.25-btc-Makefile.patch
+        case ${TARGET_CPU} in
+        ( m68k )
+            # Linux-mac68k CVS snapshot
+            decompress ${PATCHES}/linux-2.2.27-rc2-mac68k-20050408.diff | patch -p1 ;;
+        esac
+        ;;
+    ( linux-2.4.* )
+        patch -p1 < ${PATCHES}/linux-2.4-btc-Makefile.patch
+        case ${TARGET_CPU} in
+        ( m68k )
+            # Linux-m68k CVS snapshot
+            decompress ${PATCHES}/linux-2.4.35-m68k.diff | patch -p1
+            # Avoid traditional CPP for gcc-3.3
+            patch -p1 < ${PATCHES}/linux-2.4.28-m68k-use-standard-cpp.diff
+            ;;
+        ( i386 )
+            patch -p1 < ${PATCHES}/linux-2.4-btc-darwin-bzImage-build.patch
+            ;;
+        esac
+        ;;
+    ( linux-2.6.* )
+        if [ ${BUILD} != ${BUILD/%-apple-darwin*} ] ; then
+            case ${1} in
+            ( linux-2.6.[0-8] | linux-2.6.[0-8][.-]* )
+                patch -p1 < ${PATCHES}/linux-2.6-btc-darwin-config.patch
+                ;;
+            ( linux-2.6.9 | linux-2.6.9[.-]* )
+                patch -p1 < ${PATCHES}/linux-2.6.9-btc-darwin-config.patch
+                ;;
+            esac
+            case ${1} in
+            ( linux-2.6.[0-3] | linux-2.6.[0-3]-* )
+                # This patch hasn't been tested on these old versions
+                patch -p1 < ${PATCHES}/linux-2.6.4-btc-darwin-kbuild.patch
+                ;;
+            ( linux-2.6.4 | linux-2.6.4-* )
+                patch -p1 < ${PATCHES}/linux-2.6.4-btc-darwin-kbuild.patch
+                ;;
+            ( linux-2.6.[56] | linux-2.6.[56]-* )
+                patch -p1 < ${PATCHES}/linux-2.6.5-btc-darwin-kbuild.patch
+                ;;
+            ( linux-2.6.7 | linux-2.6.7-* )
+                patch -p1 < ${PATCHES}/linux-2.6.7-btc-darwin-kbuild.patch
+                ;;
+            ( linux-2.6.[89] | linux-2.6.[89][.-]* )
+                patch -p1 < ${PATCHES}/linux-2.6.8-btc-darwin-kbuild.patch
+                ;;
+            esac
+
+            case ${1} in
+            ( linux-2.6.10 | linux-2.6.10[.-]* )
+                patch -p1 < ${PATCHES}/linux-2.6.10-btc-darwin.diff
+                ;;
+            ( linux-2.6.1[1-5] | linux-2.6.1[1-5][.-]* )
+                echo need to fix patch file
+                exit 1
+                ;;
+            ( linux-2.6.16 | linux-2.6.16[.-]* )
+                patch -p1 < ${PATCHES}/linux-2.6.16-btc-darwin.diff
+                ;;
+            ( linux-2.6.17 | linux-2.6.17[.-]* )
+                patch -p1 < ${PATCHES}/linux-2.6.17-btc-darwin.diff
+                ;;
+            ( * )
+                patch -p1 < ${PATCHES}/linux-2.6.18-btc-darwin.diff
+                ;;
+            esac
+            case ${1} in
+            ( linux-2.6.[0-9] | linux-2.6.[0-9][.-]* | linux-2.6.1[01] | linux-2.6.1[01][.-]* )
+                ;;
+            ( * )
+                sed -i -e 's,^#define LOCALEDIR .*,#define LOCALEDIR "'${HOST_TOOLS_PREFIX}'/share/locale",' scripts/kconfig/lkc.h
+                ;;
+            esac
+        fi
+        case ${1} in
+        ( linux-2.6.[0-9] | linux-2.6.[0-9][.-]* | linux-2.6.10 | linux-2.6.10[.-]* )
+            patch -p1 < ${PATCHES}/linux-2.6-btc-Makefile.patch
+            ;;
+        ( linux-2.6.1[1-5] | linux-2.6.1[1-5][.-]* )
+            echo need to split up combined patch file
+            exit 1
+            ;;
+        ( linux-2.6.16 | linux-2.6.16[.-]* )
+            patch -p1 < ${PATCHES}/linux-2.6.16-depmod.pl-instead.diff
+            ;;
+        ( * )
+            patch -p1 < ${PATCHES}/linux-2.6.17-depmod.pl-instead.diff
+            ;;
+        esac
+
+        case ${TARGET_CPU} in
+        ( powerpc )
+            patch -p1 < ${PATCHES}/use_pmac32_defconfig.diff
+            ;;
+        ( mips )
+            case ${1} in
+            ( linux-2.6.20 | linux-2.6.20-* )
+                decompress ${PATCHES}/linux-2.6.20-mips-20070205.diff | patch -p1
+                ;;
+            esac
+            ;;
+        ( m68k )
+            case ${1} in
+            ( linux-2.6.18 | linux-2.6.18-* )
+                decompress ${PATCHES}/linux-2.6.18-m68k-20061204.diff | patch -p1
+                ;;
+            ( linux-2.6.19 | linux-2.6.19-* )
+                decompress ${PATCHES}/linux-2.6.19-m68k-20061226.diff | patch -p1
+                ;;
+            ( linux-2.6.20 | linux-2.6.20-* )
+                decompress ${PATCHES}/linux-2.6.20-m68k-20070303.diff | patch -p1
+                ;;
+            ( linux-2.6.22 | linux-2.6.22-* )
+                decompress ${PATCHES}/linux-2.6.22-m68k-20070815.diff | patch -p1
+                ;;
+            esac
+            patch -p1 < ${PATCHES}/linux-2.6.15-viro-m68k-math-emu-macro-names.diff
+            patch -p1 < ${PATCHES}/linux-2.6.15-viro-m68k-math-emu-macro-args.diff
+            patch -p1 < ${PATCHES}/linux-2.6.17-m68k-20060622-Os-strcpy.diff
+            ;;
+        esac
+        ;;
+    esac
+}
+
+function install_kernel_headers () {
+    if [ -d ${KERNEL_HEADERS}/linux ]; then
+        echo linux kernel headers already present
+        return 0
+    fi
+    cd ${BUILD_DIR}/${1}
+    make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- mrproper
+    case ${1} in
+    ( linux-2.[24].* )
+        yes "" | make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- config || true
+        make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- symlinks include/linux/version.h
+        ;;
+    ( linux-2.6.* )
+        make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- defconfig
+        make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- include/asm include/linux/version.h
+        ;;
+    esac
+    cp -r include/linux ${KERNEL_HEADERS}
+    cp -r include/asm-generic ${KERNEL_HEADERS}
+    cp -r include/asm-${TARGET_CPU} ${KERNEL_HEADERS}/asm
+    ln -fs ${KERNEL_HEADERS}/* ${GLIBC_HEADERS}
+
+    manifest install_kernel_headers
+}
+
+function build_kernel () {
+    if [ -e ${BUILD_DIR}/${1}/.compiled ]; then
+        echo kernel already compiled
+        return 0
+    fi
+    cd ${BUILD_DIR}/${1}
+    local config
+    config=${CONFIGS}/${DOTCONFIG:-${1}-${TARGET_CPU}-dot-config}
+    if [ -f $config ] ; then
+        make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- clean
+        cp ${config} .config
+    fi
+    yes "" | make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- oldconfig
+    case ${1} in
+    ( linux-2.[24].* )
+        make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- dep
+        make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- vmlinux
+        make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}- modules
+        ;;
+    ( linux-2.6.* )
+        ## this hack is for non-ELF platforms, like Darwin
+        #case ${1} in
+        #    ( linux-2.6.[0-7] | linux-2.6.[0-7]-* ) out=scripts/elf.h ;;
+        #    ( * )                                   out=scripts/mod/elf.h ;;
+        #esac
+        #sed 's/^#include <features.h>$//' < ${GLIBC_HEADERS}/elf.h > $out
+        make ARCH=${TARGET_CPU} CROSS_COMPILE=${TARGET}-
+        ;;
+    esac
+    touch .compiled
+}
+
+function package_kernel () {
+    KERNEL_IMAGE=${BUILD_DIR}/${1}-${TARGET_CPU}-image
+    if [ -e ${KERNEL_IMAGE}.tar.gz ]; then
+        echo linux kernel tarball already present
+        return 0
+    fi
+    rm -fr ${KERNEL_IMAGE}
+    mkdir -p ${KERNEL_IMAGE}/boot
+    cd ${BUILD_DIR}/${1}
+    make INSTALL_MOD_PATH=${KERNEL_IMAGE} ARCH=${TARGET_CPU} \
+CROSS_COMPILE=${TARGET}- modules_install
+    cd ${KERNEL_IMAGE}/lib/modules
+    ver=`ls -d [0-9]*`
+    if [ x${ver} = x ]; then
+        exit
+    fi
+    cd ${BUILD_DIR}/${1}
+    case ${TARGET_CPU} in
+    ( alpha )
+        if [ -e arch/${TARGET_CPU}/boot/vmlinux.gz ]; then
+            cp arch/${TARGET_CPU}/boot/vmlinux.gz \
+               ${KERNEL_IMAGE}/boot/vmlinux-${ver}.gz
+        else
+            gzip -c vmlinux > ${KERNEL_IMAGE}/boot/vmlinux-${ver}.gz
+        fi
+        ;;
+    ( ppc | powerpc )
+        cp vmlinux ${KERNEL_IMAGE}/boot/vmlinux-${ver}
+        ;;
+    ( * )
+        if [ -e arch/${TARGET_CPU}/boot/bzImage ]; then
+            cp arch/${TARGET_CPU}/boot/bzImage ${KERNEL_IMAGE}/boot/bzImage-${ver}
+        else
+            cp vmlinux ${KERNEL_IMAGE}/boot/vmlinux-${ver}
+        fi
+        ;;
+    esac
+    cp System.map ${KERNEL_IMAGE}/boot/System.map-${ver}
+    cp .config ${KERNEL_IMAGE}/boot/config-${ver}
+    cd ${KERNEL_IMAGE}/boot
+    ln -s System.map-${ver} System.map
+    cd ${KERNEL_IMAGE}
+    rm -f lib/modules/${ver}/{build,source}
+    chmod -R g-w,o-w ${KERNEL_IMAGE}
+    sudo chown -R 0 ${KERNEL_IMAGE}
+    tar -czf ${BUILD_DIR}/${1}-${TARGET_CPU}-image.tar.gz .
+    sudo rm -r ${KERNEL_IMAGE}
+}

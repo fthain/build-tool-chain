@@ -1,0 +1,118 @@
+##############################################
+# Functions relating to host-native tools
+
+function is_installed () {
+    if [ $(which $1 | grep -c ${HOST_TOOLS_PREFIX}/bin/$1) -eq 1 ]; then
+        echo $1 already installed
+        return 0
+    fi
+    return 1
+}
+
+function install_host_tool () {
+    is_installed ${1/-*} && return
+
+    echo unpacking $1
+    cd $BUILD_DIR
+    untar $1
+
+    echo building $1
+    cd $1
+    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX}
+    make
+
+    echo installing $1
+    make install
+}
+
+function install_sed () {
+    is_installed ${1/-*} && return
+
+    # gnu sed-4.1.5 won't build without gnu sed... duh
+    if [ $1 = sed-4.1.5 ] ; then
+        install_host_tool sed-4.1.4
+    fi
+
+    echo unpacking $1
+    cd $BUILD_DIR
+    untar $1
+
+    echo building $1
+    cd $1
+    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX}
+    make
+
+    echo installing $1
+    make install
+}
+
+function install_make () {
+    is_installed ${1/-*} && return
+
+    install_host_tool $1
+    ln -fs make ${HOST_TOOLS_PREFIX}/bin/gnumake
+}
+
+function install_coreutils () {
+    is_installed expr && return
+
+    echo unpacking $1
+    cd $BUILD_DIR
+    untar $1
+
+    echo building $1
+    cd $1
+    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX}
+    make
+
+    echo installing $1
+    dst=/tmp/junk$$
+    make DESTDIR=$dst install
+    cp -p $dst/${HOST_TOOLS_PREFIX}/bin/{expr,install} ${HOST_TOOLS_PREFIX}/bin
+    rm -fr $dst
+}
+
+function install_flex () {
+    is_installed ${1/-*} && return
+
+    echo unpacking $1
+    cd $BUILD_DIR
+    untar $1
+    cd ${1%a}
+    patch -p1 < ${PATCHES}/flex-2.5.4a-r6.diff
+
+    echo building $1
+    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX}
+    make
+
+    echo installing $1
+    make install
+}
+
+function install_depmod () {
+    is_installed ${1/-*} && return
+
+    echo installing $1
+    cd ${HOST_TOOLS_PREFIX}/bin
+    decompress ${SOURCES}/${1} > depmod.pl
+    patch < ${PATCHES}/depmod-pl-14592-btc-cross-compile.diff
+    chmod 755 depmod.pl
+}
+
+function install_loadkeys () {
+    is_installed loadkeys && return
+    
+    echo unpacking $1
+    cd $BUILD_DIR
+    untar $1
+    cd ${1}
+    patch -p1 < ${PATCHES}/kbd-1.12-gentoo.diff
+    patch -p1 < ${PATCHES}/kbd-1.12-btc-darwin.diff
+
+    echo building $1
+    CFLAGS="-O2" ./configure --disable-nls --prefix=${HOST_TOOLS_PREFIX}
+    cd src
+    make analyze.c loadkeys
+
+    cp -p loadkeys ${HOST_TOOLS_PREFIX}/bin
+}

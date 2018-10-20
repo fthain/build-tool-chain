@@ -1,0 +1,3 @@
+. ${PROFILES}/2
+TARGET=powerpc-linux-gnu
+TARGET_CPU=ppc

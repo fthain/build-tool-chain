@@ -1,0 +1,66 @@
+diff -ruN binutils-2.12.90.0.1-orig/gas/config/tc-i386.h binutils-2.12.90.0.1/gas/config/tc-i386.h
+--- binutils-2.12.90.0.1-orig/gas/config/tc-i386.h	2001-11-17 09:05:52.000000000 +1100
++++ binutils-2.12.90.0.1/gas/config/tc-i386.h	2007-08-05 10:23:14.000000000 +1000
+@@ -509,7 +509,6 @@
+ 
+ #define md_operand(x)
+ 
+-extern const struct relax_type md_relax_table[];
+ #define TC_GENERIC_RELAX_TABLE md_relax_table
+ 
+ #define md_do_align(n, fill, len, max, around)				\
+diff -ruN binutils-2.12.90.0.1-orig/gas/config/tc-m32r.h binutils-2.12.90.0.1/gas/config/tc-m32r.h
+--- binutils-2.12.90.0.1-orig/gas/config/tc-m32r.h	2001-11-17 09:05:52.000000000 +1100
++++ binutils-2.12.90.0.1/gas/config/tc-m32r.h	2007-08-05 10:23:35.000000000 +1000
+@@ -48,7 +48,6 @@
+ #define WORKING_DOT_WORD
+ 
+ /* For 8 vs 16 vs 32 bit branch selection.  */
+-extern const struct relax_type md_relax_table[];
+ #define TC_GENERIC_RELAX_TABLE md_relax_table
+ #if 0
+ extern void m32r_prepare_relax_scan ();
+diff -ruN binutils-2.12.90.0.1-orig/gas/config/tc-m68k.h binutils-2.12.90.0.1/gas/config/tc-m68k.h
+--- binutils-2.12.90.0.1-orig/gas/config/tc-m68k.h	2002-02-04 06:22:31.000000000 +1100
++++ binutils-2.12.90.0.1/gas/config/tc-m68k.h	2007-08-05 10:15:40.000000000 +1000
+@@ -224,7 +224,6 @@
+ #define TARGET_WORD_SIZE 32
+ #define TARGET_ARCH bfd_arch_m68k
+ 
+-extern struct relax_type md_relax_table[];
+ #define TC_GENERIC_RELAX_TABLE md_relax_table
+ 
+ /* We can't do a byte jump to the next instruction, so in that case
+diff -ruN binutils-2.12.90.0.1-orig/gas/config/tc-sh.h binutils-2.12.90.0.1/gas/config/tc-sh.h
+--- binutils-2.12.90.0.1-orig/gas/config/tc-sh.h	2002-02-04 06:22:31.000000000 +1100
++++ binutils-2.12.90.0.1/gas/config/tc-sh.h	2007-08-05 10:23:41.000000000 +1000
+@@ -82,7 +82,6 @@
+ 
+ #define md_operand(x)
+ 
+-extern const struct relax_type md_relax_table[];
+ #define TC_GENERIC_RELAX_TABLE md_relax_table
+ 
+ /* We record, for each section, whether we have most recently output a
+diff -ruN binutils-2.12.90.0.1-orig/gas/config/tc-v850.h binutils-2.12.90.0.1/gas/config/tc-v850.h
+--- binutils-2.12.90.0.1-orig/gas/config/tc-v850.h	2002-02-04 06:22:31.000000000 +1100
++++ binutils-2.12.90.0.1/gas/config/tc-v850.h	2007-08-05 10:23:50.000000000 +1000
+@@ -67,7 +67,6 @@
+ extern void cons_fix_new_v850 PARAMS ((fragS *, int, int, expressionS *));
+ 
+ #define TC_GENERIC_RELAX_TABLE md_relax_table
+-extern const struct relax_type md_relax_table[];
+ 
+ /* This section must be in the small data area (pointed to by GP).  */
+ #define SHF_V850_GPREL		0x10000000
+diff -ruN binutils-2.12.90.0.1-orig/gas/write.c binutils-2.12.90.0.1/gas/write.c
+--- binutils-2.12.90.0.1-orig/gas/write.c	2002-03-08 06:52:37.000000000 +1100
++++ binutils-2.12.90.0.1/gas/write.c	2007-08-05 10:18:11.000000000 +1000
+@@ -2058,6 +2058,7 @@
+ #endif /* ! BFD  */
+ 
+ #ifdef TC_GENERIC_RELAX_TABLE
++extern struct relax_type md_relax_table[40];
+ 
+ /* Relax a fragment by scanning TC_GENERIC_RELAX_TABLE.  */
+ 

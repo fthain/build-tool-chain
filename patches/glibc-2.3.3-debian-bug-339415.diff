@@ -1,0 +1,66 @@
+From anton@ozlabs.org Fri Dec 16 00:50:05 2005
+Received: (at 339415) by bugs.debian.org; 16 Dec 2005 08:50:05 +0000
+Return-path: <anton@ozlabs.org>
+Received: from ozlabs.org ([203.10.76.45])
+	by spohr.debian.org with esmtp (Exim 4.50)
+	id 1EnBHw-0002y7-S5
+	for 339415@bugs.debian.org; Fri, 16 Dec 2005 00:50:05 -0800
+Received: by ozlabs.org (Postfix, from userid 1010)
+	id 4D2A0688B3; Fri, 16 Dec 2005 19:49:53 +1100 (EST)
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+From: Anton Blanchard <anton@samba.org>
+To: Debian Bug Tracking System <339415@bugs.debian.org>
+Subject: libc6: Seen also on powerpc
+X-Mailer: reportbug 3.17
+Date: Fri, 16 Dec 2005 19:37:48 +1100
+Message-Id: <20051216084953.4D2A0688B3@ozlabs.org>
+X-Spam-Checker-Version: SpamAssassin 2.60-bugs.debian.org_2005_01_02 
+	(1.212-2003-09-23-exp) on spohr.debian.org
+X-Spam-Level: 
+X-Spam-Status: No, hits=-8.0 required=4.0 tests=BAYES_00,HAS_PACKAGE 
+	autolearn=no version=2.60-bugs.debian.org_2005_01_02
+
+Package: libc6
+Version: 2.3.5-8
+Followup-For: Bug #339415
+
+
+The following patch, taken from mainline glibc cvs fixes the problem for
+me.
+
+--- sysdeps/wordsize-32/Makefile~	2002-09-19 01:47:56.000000000 -0500
++++ sysdeps/wordsize-32/Makefile	2005-11-16 13:19:03.000000000 -0600
+@@ -2,5 +2,6 @@
+ ifeq (yes,$(build-shared))
+ sysdep_routines += divdi3
+ shared-only-routines += divdi3
++CPPFLAGS-divdi3.c = -Din_divdi3_c
+ endif
+ endif
+--- sysdeps/wordsize-32/symbol-hacks.h~	2004-03-08 14:59:34.000000000 -0600
++++ sysdeps/wordsize-32/symbol-hacks.h	2005-11-16 13:18:25.000000000 -0600
+@@ -22,7 +22,7 @@
+    therefore we get PLTs.  Unnecessarily so.  Changing gcc is a big
+    task which might not be worth it so we play tricks with the
+    assembler.  */
+-#if !defined __ASSEMBLER__ && !defined NOT_IN_libc && defined SHARED
++#if !defined __ASSEMBLER__ && !defined in_divdi3_c && !defined NOT_IN_libc && defined SHARED
+ asm ("__divdi3 = __divdi3_internal");
+ asm ("__udivdi3 = __udivdi3_internal");
+ asm ("__moddi3 = __moddi3_internal");
+
+-- System Information:
+Debian Release: testing/unstable
+  APT prefers unstable
+  APT policy: (500, 'unstable')
+Architecture: powerpc (ppc)
+Shell:  /bin/sh linked to /bin/bash
+Kernel: Linux 2.6.15-rc2-g5d240918
+Locale: LANG=en_AU, LC_CTYPE=en_AU (charmap=ISO-8859-1)
+
+-- no debconf information
+
+
+

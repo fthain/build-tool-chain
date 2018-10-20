@@ -1,0 +1,35 @@
+##############################################
+# Functions relating to gdb
+
+function prep_gdb () {
+    cd ${BUILD_DIR}
+    if [ -e ${1} ]; then
+        echo ${1} already exists
+        return 0
+    fi
+    untar ${1}
+    cd ${1}
+
+    patch -p1 < ${PATCHES}/gdb-6.6-sim-ppc-libintl-link.diff
+}
+
+function install_gdb () {
+    cd ${BUILD_DIR}
+    if [ -e ${1} ]; then
+        echo ${1} already exists
+        return 0
+    fi
+    mkdir ${1}
+    cd ${1}
+
+    mkdir intl
+    echo 'am_cv_func_iconv=${am_cv_func_iconv=no}' >intl/config.cache
+    CFLAGS="$HOST_CFLAGS -O2" AR=ar RANLIB=ranlib \
+    ../${GDB_DIST}/configure --prefix=${TC_PREFIX} --target=${TARGET} \
+--build=${BUILD} \
+--cache-file=config.cache
+    make
+    make install
+
+    manifest install_gdb
+}

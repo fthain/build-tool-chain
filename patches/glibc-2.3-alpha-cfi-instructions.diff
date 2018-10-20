@@ -1,0 +1,53 @@
+http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=422067
+
+
+--- linuxthreads/sysdeps/unix/sysv/linux/alpha/sysdep-cancel.h.orig	2007-08-10 14:26:51.000000000 +1000
++++ linuxthreads/sysdeps/unix/sysv/linux/alpha/sysdep-cancel.h	2007-08-10 14:28:24.000000000 +1000
+@@ -54,6 +54,7 @@
+ 	bne	a3, SYSCALL_ERROR_LABEL;			\
+ __LABEL($pseudo_ret)						\
+ 	.subsection 2;						\
++	cfi_startproc;						\
+ __LABEL($pseudo_cancel)						\
+ 	subq	sp, 64, sp;					\
+ 	cfi_def_cfa_offset(64);					\
+@@ -84,12 +85,13 @@
+ 	cfi_def_cfa_offset(0);					\
+ __LABEL($syscall_error)						\
+ 	SYSCALL_ERROR_HANDLER;					\
++	cfi_endproc;						\
+ 	.previous
+ 
+ # undef PSEUDO_END
+ # define PSEUDO_END(sym)					\
+-	.subsection 2;						\
+ 	cfi_endproc;						\
++	.subsection 2;						\
+ 	.size sym, .-sym
+ 
+ # define SAVE_ARGS_0	/* Nothing.  */
+--- nptl/sysdeps/unix/sysv/linux/alpha/sysdep-cancel.h.orig	2007-08-10 14:26:51.000000000 +1000
++++ nptl/sysdeps/unix/sysv/linux/alpha/sysdep-cancel.h	2007-08-10 14:29:27.000000000 +1000
+@@ -55,6 +55,7 @@
+ 	bne	a3, SYSCALL_ERROR_LABEL;			\
+ __LABEL($pseudo_ret)						\
+ 	.subsection 2;						\
++	cfi_startproc;						\
+ __LABEL($pseudo_cancel)						\
+ 	subq	sp, 64, sp;					\
+ 	cfi_def_cfa_offset(64);					\
+@@ -85,12 +86,13 @@
+ 	cfi_def_cfa_offset(0);					\
+ __LABEL($syscall_error)						\
+ 	SYSCALL_ERROR_HANDLER;					\
++	cfi_endproc;						\
+ 	.previous
+ 
+ # undef PSEUDO_END
+ # define PSEUDO_END(sym)					\
+-	.subsection 2;						\
+ 	cfi_endproc;						\
++	.subsection 2;						\
+ 	.size sym, .-sym
+ 
+ # define SAVE_ARGS_0	/* Nothing.  */

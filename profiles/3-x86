@@ -1,5 +1,0 @@
-. ${PROFILES}/3
-
-# The target tuple
-TARGET=i686-pc-linux-gnu
-TARGET_CPU=i386

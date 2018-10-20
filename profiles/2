@@ -1,10 +1,10 @@
 # Method 2 base profile
 # Suitable for gcc 3.2 and newer, glibc <= 2.3.3 and linuxthreads
 METHOD=2
-BINUTILS_DIST=binutils-2.17.50.0.2
-KERNEL=linux-2.4.32
+BINUTILS_DIST=binutils-2.17.50.0.18
+KERNEL=linux-2.4.35
 GCC_DIST=gcc-3.3.6
 GCC_CORE_DIST=gcc-core-3.3.6
-GLIBC_DIST=glibc-2.3.6
-THREADING_LIB=glibc-linuxthreads-2.3.6
-GDB_DIST=gdb-6.4
+GLIBC_DIST=glibc-2.3.2
+THREADING_LIB=glibc-linuxthreads-2.3.2
+GDB_DIST=gdb-6.6

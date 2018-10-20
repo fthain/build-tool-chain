@@ -1,0 +1,156 @@
+diff -ruN kbd-1.12/src/Makefile.in kbd-1.12-hacked/src/Makefile.in
+--- kbd-1.12/src/Makefile.in	2004-01-04 04:53:54.000000000 +1100
++++ kbd-1.12-hacked/src/Makefile.in	2007-08-01 23:58:19.000000000 +1000
+@@ -162,7 +162,7 @@
+ loadkeys mapscrn setfont resizecons loadunimap: findfile.o xmalloc.o
+ 
+ chvt clrunimap deallocvt dumpkeys fgconsole getkeycodes getunimap: getfd.o
+-kbd_mode loadkeys loadunimap mapscrn resizecons setkeycodes setfont: getfd.o
++kbd_mode loadunimap mapscrn resizecons setkeycodes setfont: getfd.o
+ setpalette showconsolefont setlogcons setvesablank showkey: getfd.o
+ 
+ setfont: mapscrn.o loadunimap.o kdmapop.o kdfontop.o psffontop.o utf8.o
+diff -ruN kbd-1.12/src/analyze.l kbd-1.12-hacked/src/analyze.l
+--- kbd-1.12/src/analyze.l	2004-01-17 08:51:44.000000000 +1100
++++ kbd-1.12-hacked/src/analyze.l	2007-08-01 23:41:00.000000000 +1000
+@@ -1,6 +1,6 @@
+ %{
+ #include <stdlib.h>
+-#include <linux/kd.h>
++#include "kd.h"
+ #include "ksyms.h"
+ #include "xmalloc.h"
+ 
+@@ -117,7 +117,6 @@
+ .			{return(ERROR); /* report any unknown characters */}
+ %%
+ #include "ksyms.h"
+-#include <linux/keyboard.h>
+ 
+ void
+ stringovfl(void) {
+diff -ruN kbd-1.12/src/kd.h kbd-1.12-hacked/src/kd.h
+--- kbd-1.12/src/kd.h	1970-01-01 10:00:00.000000000 +1000
++++ kbd-1.12-hacked/src/kd.h	2007-08-01 23:47:42.000000000 +1000
+@@ -0,0 +1,59 @@
++#ifndef __LINUX_KD_H__
++#define __LINUX_KD_H__
++#define MAX_NR_KEYMAPS 256
++#define NR_KEYS                128
++#define MAX_NR_FUNC    256
++#define MAX_DIACR      256
++#define KG_SHIFT        0
++#define KG_CTRL         2
++#define KG_ALT          3
++#define KG_ALTGR        1
++#define KG_SHIFTL       4
++#define KG_SHIFTR       5
++#define KG_CTRLL        6
++#define KG_CTRLR        7
++#define KG_CAPSSHIFT    8
++#define K(t,v)          (((t)<<8)|(v))
++#define KTYP(x)                ((x) >> 8)
++#define KVAL(x)                ((x) & 0xff)
++#define K_HOLE          K(KT_SPEC,0)
++#define KT_LATIN        0       /* we depend on this being zero */
++#define KT_LETTER       11      /* symbol that can be acted upon by CapsLock */
++#define KT_FN           1
++#define KT_SPEC         2
++#define KT_PAD          3
++#define KT_DEAD         4
++#define KT_CONS         5
++#define KT_CUR          6
++#define KT_SHIFT        7
++#define KT_META         8
++#define KT_ASCII        9
++#define KT_LOCK         10
++#define KT_SLOCK        12
++#define KDGKBMODE       0x4B44  /* gets current keyboard mode */
++#define KDSKBMODE       0x4B45  /* sets current keyboard mode */
++#define KDGKBENT        0x4B46  /* gets one entry in translation table */
++#define KDSKBENT        0x4B47  /* sets one entry in translation table */
++#define         K_UNICODE       0x03
++#define K_NOSUCHMAP    K(KT_SPEC,127) /* returned by KDGKBENT */
++#define KDSKBSENT       0x4B49  /* sets one function key string entry */
++#define KDSKBDIACR      0x4B4B  /* write kernel accent table */
++
++struct kbentry {
++        unsigned char kb_table;
++        unsigned char kb_index; 
++        unsigned short kb_value;
++};
++struct kbsentry {
++        unsigned char kb_func;
++        unsigned char kb_string[512];
++};
++struct kbdiacr {
++        unsigned char diacr, base, result;
++};
++//struct kbdiacr accent_table[];
++struct kbdiacrs {
++        unsigned int kb_cnt;    /* number of entries in following array */
++        struct kbdiacr kbdiacr[256];    /* MAX_DIACR from keyboard.h */
++};
++#endif
+\ No newline at end of file
+diff -ruN kbd-1.12/src/ksyms.c kbd-1.12-hacked/src/ksyms.c
+--- kbd-1.12/src/ksyms.c	2007-08-01 23:58:54.000000000 +1000
++++ kbd-1.12-hacked/src/ksyms.c	2007-08-01 23:38:08.000000000 +1000
+@@ -1,4 +1,4 @@
+-#include <linux/keyboard.h>
++#include "kd.h"
+ #include <stdio.h>
+ #include <string.h>
+ #include "ksyms.h"
+diff -ruN kbd-1.12/src/loadkeys.y kbd-1.12-hacked/src/loadkeys.y
+--- kbd-1.12/src/loadkeys.y	2007-08-01 23:58:54.000000000 +1000
++++ kbd-1.12-hacked/src/loadkeys.y	2007-08-01 23:53:52.000000000 +1000
+@@ -18,10 +18,8 @@
+ #include <fcntl.h>
+ #include <ctype.h>
+ #include <sys/ioctl.h>
+-#include <linux/kd.h>
+-#include <linux/keyboard.h>
++#include "kd.h"
+ #include "paths.h"
+-#include "getfd.h"
+ #include "findfile.h"
+ #include "modifiers.h"
+ #include "nls.h"
+@@ -330,8 +328,6 @@
+ 	do_constant();
+ 	if(optm)
+ 	        mktable();
+-	else
+-	        loadkeys();
+ 	exit(0);
+ }
+ 
+@@ -980,27 +976,6 @@
+ 	}
+ }
+ 
+-static void
+-loadkeys (void) {
+-        int fd;
+-        int keyct, funcct, diacct;
+-
+-	fd = getfd(NULL);
+-	keyct = defkeys(fd);
+-	funcct = deffuncs(fd);
+-	if (accent_table_size > 0 || nocompose)
+-		diacct = defdiacs(fd);
+-	if (verbose) {
+-	        printf(_("\nChanged %d %s and %d %s.\n"),
+-		       keyct, (keyct == 1) ? _("key") : _("keys"),
+-		       funcct, (funcct == 1) ? _("string") : _("strings"));
+-		if (accent_table_size > 0 || nocompose)
+-			printf(_("Loaded %d compose %s.\n"), diacct,
+-			       (diacct == 1) ? _("definition") : _("definitions"));
+-		else
+-			printf(_("(No change in compose definitions.)\n"));
+-	}
+-}
+ 
+ static void strings_as_usual(void) {
+ 	/*

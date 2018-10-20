@@ -1,0 +1,19 @@
+--- glibc-2.3.3/csu/Makefile.orig	2007-08-07 23:42:50.000000000 +1000
++++ glibc-2.3.3/csu/Makefile	2007-08-07 23:45:03.000000000 +1000
+@@ -231,13 +231,13 @@
+ 		   if [ -z "$$os" ]; then \
+ 		     os=Linux; \
+ 		   fi; \
+-		   echo "\"Compiled on a $$os $$version system" \
+-			"on `date +%Y-%m-%d`.\\n\"" ;; \
++		   printf "\"Compiled on a $$os $$version system"; \
++		   printf " on `date +%Y-%m-%d`.\\\n\"\n" ;; \
+ 	   *) ;; \
+ 	 esac; \
+ 	 files="$(all-Banner-files)";				\
+ 	 if test -n "$$files"; then				\
+-	   echo "\"Available extensions:\\n\"";			\
++	   printf "\"Available extensions:\\\n\"\n";			\
+ 	   sed -e '/^#/d' -e 's/^[[:space:]]*/	/'		\
+ 	       -e 's/^\(.*\)$$/\"\1\\n\"/' $$files;		\
+ 	 fi) > $@T

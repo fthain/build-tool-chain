@@ -1,0 +1,54 @@
+##############################################
+# Common functions
+
+function untar () {
+    echo untar $1 1>&2
+    local f
+    for f in $SOURCES/$1*; do
+        case $f in
+        ( $SOURCES/$1.tar.bz2 )
+            tar -xjf $f
+            return
+            ;;
+        ( $SOURCES/$1.tar.gz )
+            tar -xzf $f
+            return
+            ;;
+        ( $SOURCES/$1.tar )
+            tar -xf $f
+            return
+            ;;
+        esac
+    done
+    echo untar: can\'t find $1 1>&2
+    return 1
+}
+
+function decompress () {
+    echo decompress $1 1>&2
+    local f
+    for f in $1*; do
+        case $f in
+        ( $1.bz2 )
+            bzip2 -dc $f && return
+            ;;
+        ( $1.gz )
+            gzip -dc $f && return
+            ;;
+        esac
+    done
+    echo decompress: failed: $1 1>&2
+    # set -o pipefail isn't always available, so send garbage to patch on failure.
+    echo garbage
+    return 1
+}
+
+function manifest () {
+    ( cd ${TC_PREFIX} && find . | sort | bzip2 -c > ${LOGS_DIR}/${1}.list.bz2 )
+}
+
+function log () {
+    echo "$@"
+    "$@" >> ${LOGS_DIR}/${1}.log 2>&1
+    return
+}

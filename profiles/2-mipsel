@@ -1,0 +1,3 @@
+. ${PROFILES}/2
+TARGET=mipsel-linux-gnu
+TARGET_CPU=mips

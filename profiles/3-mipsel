@@ -1,5 +1,5 @@
 . ${PROFILES}/3
-
-# The target tuple
-TARGET=mipsel-unknown-linux-gnu
+TARGET=mipsel-linux-gnu
 TARGET_CPU=mips
+
+KERNEL=linux-2.6.20

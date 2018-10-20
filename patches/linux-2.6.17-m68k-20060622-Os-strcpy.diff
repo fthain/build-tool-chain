@@ -1,0 +1,11 @@
+--- a/Makefile	2006-06-23 22:47:48.000000000 +1000
++++ b/Makefile	2006-06-23 22:13:50.000000000 +1000
+@@ -464,7 +464,7 @@
+ all: vmlinux
+ 
+ ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
+-CFLAGS		+= -Os
++CFLAGS		+= -Os -fno-builtin-sprintf
+ else
+ CFLAGS		+= -O2
+ endif

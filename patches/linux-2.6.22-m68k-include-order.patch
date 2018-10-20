@@ -1,0 +1,63 @@
+	... because somebody had added preempt.h -> list.h, resulting in
+asm/system.h -> hardirq.h -> preempt.h -> list.h -> asm/system.h on m68k,
+with smp_wmb() used in list.h and defined in asm/system.h below the include
+of hardirq.h.
+
+Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+---
+
+diff --git a/include/asm-m68k/system.h b/include/asm-m68k/system.h
+index 198878b..caa9b16 100644
+--- a/include/asm-m68k/system.h
++++ b/include/asm-m68k/system.h
+@@ -46,6 +46,22 @@ asmlinkage void resume(void);
+ } while (0)
+ 
+ 
++/*
++ * Force strict CPU ordering.
++ * Not really required on m68k...
++ */
++#define nop()		do { asm volatile ("nop"); barrier(); } while (0)
++#define mb()		barrier()
++#define rmb()		barrier()
++#define wmb()		barrier()
++#define read_barrier_depends()	((void)0)
++#define set_mb(var, value)	({ (var) = (value); wmb(); })
++
++#define smp_mb()	barrier()
++#define smp_rmb()	barrier()
++#define smp_wmb()	barrier()
++#define smp_read_barrier_depends()	((void)0)
++
+ /* interrupt control.. */
+ #if 0
+ #define local_irq_enable() asm volatile ("andiw %0,%%sr": : "i" (ALLOWINT) : "memory")
+@@ -70,23 +86,6 @@ static inline int irqs_disabled(void)
+ /* For spinlocks etc */
+ #define local_irq_save(x)	({ local_save_flags(x); local_irq_disable(); })
+ 
+-/*
+- * Force strict CPU ordering.
+- * Not really required on m68k...
+- */
+-#define nop()		do { asm volatile ("nop"); barrier(); } while (0)
+-#define mb()		barrier()
+-#define rmb()		barrier()
+-#define wmb()		barrier()
+-#define read_barrier_depends()	((void)0)
+-#define set_mb(var, value)	({ (var) = (value); wmb(); })
+-
+-#define smp_mb()	barrier()
+-#define smp_rmb()	barrier()
+-#define smp_wmb()	barrier()
+-#define smp_read_barrier_depends()	((void)0)
+-
+-
+ #define xchg(ptr,x) ((__typeof__(*(ptr)))__xchg((unsigned long)(x),(ptr),sizeof(*(ptr))))
+ 
+ struct __xchg_dummy { unsigned long a[100]; };
+-
+To unsubscribe from this list: send the line "unsubscribe linux-m68k" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html

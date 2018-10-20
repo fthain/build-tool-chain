@@ -1,0 +1,206 @@
+##############################################
+# Functions relating to glibc
+
+function prep_glibc () {
+    cd ${BUILD_DIR}
+    if [ -e ${1} ]; then
+        echo ${1} already exists
+        return 0
+    fi
+    untar ${1}
+    cd ${1}
+
+    # Linuxthreads is a seperate package in 2.3.2 and earlier
+    if [ -n "${THREADING_LIB}" ] ; then
+        untar ${THREADING_LIB}
+    fi
+    case ${1} in
+    ( glibc-2.2.5 )
+        # Debian sources
+        decompress ${PATCHES}/glibc-2.2.5-11.8-debian.diff | patch -p1
+        # Create the 2.2.5-11.8 symlink that patch can't
+        ln -s . db/db1
+        # Fix for glibc-2.2 with recent kernel headers (m68k)
+        patch -p1 < ${PATCHES}/glibc-2.2.5-pread64_pwrite64.diff
+        # Permit install headers with gcc 4
+        patch -p1 < ${PATCHES}/glibc-2.2.5-btc-gcc4.diff
+        ;;
+    ( glibc-2.3.2 )
+        ## Some patches for vanila 2.3.2
+        #patch -p0 < ${PATCHES}/glibc-2.3.2-debian-alpha-pic.patch
+        #patch -p1 < ${PATCHES}/glibc-2.3.2-gentoo-alpha-crti.patch
+        #patch -p1 < ${PATCHES}/glibc-2.3.2-lfs-sscanf-1.patch
+
+        # Debian sources
+        decompress ${PATCHES}/glibc-2.3.2ds1-22sarge6.diff | patch -p1
+        # Permit install headers with gcc 4
+        patch -p1 < ${PATCHES}/glibc-2.3.3-btc-gcc4.diff
+        # Fix for systems on which sh is not bash
+        patch -p1 < ${PATCHES}/glibc-2.3.3-portable-sh.diff
+        # Make install headers work without a mips compiler
+        patch -p1 < ${PATCHES}/glibc-2.3.2-btc-allow-wrong-cc.diff
+        # alpha build failures
+        patch -p1 < ${PATCHES}/glibc-2.3.3-lfs-fix_pread_pwrite_syscalls_in_alpha.patch
+        patch -p0 < ${PATCHES}/glibc-2.3-alpha-cfi-instructions.diff
+        # powerpc build failure
+        patch -p0 < ${PATCHES}/glibc-2.3.2-debian-bug-343571.diff
+        ;;
+    ( glibc-2.3.3 )
+        # CVS snapshot
+        decompress ${PATCHES}/glibc-2.3.3-20040728.diff | patch -p1
+        patch -p0 < ${PATCHES}/glibc-2.3.3-new-syscall-tests.patch
+        # Permit install headers with gcc 4
+        patch -p1 < ${PATCHES}/glibc-2.3.3-btc-gcc4.diff
+        # Fix for systems on which sh is not bash
+        patch -p1 < ${PATCHES}/glibc-2.3.3-portable-sh.diff
+        # Build failures
+        patch -p0 < ${PATCHES}/glibc-2.3.3-debian-bug-339415.diff
+        patch -p0 < ${PATCHES}/glibc-2.3.5-debian-bug-343571.diff
+        ;;
+    ( glibc-2.3.6 )
+        ## Some patches for vanila 2.3.6
+        #patch -p1 < ${PATCHES}/glibc-2.3.6-allow-gcc-4.1-powerpc32-initfini.s.patch
+
+        # Debian sources
+        decompress ${PATCHES}/glibc-2.3.6-ds1-13.diff | patch -p1
+        # Make install headers work without a mips compiler
+        patch -p1 < ${PATCHES}/glibc-2.3.2-btc-allow-wrong-cc.diff
+        # alpha build failures
+        patch -p0 < ${PATCHES}/glibc-2.3-alpha-cfi-instructions.diff
+        ;;
+    esac
+
+    case ${1} in
+    ( glibc-2.3.* )
+        # m68k doesn't have fcntl64 prior to linux-2.6.10
+        patch -p1 < ${PATCHES}/glibc-2.3.2-btc-m68k_fix_fcntl.diff
+        ;;
+    esac
+}
+
+function install_glibc_headers () {
+    cd ${BUILD_DIR}
+    if [ -e ${1} ]; then
+        echo ${1} already exists
+        return 0
+    fi
+    mkdir ${1}
+    cd ${1}
+
+    # glibc wants to test the compiler, but it hasn't been built yet
+    case $GLIBC_DIST in
+    ( glibc-2.2.* )
+        echo 'ac_cv_prog_cc_cross=${ac_cv_prog_cc_works=no}' >config.cache
+        echo 'ac_cv_prog_cc_cross=${ac_cv_prog_cc_cross=yes}' >>config.cache
+        echo 'libc_cv_asm_global_directive=${libc_cv_asm_global_directive=.globl}' >>config.cache
+        ;;
+    ( glibc-2.3.* )
+        if [ x${GLIBC_NEEDS_SHARED_GCC} = xyes ]; then
+            cp ${CONFIGS}/glibc-2.3.2-nptl-__thread-config.cache config.cache
+        else
+            echo 'libc_cv_ppc_machine=${libc_cv_ppc_machine=yes}' >config.cache
+        fi
+        ;;
+    ( glibc-2.4.* )
+        echo glibc config cache for glibc 2.4?
+        exit 1
+        ;;
+    esac
+    # touch this to keep configure's compiler tests happy:
+    touch ${GLIBC_HEADERS}/assert.h
+    if [ ${BUILD} != ${BUILD/%-apple-darwin*} ] ; then
+        # keep the the compiler happy and prevent missing stddef.h warnings
+        touch stddef.h
+    fi
+
+    case ${TARGET_CPU} in
+    ( mips )
+        # o32
+        arch_defines="-D_MIPS_FPSET=16 -D_MIPS_ISA=2 -D_ABIO32=1 -D_MIPS_SIM=_ABIO32 -D_MIPS_SZINT=32 -D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32 -D__WORDSIZE=32"
+        ## n64
+        #arch_defines="-D_MIPS_FPSET=32 -D_MIPS_ISA=4 -D_ABI64=3 -D_MIPS_SIM=_ABI64 -D_MIPS_SZINT=32 -D_MIPS_SZLONG=64 -D_MIPS_SZPTR=64 -D__WORDSIZE=64"
+        ## n32
+        #arch_defines="-D_MIPS_FPSET=32 -D_MIPS_ISA=4 -D_ABI64=3 -D_MIPS_SIM=_NABI32 -D_MIPS_SZINT=32 -D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32 -D__WORDSIZE=32"
+        ;;
+    ( arm )
+        arch_defines="-D__ARM_EABI__"
+        ;;
+    ( * )
+        arch_defines=""
+        ;;
+    esac
+
+    CC="gcc $arch_defines" CPP="gcc -E $arch_defines" CFLAGS="-O2 ${HOST_CFLAGS}" \
+../${GLIBC_DIST}/configure --prefix=${GLIBC_PREFIX} \
+--host=${TARGET} --build=${BUILD} \
+--without-cvs --disable-sanity-checks \
+--cache-file=./config.cache \
+$GLIBC_CONFIG_OPTS \
+--with-headers=${KERNEL_HEADERS} \
+--with-binutils=${TC_PREFIX}/${TARGET}/bin
+    rm ${GLIBC_HEADERS}/assert.h
+    make btc_wrong_cc=yes install_root=${GLIBC_INSTALL_ROOT} install-headers
+    if [ ! -e ${GLIBC_HEADERS}/features.h ] ; then
+        cp ../${GLIBC_DIST}/include/features.h ${GLIBC_HEADERS}
+    fi
+    if [ ! -e ${GLIBC_HEADERS}/gnu/stubs.h ] ; then
+        mkdir -p ${GLIBC_HEADERS}/gnu
+        touch ${GLIBC_HEADERS}/gnu/stubs.h
+    fi
+    if [ ! -e ${GLIBC_HEADERS}/bits/stdio_lim.h ] ; then
+        cp bits/stdio_lim.h ${GLIBC_HEADERS}/bits || true
+    fi
+
+    manifest install_glibc_headers
+}
+
+function make_glibc_runtime () {
+    cd ${BUILD_DIR}
+    if [ -e ${1} ]; then
+        echo ${1} already exists
+        return 0
+    fi
+    mkdir ${1}
+    cd ${1}
+
+    cp ${CONFIGS}/glibc-2.3.2-nptl-config.cache config.cache
+    BUILD_CC=gcc BUILD_CFLAGS=$HOST_CFLAGS \
+CFLAGS=-O2 CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib \
+../${GLIBC_DIST}/configure --prefix=${GLIBC_PREFIX} \
+--host=${TARGET} --build=${BUILD} \
+--cache-file=./config.cache \
+$GLIBC_CONFIG_OPTS \
+--without-cvs --disable-profile --disable-debug --without-gd \
+--enable-clocale=gnu \
+--with-headers=${KERNEL_HEADERS}
+    make csu/subdir_lib
+}
+
+function install_glibc () {
+    cd ${BUILD_DIR}
+    [ -e $1 ] && echo $1 already exists && return 0
+    mkdir ${1}
+    cd ${1}
+
+    if [ x${GLIBC_NEEDS_SHARED_GCC} = xyes ]; then
+        cp ${CONFIGS}/glibc-2.3.2-nptl-config.cache config.cache
+    fi
+    BUILD_CC=gcc BUILD_CFLAGS=$HOST_CFLAGS \
+CFLAGS=-O2 CC=${TARGET}-gcc AR=${TARGET}-ar RANLIB=${TARGET}-ranlib \
+../${GLIBC_DIST}/configure --prefix=${GLIBC_PREFIX} \
+--host=${TARGET} --build=${BUILD} \
+--cache-file=./config.cache \
+$GLIBC_CONFIG_OPTS \
+--without-cvs --disable-profile --disable-debug --without-gd \
+--enable-clocale=gnu \
+--with-headers=${KERNEL_HEADERS}
+    if [ x${GLIBC_NEEDS_SHARED_GCC} != xyes ]; then
+        # we have no libgcc_eh, libgcc_s
+        make static-gnulib=-lgcc libgcc_eh=
+    else
+        make
+    fi
+    make install_root=${GLIBC_INSTALL_ROOT} install
+
+    manifest install_glibc
+}

@@ -1,6 +1,3 @@
 . ${PROFILES}/1
-
-# The target tuple
-#TARGET=m68k-unknown-linux-gnu
-TARGET=m68k-linux
+TARGET=m68k-linux-gnu
 TARGET_CPU=m68k

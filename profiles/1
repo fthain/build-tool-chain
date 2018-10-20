@@ -7,4 +7,4 @@ GCC_DIST=gcc-2.95.3
 GCC_CORE_DIST=gcc-core-2.95.3
 GLIBC_DIST=glibc-2.2.5
 THREADING_LIB=glibc-linuxthreads-2.2.5
-GDB_DIST=gdb-6.4
+GDB_DIST=gdb-6.6

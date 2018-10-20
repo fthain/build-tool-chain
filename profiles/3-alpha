@@ -1,5 +1,3 @@
 . ${PROFILES}/3
-
-# The target tuple
-TARGET=alpha-unknown-linux-gnu
+TARGET=alpha-linux-gnu
 TARGET_CPU=alpha

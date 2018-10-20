@@ -1,0 +1,5 @@
+. ${PROFILES}/31
+TARGET=mipsel-linux-gnu
+TARGET_CPU=mips
+
+KERNEL=linux-2.6.20
