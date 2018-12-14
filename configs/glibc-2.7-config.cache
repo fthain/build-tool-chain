@@ -24,3 +24,4 @@ libc_cv_z_relro=${libc_cv_z_relro=yes}
 libc_cv_asm_cfi_directive_sections=${libc_cv_asm_cfi_directive_sections=yes}
 libc_cv_asm_cfi_personality=${libc_cv_asm_cfi_personality=yes}
 ac_cv_header_cpuid_h=${ac_cv_header_cpuid_h=yes}
+libc_cv_ppc_rel16=${libc_cv_ppc_rel16=yes}

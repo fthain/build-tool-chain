@@ -1,0 +1,21 @@
+gcc rpc_clntout.c -c -D_RPC_THREAD_SAFE_ -D_CROSS_RPCGEN_ \
+                -o /Volumes/btc-13/build/glibc-powerpc-linux-gnu-3/sunrpc/cross-rpc_clntout.o -MD -MP -MF /Volumes/btc-13/build/glibc-powerpc-linux-gnu-3/sunrpc/cross-rpc_clntout.o.dt -MT /Volumes/btc-13/build/glibc-powerpc-linux-gnu-3/sunrpc/cross-rpc_clntout.o
+rpc_clntout.c:34:23: fatal error: rpc/types.h: No such file or directory
+compilation terminated.
+make[2]: *** [/Volumes/btc-13/build/glibc-powerpc-linux-gnu-3/sunrpc/cross-rpc_clntout.o] Error 1
+make[2]: Leaving directory `/Volumes/btc-13/build/glibc-2.13/sunrpc'
+make[1]: *** [sunrpc/others] Error 2
+make[1]: Leaving directory `/Volumes/btc-13/build/glibc-2.13'
+make: *** [all] Error 2
+
+--- glibc-2.13.orig/sunrpc/rpc_clntout.c	2011-01-18 15:34:07.000000000 +1100
++++ glibc-2.13/sunrpc/rpc_clntout.c	2018-12-14 21:23:35.244362486 +1100
+@@ -31,7 +31,7 @@
+  */
+ #include <stdio.h>
+ #include <string.h>
+-#include <rpc/types.h>
++#include "rpc/types.h"
+ #include "rpc_parse.h"
+ #include "rpc_util.h"
+ #include "proto.h"
