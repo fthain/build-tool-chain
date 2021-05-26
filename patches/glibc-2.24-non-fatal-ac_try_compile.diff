@@ -65,3 +65,49 @@ diff -ruN glibc-2.24.orig/sysdeps/unix/sysv/linux/configure.ac glibc-2.24/sysdep
  *** compatible kernel version])
  fi
  
+diff -u glibc-2.24/sysdeps/unix/sysv/linux/mips/configure{.orig,}
+--- glibc-2.24/sysdeps/unix/sysv/linux/mips/configure.orig	2020-07-25 17:20:38.408945632 +1000
++++ glibc-2.24/sysdeps/unix/sysv/linux/mips/configure	2020-07-25 17:37:08.460397731 +1000
+@@ -60,7 +60,8 @@
+ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+ 
+ if test -z "$libc_mips_abi"; then
+-  as_fn_error $? "could not determine what ABI the compiler is using" "$LINENO" 5
++  as_fn_warn $? "could not determine what ABI the compiler is using" "$LINENO" 5
++  libc_mips_abi=o32
+ fi
+ 
+ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+@@ -102,7 +103,8 @@
+ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+ 
+ if test -z "$libc_mips_float"; then
+-  as_fn_error $? "could not determine if compiler is using hard or soft floating point ABI" "$LINENO" 5
++  as_fn_warn $? "could not determine if compiler is using hard or soft floating point ABI" "$LINENO" 5
++  libc_mips_float=hard
+ fi
+ 
+ libc_mips_o32_fp=
+diff -u glibc-2.24/sysdeps/unix/sysv/linux/mips/configure.ac{.orig,}
+--- glibc-2.24/sysdeps/unix/sysv/linux/mips/configure.ac.orig	2020-07-25 17:41:17.540763054 +1000
++++ glibc-2.24/sysdeps/unix/sysv/linux/mips/configure.ac	2020-07-25 17:42:13.320844867 +1000
+@@ -23,7 +23,8 @@
+       [])])])
+ 
+ if test -z "$libc_mips_abi"; then
+-  AC_MSG_ERROR([could not determine what ABI the compiler is using])
++  AC_MSG_WARN([could not determine what ABI the compiler is using])
++  libc_mips_abi=o32
+ fi
+ 
+ AC_COMPILE_IFELSE(
+@@ -41,7 +42,8 @@
+     [])])
+ 
+ if test -z "$libc_mips_float"; then
+-  AC_MSG_ERROR([could not determine if compiler is using hard or soft floating point ABI])
++  AC_MSG_WARN([could not determine if compiler is using hard or soft floating point ABI])
++  libc_mips_float=hard
+ fi
+ 
+ libc_mips_o32_fp=

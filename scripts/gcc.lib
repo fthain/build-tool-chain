@@ -532,7 +532,7 @@ get_gcc_arch_defs () {
         echo " -D__ARM_EABI__"
         ;;
     mips-* | mipsel-* )
-        echo " -D_ABIO32=1 -D_MIPS_SIM=_ABIO32 -D_MIPS_FPSET=16 -D_MIPS_ISA=1 -D_MIPS_SZINT=32 -D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32 -D__WORDSIZE=32 -D__mips=1"
+        echo " -D_ABIO32=1 -D_MIPS_SIM=_ABIO32 -D_MIPS_FPSET=16 -D_MIPS_ISA=1 -D_MIPS_SZINT=32 -D_MIPS_SZLONG=32 -D_MIPS_SZPTR=32 -D__WORDSIZE=32 -D__mips=1 -D__mips_hard_float -D__mips_fpr=32"
         ;;
     esac
 }
