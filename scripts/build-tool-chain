@@ -2,7 +2,6 @@
 
 # Scripts for building cross-toolchains targeting Linux, hosted on Linux or Mac OS X.
 # Copyright (c) 2004-2014 Finn Thain
-# fthain@telegraphics.com.au
 
 set -o pipefail 2>/dev/null
 set -e -u
