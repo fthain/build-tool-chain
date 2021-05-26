@@ -1,0 +1,6 @@
+GCC_DIST=gcc-6.4.0
+GLIBC_DIST=glibc-2.25
+TARGET=mipsel-linux-gnu
+LINUX_ARCH=mips
+
+. ${BTC_PROFILES}/F9

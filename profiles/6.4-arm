@@ -1,0 +1,5 @@
+GCC_DIST=gcc-6.4.0
+TARGET=arm-unknown-linux-gnueabi
+
+. ${BTC_PROFILES}/F9
+
